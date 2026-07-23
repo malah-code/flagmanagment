@@ -1,5 +1,7 @@
 # FlagManagment — Spec Kit Execution Roadmap
 
+**Official Repository:** [https://github.com/malah-code/flagmanagment](https://github.com/malah-code/flagmanagment)
+
 ## 1. Objective and Methodology
 
 This document defines the phased execution roadmap for building the FlagManagment platform using the [Spec Kit](https://github.com/github/spec-kit) framework. Every feature listed below MUST pass through the full Spec Kit lifecycle before any implementation code is written:

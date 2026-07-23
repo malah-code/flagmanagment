@@ -193,6 +193,10 @@ project. It supersedes all other development practices, conventions, and
 ad-hoc agreements. Compliance with these principles is mandatory for all
 contributors.
 
+### Source Control & Repository
+- **Official Repository**: [https://github.com/malah-code/flagmanagment](https://github.com/malah-code/flagmanagment)
+- All feature branches, specifications, and pull requests MUST target this central repository.
+
 ### Amendment Procedure
 
 1. Propose the amendment in writing with rationale

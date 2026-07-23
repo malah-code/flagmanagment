@@ -2,6 +2,8 @@
 
 FlagManagment — Cloud-native feature flag management and remote configuration platform.
 
+**Official Repository:** [github.com/malah-code/flagmanagment](https://github.com/malah-code/flagmanagment)
+
 ## Prerequisites
 
 - Docker 24+ and Docker Compose
