@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package flagmanagement.sdk.v1;
+
+option go_package = "github.com/flagmanagement/backend/pkg/gen/sdk/v1";
+
+service SDKService {
+  // Thick clients use this to fetch the full snapshot and then establish a stream
+  rpc StreamRulesets(StreamRequest) returns (stream RulesetDelta);
+  
+  // Alternative: fetch snapshot via standard gRPC
+  rpc FetchSnapshot(SnapshotRequest) returns (RulesetSnapshot);
+}
+
+message StreamRequest {
+  string environment_token = 1;
+  string last_known_version = 2; // Empty if initial connection
+}
+
+message SnapshotRequest {
+  string environment_token = 1;
+}
+
+message RulesetDelta {
+  // If true, the client must discard its cache and use the attached snapshot
+  bool full_reset = 1; 
+  string version = 2;
+  
+  // Either a full snapshot (if full_reset) or a list of changed flags
+  repeated FlagRule updated_flags = 3;
+  repeated string deleted_flag_keys = 4;
+}
+
+message RulesetSnapshot {
+  string version = 1;
+  repeated FlagRule flags = 2;
+}
+
+message FlagRule {
+  string key = 1;
+  string type = 2; // BOOLEAN, STRING, NUMBER, JSON
+  bool enabled = 3;
+  string default_variation = 4;
+  bytes targeting_rules_json = 5; // JSON representation of the rules
+}

@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${FM_DB_USER:-flagmgmt}
+      POSTGRES_PASSWORD: ${FM_DB_PASSWORD:-flagmgmt_dev}
+      POSTGRES_DB: ${FM_DB_NAME:-flagmanagment}
+    ports:
+      - "${FM_DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${FM_DB_USER:-flagmgmt} -d ${FM_DB_NAME:-flagmanagment}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${FM_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - "${FM_BACKEND_PORT:-8080}:8080"
+    environment:
+      FM_BACKEND_PORT: ${FM_BACKEND_PORT:-8080}
+      FM_ENV: ${FM_ENV:-development}
+      FM_LOG_FORMAT: ${FM_LOG_FORMAT:-auto}
+      FM_DB_HOST: postgres
+      FM_DB_PORT: 5432
+      FM_DB_USER: ${FM_DB_USER:-flagmgmt}
+      FM_DB_PASSWORD: ${FM_DB_PASSWORD:-flagmgmt_dev}
+      FM_DB_NAME: ${FM_DB_NAME:-flagmanagment}
+      FM_REDIS_HOST: redis
+      FM_REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - "${FM_FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  redisdata:

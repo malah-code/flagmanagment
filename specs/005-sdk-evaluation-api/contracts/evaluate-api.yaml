@@ -1,0 +1,46 @@
+openapi: 3.0.0
+info:
+  title: FlagManagement SDK API (Thin Clients)
+  version: 1.0.0
+paths:
+  /api/v1/sdk/evaluate:
+    post:
+      summary: Evaluate a flag for a given context
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - flagKey
+              properties:
+                flagKey:
+                  type: string
+                context:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Evaluation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: string
+                  reason:
+                    type: string
+        '401':
+          description: Invalid environment token
+        '404':
+          description: Flag not found
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Use the Environment SDK Token

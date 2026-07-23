@@ -1,0 +1,16 @@
+FROM golang:1.22-bookworm
+
+WORKDIR /app
+
+# Install air for hot-reload
+RUN go install github.com/air-verse/air@latest
+
+# Pre-download dependencies (cached layer)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source (will be overridden by volume mount in docker-compose.override.yml)
+COPY . .
+
+# Air will build and run the server
+CMD ["air", "-c", ".air.toml"]

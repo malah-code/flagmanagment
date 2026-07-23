@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Backend (Go)",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/backend/cmd/server",
+      "env": {
+        "FM_DB_HOST": "localhost",
+        "FM_REDIS_HOST": "localhost",
+        "FM_ENV": "development",
+        "FM_LOG_FORMAT": "text"
+      },
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Debug Backend Tests (Go)",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/backend/...",
+      "cwd": "${workspaceFolder}/backend"
+    }
+  ]
+}
