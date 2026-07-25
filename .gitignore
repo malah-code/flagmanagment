@@ -13,7 +13,8 @@ backend/tmp/
 *.test
 vendor/
 *.out
-*.tar.gz
-*.zip
+*.tar.gz*
+*.tgz
+*.zip*
 wget-log
 tmp/
