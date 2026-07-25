@@ -3,6 +3,7 @@ import { useFlags } from '../../hooks/useFlags';
 import { ToggleLeft, ToggleRight, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { KillSwitchForm } from '../KillSwitchForm';
+import { SlackConfigForm } from '../SlackConfigForm';
 
 interface FlagStatesListProps {
   projectId: string;
@@ -126,6 +127,8 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
       {selectedFlagForKS && (
         <KillSwitchForm envId={environmentId} flagId={selectedFlagForKS} />
       )}
+
+      <SlackConfigForm environmentId={environmentId} />
     </div>
   );
 };

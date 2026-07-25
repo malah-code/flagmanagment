@@ -16,16 +16,18 @@ type WebhookService interface {
 }
 
 type webhookService struct {
-	store       repository.Store
-	audit       *AuditService
-	cacheClient *cache.Client
+	store           repository.Store
+	audit           *AuditService
+	cacheClient     *cache.Client
+	notificationSvc NotificationService
 }
 
-func NewWebhookService(store repository.Store, audit *AuditService, cacheClient *cache.Client) WebhookService {
+func NewWebhookService(store repository.Store, audit *AuditService, cacheClient *cache.Client, notificationSvc NotificationService) WebhookService {
 	return &webhookService{
-		store:       store,
-		audit:       audit,
-		cacheClient: cacheClient,
+		store:           store,
+		audit:           audit,
+		cacheClient:     cacheClient,
+		notificationSvc: notificationSvc,
 	}
 }
 
@@ -88,6 +90,9 @@ func (s *webhookService) ProcessAPMAlert(ctx context.Context, envID uuid.UUID, a
 
 		if err == nil {
 			flagsKilled++
+			if s.notificationSvc != nil {
+				s.notificationSvc.SendFlagStateChanged(ctx, envID, rule.FlagID.String(), true, false, "Automated APM Kill-Switch")
+			}
 		}
 	}
 

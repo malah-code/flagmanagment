@@ -81,9 +81,11 @@ func main() {
 	crHandler := api.NewChangeRequestHandler(store, crService, rbacMiddleware, cacheClient)
 	sdkHandler := api.NewSDKHandler(store)
 
-	webhookService := services.NewWebhookService(store, auditService, cacheClient)
+	notificationService := services.NewNotificationService(store)
+	webhookService := services.NewWebhookService(store, auditService, cacheClient, notificationService)
 	webhookHandler := api.NewWebhookHandler(webhookService)
 	ksHandler := api.NewKillSwitchHandler(store, rbacMiddleware)
+	slackHandler := api.NewSlackConfigHandler(store, rbacMiddleware)
 
 	// API v1 Routes
 	router.Route("/api/v1", func(r chi.Router) {
@@ -103,6 +105,7 @@ func main() {
 			flagHandler.RegisterRoutes(r)
 			crHandler.RegisterRoutes(r)
 			ksHandler.RegisterRoutes(r)
+			slackHandler.RegisterRoutes(r)
 		})
 
 		// SDK Routes (Protected by API Key AuthMiddleware)

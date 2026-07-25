@@ -41,6 +41,10 @@ func (s *store) KillSwitchRepo() KillSwitchRepository {
 	return NewKillSwitchRepository(s.db)
 }
 
+func (s *store) SlackConfigRepo() SlackConfigRepository {
+	return NewSlackConfigRepository(s.db)
+}
+
 func (s *store) RoleRepo() RoleRepository {
 	return NewRoleRepository(s.db)
 }

@@ -123,7 +123,7 @@ func TestWebhookService_ProcessAPMAlert_DisablesFlag(t *testing.T) {
 	}
 
 	auditSvc := services.NewAuditService(store)
-	svc := services.NewWebhookService(store, auditSvc, nil)
+	svc := services.NewWebhookService(store, auditSvc, nil, nil)
 
 	envID := uuid.New()
 	flagID := uuid.New()

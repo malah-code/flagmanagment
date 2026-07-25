@@ -23,6 +23,7 @@ type Store interface {
 	AuditRepo() AuditRepository
 	ChangeRequestRepo() ChangeRequestRepository
 	KillSwitchRepo() KillSwitchRepository
+	SlackConfigRepo() SlackConfigRepository
 	RoleRepo() RoleRepository
 	UserRepo() UserRepository
 
