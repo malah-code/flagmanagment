@@ -22,6 +22,7 @@ type Store interface {
 	FlagStateRepo() FlagStateRepository
 	AuditRepo() AuditRepository
 	ChangeRequestRepo() ChangeRequestRepository
+	KillSwitchRepo() KillSwitchRepository
 	RoleRepo() RoleRepository
 	UserRepo() UserRepository
 

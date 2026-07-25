@@ -37,3 +37,12 @@ type UpdateFlagStateRequest struct {
 	TargetingRules map[string]interface{} `json:"targetingRules" validate:"required"`
 	RemoteConfig   map[string]interface{} `json:"remoteConfig" validate:"required"`
 }
+
+// Change Request Requests
+type ApproveChangeRequestRequest struct {
+	Comment string `json:"comment"`
+}
+
+type RejectChangeRequestRequest struct {
+	Reason string `json:"reason"`
+}

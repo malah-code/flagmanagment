@@ -21,15 +21,17 @@ type FlagHandler struct {
 	validate    *validator.Validate
 	rbac        *RBACMiddleware
 	audit       *services.AuditService
+	crService   *services.ChangeRequestService
 }
 
-func NewFlagHandler(store repository.Store, cacheClient *cache.Client, rbac *RBACMiddleware, audit *services.AuditService) *FlagHandler {
+func NewFlagHandler(store repository.Store, cacheClient *cache.Client, rbac *RBACMiddleware, audit *services.AuditService, crService *services.ChangeRequestService) *FlagHandler {
 	return &FlagHandler{
 		store:       store,
 		cacheClient: cacheClient,
 		validate:    validator.New(),
 		rbac:        rbac,
 		audit:       audit,
+		crService:   crService,
 	}
 }
 
@@ -227,6 +229,68 @@ func (h *FlagHandler) UpdateFlagState(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.validate.Struct(req); err != nil {
 		RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	env, err := h.store.EnvironmentRepo().GetByID(r.Context(), envID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			RespondWithError(w, http.StatusNotFound, "Environment not found")
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, "Failed to retrieve environment")
+		return
+	}
+
+	if env.IsProtected && h.crService != nil {
+		actorIDStr, _ := r.Context().Value(UserIDKey).(string)
+		actorID, _ := uuid.Parse(actorIDStr)
+
+		proposed := models.JSONB{
+			"flag_id":         flagID.String(),
+			"enabled":         req.Enabled,
+			"targeting_rules": req.TargetingRules,
+			"remote_config":   req.RemoteConfig,
+		}
+
+		var currentState models.JSONB
+		state, err := h.store.FlagStateRepo().GetByEnvAndFlag(r.Context(), envID, flagID)
+		if err == nil && state != nil {
+			currentState = models.JSONB{
+				"flag_id":         state.FeatureFlagID.String(),
+				"enabled":         state.Enabled,
+				"targeting_rules": state.TargetingRules,
+				"remote_config":   state.RemoteConfig,
+			}
+		} else {
+			currentState = models.JSONB{
+				"flag_id":         flagID.String(),
+				"enabled":         false,
+				"targeting_rules": nil,
+				"remote_config":   nil,
+			}
+		}
+
+		cr := &models.ChangeRequest{
+			ID:              uuid.New(),
+			ProjectID:       env.ProjectID,
+			EnvironmentID:   envID,
+			Title:           "Update Flag State",
+			Description:     "Proposed state change for flag in protected environment",
+			Status:          models.StatusPending,
+			ProposedChanges: proposed,
+			CurrentState:    currentState,
+			CreatedBy:       actorID,
+			CreatedAt:       time.Now().UTC(),
+			UpdatedAt:       time.Now().UTC(),
+		}
+
+		if err := h.crService.Create(r.Context(), cr); err != nil {
+			RespondWithError(w, http.StatusInternalServerError, "Failed to create change request")
+			return
+		}
+
+		RespondWithJSON(w, http.StatusAccepted, cr)
 		return
 	}
 

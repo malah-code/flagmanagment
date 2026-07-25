@@ -37,6 +37,10 @@ func (s *store) ChangeRequestRepo() ChangeRequestRepository {
 	return NewChangeRequestRepository(s.db)
 }
 
+func (s *store) KillSwitchRepo() KillSwitchRepository {
+	return NewKillSwitchRepository(s.db)
+}
+
 func (s *store) RoleRepo() RoleRepository {
 	return NewRoleRepository(s.db)
 }

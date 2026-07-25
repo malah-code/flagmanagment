@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Change Requests API
+  version: 1.0.0
+paths:
+  /environments/{env_id}:
+    patch:
+      summary: Update Environment (Set Protected)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_protected:
+                  type: boolean
+  /flags/{flag_id}/environments/{env_id}:
+    put:
+      summary: Update Flag in Environment
+      description: If the environment is protected, returns 202 and creates a Change Request instead of 200.
+      responses:
+        '200':
+          description: Flag updated (Environment not protected)
+        '202':
+          description: Change Request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+  /change-requests:
+    get:
+      summary: List Change Requests
+      parameters:
+        - name: environment_id
+          in: query
+          schema:
+            type: string
+        - name: flag_id
+          in: query
+          schema:
+            type: string
+  /change-requests/{request_id}/approve:
+    post:
+      summary: Approve Change Request
+      responses:
+        '200':
+          description: Approved and Applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+        '403':
+          description: Forbidden (Self-approval or missing Release Manager role)
+  /change-requests/{request_id}/reject:
+    post:
+      summary: Reject Change Request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+
+components:
+  schemas:
+    ChangeRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        environment_id:
+          type: string
+        flag_id:
+          type: string
+        author_id:
+          type: string
+        status:
+          type: string
+          enum: [Pending, Approved, Applied, Rejected]
+        proposed_state:
+          type: object
+        current_state:
+          type: object
+        reviewer_id:
+          type: string
+        review_comment:
+          type: string

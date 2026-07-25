@@ -73,11 +73,17 @@ func main() {
 	rbacMiddleware := api.NewRBACMiddleware(store)
 	auditHandler := api.NewAuditHandler(store)
 	auditService := services.NewAuditService(store)
-	
+	crService := services.NewChangeRequestService(store, auditService)
+
 	projectHandler := api.NewProjectHandler(store, rbacMiddleware, auditHandler)
 	envHandler := api.NewEnvironmentHandler(store, rbacMiddleware, auditService)
-	flagHandler := api.NewFlagHandler(store, cacheClient, rbacMiddleware, auditService)
+	flagHandler := api.NewFlagHandler(store, cacheClient, rbacMiddleware, auditService, crService)
+	crHandler := api.NewChangeRequestHandler(store, crService, rbacMiddleware, cacheClient)
 	sdkHandler := api.NewSDKHandler(store)
+
+	webhookService := services.NewWebhookService(store, auditService, cacheClient)
+	webhookHandler := api.NewWebhookHandler(webhookService)
+	ksHandler := api.NewKillSwitchHandler(store, rbacMiddleware)
 
 	// API v1 Routes
 	router.Route("/api/v1", func(r chi.Router) {
@@ -92,15 +98,25 @@ func main() {
 			r.Route("/projects", func(r chi.Router) {
 				projectHandler.RegisterRoutes(r)
 			})
-			
+
 			envHandler.RegisterRoutes(r)
 			flagHandler.RegisterRoutes(r)
+			crHandler.RegisterRoutes(r)
+			ksHandler.RegisterRoutes(r)
 		})
 
 		// SDK Routes (Protected by API Key AuthMiddleware)
 		r.Group(func(r chi.Router) {
 			r.Use(api.AuthMiddleware(store))
 			sdkHandler.RegisterRoutes(r)
+		})
+		
+		// Webhook Routes (Protected by API Key AuthMiddleware for environment identification)
+		r.Group(func(r chi.Router) {
+			r.Use(api.AuthMiddleware(store))
+			r.Route("/webhooks", func(r chi.Router) {
+				webhookHandler.RegisterRoutes(r)
+			})
 		})
 	})
 

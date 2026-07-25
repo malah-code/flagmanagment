@@ -1,6 +1,8 @@
 import { useFlagStates, useUpdateFlagState } from '../../hooks/useFlagStates';
 import { useFlags } from '../../hooks/useFlags';
 import { ToggleLeft, ToggleRight, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { KillSwitchForm } from '../KillSwitchForm';
 
 interface FlagStatesListProps {
   projectId: string;
@@ -11,6 +13,7 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
   const { data: flags = [], isLoading: isLoadingFlags } = useFlags(projectId);
   const { data: flagStates = [], isLoading: isLoadingStates, isError, error } = useFlagStates(environmentId);
   const updateMutation = useUpdateFlagState(environmentId);
+  const [selectedFlagForKS, setSelectedFlagForKS] = useState<string | null>(null);
 
   const isLoading = isLoadingFlags || isLoadingStates;
 
@@ -57,7 +60,7 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
                 <th className="px-6 py-3.5">Flag Key</th>
                 <th className="px-6 py-3.5">Type</th>
                 <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5 text-right">Toggle</th>
+                <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -88,18 +91,26 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
                     </td>
                     <td className="px-6 py-4 text-right">
                       {state ? (
-                        <button
-                          onClick={() => handleToggle(state.id, isEnabled)}
-                          disabled={updateMutation.isPending}
-                          className="focus:outline-none transition-transform active:scale-95 disabled:opacity-50"
-                          title={isEnabled ? 'Turn OFF' : 'Turn ON'}
-                        >
-                          {isEnabled ? (
-                            <ToggleRight className="w-8 h-8 text-indigo-600 hover:text-indigo-700 transition-colors" />
-                          ) : (
-                            <ToggleLeft className="w-8 h-8 text-slate-300 hover:text-slate-400 transition-colors" />
-                          )}
-                        </button>
+                        <div className="flex items-center justify-end gap-4">
+                          <button
+                            onClick={() => setSelectedFlagForKS(flag.id)}
+                            className="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded transition-colors"
+                          >
+                            Kill Switches
+                          </button>
+                          <button
+                            onClick={() => handleToggle(state.id, isEnabled)}
+                            disabled={updateMutation.isPending}
+                            className="focus:outline-none transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0"
+                            title={isEnabled ? 'Turn OFF' : 'Turn ON'}
+                          >
+                            {isEnabled ? (
+                              <ToggleRight className="w-8 h-8 text-indigo-600 hover:text-indigo-700 transition-colors" />
+                            ) : (
+                              <ToggleLeft className="w-8 h-8 text-slate-300 hover:text-slate-400 transition-colors" />
+                            )}
+                          </button>
+                        </div>
                       ) : (
                         <span className="text-xs text-slate-400 italic">No state record</span>
                       )}
@@ -110,6 +121,10 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
             </tbody>
           </table>
         </div>
+      )}
+
+      {selectedFlagForKS && (
+        <KillSwitchForm envId={environmentId} flagId={selectedFlagForKS} />
       )}
     </div>
   );

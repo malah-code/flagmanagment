@@ -76,6 +76,9 @@ func hasPermission(userRole, requiredRole string) bool {
 	if userRole == "ADMIN" {
 		return true
 	}
+	if userRole == "RELEASE_MANAGER" && (requiredRole == "RELEASE_MANAGER" || requiredRole == "EDITOR" || requiredRole == "VIEWER") {
+		return true
+	}
 	if userRole == "EDITOR" && (requiredRole == "EDITOR" || requiredRole == "VIEWER") {
 		return true
 	}

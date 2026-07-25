@@ -14,6 +14,7 @@ type ChangeRequest struct {
 	Description     string              `json:"description" db:"description"`
 	Status          ChangeRequestStatus `json:"status" db:"status"`
 	ProposedChanges JSONB               `json:"proposed_changes" db:"proposed_changes"`
+	CurrentState    JSONB               `json:"current_state" db:"current_state"`
 	CreatedBy       uuid.UUID           `json:"created_by" db:"created_by"`
 	AppliedBy       *uuid.UUID          `json:"applied_by,omitempty" db:"applied_by"`
 	CreatedAt       time.Time           `json:"created_at" db:"created_at"`
