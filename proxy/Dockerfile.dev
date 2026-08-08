@@ -1,0 +1,12 @@
+FROM golang:1.21-alpine
+
+WORKDIR /app
+
+RUN go install github.com/cosmtrek/air@latest
+
+COPY backend/pkg/gen/sdk/v1 ../backend/pkg/gen/sdk/v1
+COPY proxy/ ./
+
+EXPOSE 9091 8081
+
+CMD ["air"]

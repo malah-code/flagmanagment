@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  edge-proxy:
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    ports:
+      - "${FM_PROXY_GRPC_PORT:-9091}:9091"
+      - "${FM_PROXY_HEALTH_PORT:-8081}:8081"
+    environment:
+      FM_PROXY_BACKEND_ADDR: "backend:9090"
+      FM_PROXY_ENV_TOKEN: "${FM_PROXY_ENV_TOKEN:-}"
+      FM_PROXY_GRPC_PORT: "9091"
+      FM_PROXY_HEALTH_PORT: "8081"
+      FM_PROXY_UPSTREAM_TLS: "false"
+      FM_PROXY_LOG_FORMAT: "auto"
+    depends_on:
+      backend:
+        condition: service_started

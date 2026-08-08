@@ -1,0 +1,110 @@
+openapi: "3.0.3"
+info:
+  title: Edge Proxy Health API
+  version: "1.0.0"
+  description: |
+    HTTP health check endpoint exposed by the FlagManagment Edge Proxy / Relay Node.
+    Monitoring systems (Prometheus, Kubernetes liveness/readiness probes, Datadog) 
+    should use this endpoint.
+
+servers:
+  - url: "http://{proxy-host}:{health-port}"
+    variables:
+      proxy-host:
+        default: "localhost"
+      health-port:
+        default: "8081"
+
+paths:
+  /healthz:
+    get:
+      summary: Proxy health check
+      description: |
+        Returns the current health status of the Edge Proxy, including upstream connectivity,
+        connected SDK client count, and ruleset version. Returns HTTP 200 for "healthy" and
+        "degraded" (still serving from last-known-good state). Returns HTTP 503 for "starting_up"
+        (no ruleset loaded yet).
+      operationId: getHealth
+      responses:
+        "200":
+          description: Proxy is healthy or degraded (still serving)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              examples:
+                healthy:
+                  summary: Fully connected
+                  value:
+                    status: "healthy"
+                    upstream_connected: true
+                    upstream_addr: "flagmanagment.internal:9090"
+                    connected_since: "2026-08-08T12:00:00Z"
+                    last_delta_at: "2026-08-08T12:05:30Z"
+                    downstream_clients: 47
+                    ruleset_version: "v1720123456"
+                degraded:
+                  summary: Upstream disconnected, serving last-known-good
+                  value:
+                    status: "degraded"
+                    upstream_connected: false
+                    upstream_addr: "flagmanagment.internal:9090"
+                    connected_since: "2026-08-08T11:55:00Z"
+                    last_delta_at: "2026-08-08T12:01:00Z"
+                    downstream_clients: 47
+                    ruleset_version: "v1720123456"
+        "503":
+          description: Proxy is starting up and has not yet loaded a ruleset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: "starting_up"
+                upstream_connected: false
+                upstream_addr: "flagmanagment.internal:9090"
+                connected_since: null
+                last_delta_at: null
+                downstream_clients: 0
+                ruleset_version: ""
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - upstream_connected
+        - upstream_addr
+        - downstream_clients
+        - ruleset_version
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, starting_up]
+          description: |
+            - `healthy`: upstream connected and serving live ruleset
+            - `degraded`: upstream disconnected, serving from last known good in-memory state
+            - `starting_up`: no ruleset loaded yet (first connect attempt in progress)
+        upstream_connected:
+          type: boolean
+          description: Whether the gRPC stream to the FlagManagment backend is currently active
+        upstream_addr:
+          type: string
+          description: The configured upstream backend address
+        connected_since:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO8601 timestamp of the last successful upstream stream establishment
+        last_delta_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO8601 timestamp of the last delta update received from the backend
+        downstream_clients:
+          type: integer
+          description: Current number of SDK clients connected to this proxy instance
+        ruleset_version:
+          type: string
+          description: Current in-memory ruleset version string (matches backend version)
