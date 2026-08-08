@@ -41,6 +41,60 @@ func generateSecureAPIKey() (string, error) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
+func generateKeyAndHash() (apiKey, hashHex string, err error) {
+	rawKey, err := generateSecureAPIKey()
+	if err != nil {
+		return "", "", err
+	}
+	apiKey = "env_" + rawKey
+	hash := sha256.Sum256([]byte(apiKey))
+	hashHex = hex.EncodeToString(hash[:])
+	return apiKey, hashHex, nil
+}
+
+func (s *EnvironmentService) CreateEnvironment(ctx context.Context, projectID uuid.UUID, name string, isProtected bool, actorID uuid.UUID, actorIP string) (*models.Environment, string, error) {
+	apiKey, hashHex, err := generateKeyAndHash()
+	if err != nil {
+		return nil, "", err
+	}
+
+	now := time.Now().UTC()
+	env := &models.Environment{
+		ID:          uuid.New(),
+		ProjectID:   projectID,
+		Name:        name,
+		Key:         strings.ToLower(strings.ReplaceAll(name, " ", "-")),
+		APIKeyHash:  hashHex,
+		IsProtected: isProtected,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+
+	if err := s.store.EnvironmentRepo().Create(ctx, env); err != nil {
+		return nil, "", err
+	}
+
+	bNew, _ := json.Marshal(env)
+	var newState models.JSONB
+	json.Unmarshal(bNew, &newState)
+
+	s.audit.LogAction(ctx, &models.AuditLog{
+		ID:            uuid.New(),
+		ProjectID:     &projectID,
+		EnvironmentID: &env.ID,
+		ActorID:       actorID,
+		Action:        "CREATE",
+		TargetType:    "ENVIRONMENT",
+		TargetID:      env.ID,
+		NewState:      newState,
+		ActorIP:       actorIP,
+		CreatedAt:     now,
+	})
+
+	return env, apiKey, nil
+}
+
+
 func (s *EnvironmentService) CloneEnvironment(ctx context.Context, projectID, sourceEnvID uuid.UUID, name string, actorID uuid.UUID, actorIP string) (*models.Environment, string, error) {
 	sourceEnv, err := s.store.EnvironmentRepo().GetByID(ctx, sourceEnvID)
 	if err != nil {
@@ -50,13 +104,10 @@ func (s *EnvironmentService) CloneEnvironment(ctx context.Context, projectID, so
 		return nil, "", repository.ErrNotFound
 	}
 
-	rawKey, err := generateSecureAPIKey()
+	apiKey, hashHex, err := generateKeyAndHash()
 	if err != nil {
 		return nil, "", err
 	}
-	apiKey := "env_" + rawKey
-	hash := sha256.Sum256([]byte(apiKey))
-	hashHex := hex.EncodeToString(hash[:])
 
 	now := time.Now().UTC()
 	newEnv := &models.Environment{

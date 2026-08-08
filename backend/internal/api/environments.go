@@ -1,12 +1,7 @@
 package api
 
 import (
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -50,14 +45,6 @@ func (h *EnvironmentHandler) RegisterRoutes(r chi.Router) {
 	r.With(h.rbac.RequireRole("ADMIN")).Delete("/environments/{envId}", h.Delete)
 }
 
-// generateSecureAPIKey creates a 32-byte secure random string
-func generateSecureAPIKey() (string, error) {
-	b := make([]byte, 32)
-	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.EncodeToString(b), nil
-}
 
 func (h *EnvironmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 	projectIDStr := chi.URLParam(r, "projectId")
@@ -78,52 +65,14 @@ func (h *EnvironmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generate API Key
-	rawKey, err := generateSecureAPIKey()
-	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, "Failed to generate API key")
-		return
-	}
-	apiKey := "env_" + rawKey
-	hash := sha256.Sum256([]byte(apiKey))
-	hashHex := hex.EncodeToString(hash[:])
-
-	now := time.Now().UTC()
-	env := &models.Environment{
-		ID:          uuid.New(),
-		ProjectID:   projectID,
-		Name:        req.Name,
-		Key:         strings.ToLower(strings.ReplaceAll(req.Name, " ", "-")),
-		APIKeyHash:  hashHex,
-		IsProtected: req.IsProtected,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	}
-
-	if err := h.store.EnvironmentRepo().Create(r.Context(), env); err != nil {
-		RespondWithError(w, http.StatusInternalServerError, "Failed to create environment")
-		return
-	}
-
 	actorIDStr := r.Context().Value(UserIDKey).(string)
 	actorID, _ := uuid.Parse(actorIDStr)
 
-	bNew, _ := json.Marshal(env)
-	var newState models.JSONB
-	json.Unmarshal(bNew, &newState)
-
-	h.audit.LogAction(r.Context(), &models.AuditLog{
-		ID:            uuid.New(),
-		ProjectID:     &projectID,
-		EnvironmentID: &env.ID,
-		ActorID:       actorID,
-		Action:        "CREATE",
-		TargetType:    "ENVIRONMENT",
-		TargetID:      env.ID,
-		NewState:      newState,
-		ActorIP:       r.RemoteAddr,
-		CreatedAt:     time.Now().UTC(),
-	})
+	env, apiKey, err := h.envService.CreateEnvironment(r.Context(), projectID, req.Name, req.IsProtected, actorID, r.RemoteAddr)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Failed to create environment")
+		return
+	}
 
 	res := dto.CreateEnvironmentResponse{
 		EnvironmentResponse: dto.EnvironmentResponse{
