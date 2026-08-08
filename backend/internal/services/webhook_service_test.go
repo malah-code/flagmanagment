@@ -150,6 +150,11 @@ func (m *WebhookMockAuditRepo) ListByEnvironment(ctx context.Context, envID uuid
 	return args.Get(0).([]*models.AuditLog), args.Int(1), args.Error(2)
 }
 
+func (m *WebhookMockAuditRepo) DeleteOlderThan(ctx context.Context, cutoff time.Time) error {
+	args := m.Called(ctx, cutoff)
+	return args.Error(0)
+}
+
 type WebhookMockStore struct {
 	ksRepo    *WebhookMockKillSwitchRepo
 	fsRepo    *WebhookMockFlagStateRepo
@@ -165,6 +170,7 @@ func (m *WebhookMockStore) FlagRepo() repository.FlagRepository           { retu
 func (m *WebhookMockStore) ChangeRequestRepo() repository.ChangeRequestRepository { return nil }
 func (m *WebhookMockStore) RoleRepo() repository.RoleRepository           { return nil }
 func (m *WebhookMockStore) UserRepo() repository.UserRepository           { return nil }
+func (m *WebhookMockStore) WebhookIntegrationRepo() repository.WebhookIntegrationRepository { return nil }
 func (m *WebhookMockStore) SlackConfigRepo() repository.SlackConfigRepository { return nil }
 func (m *WebhookMockStore) ScheduledChangeRepo() repository.ScheduledChangeRepository { return nil }
 func (m *WebhookMockStore) StalePolicyRepo() repository.StalePolicyRepository { return nil }

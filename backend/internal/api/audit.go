@@ -17,6 +17,10 @@ func NewAuditHandler(store repository.Store) *AuditHandler {
 	return &AuditHandler{store: store}
 }
 
+func (h *AuditHandler) RegisterRoutes(r chi.Router) {
+	r.Get("/projects/{id}/audit-logs", h.ListByProject)
+}
+
 func (h *AuditHandler) ListByProject(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	projectID, err := uuid.Parse(idStr)

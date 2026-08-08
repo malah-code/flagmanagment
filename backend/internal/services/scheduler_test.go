@@ -52,6 +52,11 @@ func (m *schedulerMockStore) AuditRepo() repository.AuditRepository {
 	return m.auditRepo
 }
 
+func (m *schedulerMockStore) StalePolicyRepo() repository.StalePolicyRepository { return nil }
+func (m *schedulerMockStore) RoleRepo() repository.RoleRepository { return nil }
+func (m *schedulerMockStore) UserRepo() repository.UserRepository { return nil }
+func (m *schedulerMockStore) WebhookIntegrationRepo() repository.WebhookIntegrationRepository { return nil }
+
 func (m *schedulerMockStore) WithTx(ctx context.Context, fn func(repository.Store) error) error {
 	return fn(m)
 }

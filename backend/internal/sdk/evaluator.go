@@ -74,8 +74,8 @@ func executeErrorHooks(ctx hooks.HookContext, err error) {
 // EvaluationContext represents the stringified context for internal evaluation matching
 type EvaluationContext map[string]string
 
-// HashPII creates a shallow copy of the EvaluationContext and hashes PII fields
-func HashPII(ctx *models.EvaluationContext) *models.EvaluationContext {
+// HashPII creates a shallow copy of the EvaluationContext and hashes PII fields using SHA-256 and the provided salt
+func HashPII(ctx *models.EvaluationContext, salt string) *models.EvaluationContext {
 	if ctx == nil {
 		return nil
 	}
@@ -94,7 +94,7 @@ func HashPII(ctx *models.EvaluationContext) *models.EvaluationContext {
 	for k, v := range ctx.Attributes {
 		if piiFields[k] {
 			if strVal, ok := v.(string); ok {
-				hash := sha256.Sum256([]byte(strVal))
+				hash := sha256.Sum256([]byte(salt + strVal))
 				hashedCtx.Attributes[k] = hex.EncodeToString(hash[:])
 				continue
 			}
@@ -104,8 +104,8 @@ func HashPII(ctx *models.EvaluationContext) *models.EvaluationContext {
 	return hashedCtx
 }
 
-// EvaluateRolloutSplit evaluates percentage rollout using MurmurHash3
-func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON models.JSONB) (string, bool) {
+// EvaluateRolloutSplit evaluates percentage rollout using MurmurHash3 and an environment salt
+func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON models.JSONB, salt string) (string, bool) {
 	if rolloutRulesJSON == nil || entityKey == "" {
 		return "", false
 	}
@@ -122,8 +122,8 @@ func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON mod
 		return "", false
 	}
 
-	// MurmurHash3 32-bit calculation
-	hash := murmur3.Sum32([]byte(flagKey + ":" + entityKey))
+	// MurmurHash3 32-bit calculation with environment salt
+	hash := murmur3.Sum32([]byte(flagKey + ":" + entityKey + ":" + salt))
 	bucket := int(hash % 10000) // 0 - 9999
 
 	cumulative := 0
@@ -137,7 +137,12 @@ func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON mod
 }
 
 // EvaluateFlag orchestrates the evaluation of a single flag against the context
-func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rulesMap map[string]*models.FlagRule) models.EvaluationResult {
+func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rulesMap map[string]*models.FlagRule, salt ...string) models.EvaluationResult {
+	sVal := ""
+	if len(salt) > 0 {
+		sVal = salt[0]
+	}
+
 	hookCtx := hooks.HookContext{
 		FlagKey:           flagRule.Key,
 		FlagType:          flagRule.Type,
@@ -160,7 +165,7 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 	if flagRule.ParentFlagKey != "" && rulesMap != nil {
 		parentRule, exists := rulesMap[flagRule.ParentFlagKey]
 		if exists && parentRule != nil {
-			parentResult := EvaluateFlag(parentRule, ctx, rulesMap)
+			parentResult := EvaluateFlag(parentRule, ctx, rulesMap, sVal)
 			if parentResult.Reason == "FLAG_DISABLED" || parentResult.Value == "false" || parentResult.Value == false {
 				res := models.EvaluationResult{
 					Value:  flagRule.DefaultVariation,
@@ -214,7 +219,7 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 	if flagRule.RolloutRules != nil && entityKey != "" {
 		var rolloutMap models.JSONB
 		if err := json.Unmarshal(flagRule.RolloutRules, &rolloutMap); err == nil {
-			variationID, matched := EvaluateRolloutSplit(flagRule.Key, entityKey, rolloutMap)
+			variationID, matched := EvaluateRolloutSplit(flagRule.Key, entityKey, rolloutMap, sVal)
 			if matched {
 				res := models.EvaluationResult{
 					Value:  variationID,

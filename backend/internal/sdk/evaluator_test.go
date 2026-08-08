@@ -113,13 +113,15 @@ func TestEvaluateRolloutSplit(t *testing.T) {
 		},
 	}
 
+	salt := "test-env-salt"
+
 	// 1. Assert Determinism (same user_id -> same variation 100 times)
-	firstVarID, matched := EvaluateRolloutSplit("my-ab-flag", "user-12345", rolloutJSON)
+	firstVarID, matched := EvaluateRolloutSplit("my-ab-flag", "user-12345", rolloutJSON, salt)
 	if !matched {
 		t.Fatalf("expected rollout match for user-12345")
 	}
 	for i := 0; i < 100; i++ {
-		varID, _ := EvaluateRolloutSplit("my-ab-flag", "user-12345", rolloutJSON)
+		varID, _ := EvaluateRolloutSplit("my-ab-flag", "user-12345", rolloutJSON, salt)
 		if varID != firstVarID {
 			t.Fatalf("expected consistent variation %s, got %s at iteration %d", firstVarID, varID, i)
 		}
@@ -129,7 +131,7 @@ func TestEvaluateRolloutSplit(t *testing.T) {
 	counts := map[string]int{}
 	for i := 0; i < 10000; i++ {
 		userID := "user-id-" + string(rune(i))
-		varID, matched := EvaluateRolloutSplit("my-ab-flag", userID, rolloutJSON)
+		varID, matched := EvaluateRolloutSplit("my-ab-flag", userID, rolloutJSON, salt)
 		if matched {
 			counts[varID]++
 		}
@@ -248,4 +250,33 @@ func TestEvaluateFlag_Hooks(t *testing.T) {
 	// Clean up
 	ClearHooks()
 }
+
+func TestHashPII(t *testing.T) {
+	ctx := &models.EvaluationContext{
+		EntityKey: "user-123",
+		Attributes: map[string]interface{}{
+			"email": "user@example.com",
+			"name":  "John Doe",
+			"phone": "555-0199",
+		},
+	}
+
+	salt := "test-salt-123"
+	hashed := HashPII(ctx, salt)
+
+	if hashed.Attributes["name"] != "John Doe" {
+		t.Errorf("expected name to remain unhashed, got %v", hashed.Attributes["name"])
+	}
+
+	emailStr, ok := hashed.Attributes["email"].(string)
+	if !ok || emailStr == "user@example.com" {
+		t.Errorf("expected email to be hashed, got %v", hashed.Attributes["email"])
+	}
+
+	phoneStr, ok := hashed.Attributes["phone"].(string)
+	if !ok || phoneStr == "555-0199" {
+		t.Errorf("expected phone to be hashed, got %v", hashed.Attributes["phone"])
+	}
+}
+
 

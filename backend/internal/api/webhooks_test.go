@@ -24,6 +24,21 @@ func (m *MockWebhookService) ProcessAPMAlert(ctx context.Context, envID uuid.UUI
 	return args.Int(0), args.Error(1)
 }
 
+func (m *MockWebhookService) CreateWebhook(ctx context.Context, wh *models.WebhookIntegration) error {
+	args := m.Called(ctx, wh)
+	return args.Error(0)
+}
+
+func (m *MockWebhookService) ListWebhooks(ctx context.Context, projectID uuid.UUID) ([]*models.WebhookIntegration, error) {
+	args := m.Called(ctx, projectID)
+	return args.Get(0).([]*models.WebhookIntegration), args.Error(1)
+}
+
+func (m *MockWebhookService) DeleteWebhook(ctx context.Context, id uuid.UUID) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
 func TestHandleAPMWebhook_Unauthorized(t *testing.T) {
 	mockSvc := new(MockWebhookService)
 	handler := api.NewWebhookHandler(mockSvc)

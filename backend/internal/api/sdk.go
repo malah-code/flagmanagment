@@ -162,7 +162,7 @@ func (h *SDKHandler) EvaluateSingleFlag(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// PII Hashing per Constitution VII
-	hashedContext := sdk.HashPII(&req.Context)
+	hashedContext := sdk.HashPII(&req.Context, env.Salt)
 
 	var targetingRules json.RawMessage
 	if state.TargetingRules != nil {
@@ -246,7 +246,7 @@ func (h *SDKHandler) EvaluateSingleFlag(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	result := sdk.EvaluateFlag(flagRule, hashedContext, rulesMap)
+	result := sdk.EvaluateFlag(flagRule, hashedContext, rulesMap, env.Salt)
 
 	RespondWithJSON(w, http.StatusOK, map[string]interface{}{
 		"value":  result.Value,

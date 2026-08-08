@@ -127,6 +127,8 @@ func main() {
 			slackHandler.RegisterRoutes(r)
 			promotionHandler.RegisterRoutes(r)
 			scHandler.RegisterRoutes(r)
+			auditHandler.RegisterRoutes(r)
+			webhookHandler.RegisterManagementRoutes(r)
 		})
 
 		// SDK Routes (Protected by API Key AuthMiddleware)
@@ -139,7 +141,7 @@ func main() {
 		r.Group(func(r chi.Router) {
 			r.Use(api.AuthMiddleware(store))
 			r.Route("/webhooks", func(r chi.Router) {
-				webhookHandler.RegisterRoutes(r)
+				webhookHandler.RegisterAPMRoutes(r)
 			})
 		})
 	})
@@ -147,6 +149,21 @@ func main() {
 	// Start Background Scheduler for Scheduled Flag Changes
 	scheduler := services.NewScheduler(store, auditService, crService, cacheClient, logger)
 	go scheduler.Start(context.Background())
+
+	// Start Webhook Dispatcher
+	webhookDispatcher := services.NewWebhookDispatcher(store.WebhookIntegrationRepo(), auditService.Subscribe())
+	go webhookDispatcher.Start(context.Background())
+
+	// Start Data Retention Cleanup Ticker (purges audit/analytics logs older than 30 days every 24 hours)
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := auditService.CleanupOldLogs(context.Background(), 30); err != nil {
+				logger.Error().Err(err).Msg("failed to clean up old audit logs")
+			}
+		}
+	}()
 
 	// Start gRPC server for SDK streaming
 	go func() {

@@ -52,8 +52,21 @@ func generateKeyAndHash() (apiKey, hashHex string, err error) {
 	return apiKey, hashHex, nil
 }
 
+func generateRandomSalt() (string, error) {
+	b := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
 func (s *EnvironmentService) CreateEnvironment(ctx context.Context, projectID uuid.UUID, name string, isProtected bool, actorID uuid.UUID, actorIP string) (*models.Environment, string, error) {
 	apiKey, hashHex, err := generateKeyAndHash()
+	if err != nil {
+		return nil, "", err
+	}
+
+	salt, err := generateRandomSalt()
 	if err != nil {
 		return nil, "", err
 	}
@@ -65,6 +78,7 @@ func (s *EnvironmentService) CreateEnvironment(ctx context.Context, projectID uu
 		Name:        name,
 		Key:         strings.ToLower(strings.ReplaceAll(name, " ", "-")),
 		APIKeyHash:  hashHex,
+		Salt:        salt,
 		IsProtected: isProtected,
 		CreatedAt:   now,
 		UpdatedAt:   now,
@@ -109,6 +123,11 @@ func (s *EnvironmentService) CloneEnvironment(ctx context.Context, projectID, so
 		return nil, "", err
 	}
 
+	salt, err := generateRandomSalt()
+	if err != nil {
+		return nil, "", err
+	}
+
 	now := time.Now().UTC()
 	newEnv := &models.Environment{
 		ID:          uuid.New(),
@@ -116,6 +135,7 @@ func (s *EnvironmentService) CloneEnvironment(ctx context.Context, projectID, so
 		Name:        name,
 		Key:         strings.ToLower(strings.ReplaceAll(name, " ", "-")),
 		APIKeyHash:  hashHex,
+		Salt:        salt,
 		IsProtected: false,
 		CreatedAt:   now,
 		UpdatedAt:   now,

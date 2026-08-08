@@ -80,21 +80,21 @@ func TestAuditService_LogAction_SanitizesSensitiveData(t *testing.T) {
 	createdLog := mockRepo.logs[0]
 
 	// Verify sensitive keys were redacted
-	if createdLog.NewState["api_key"] != "***" {
-		t.Errorf("expected api_key to be redacted to '***', got %v", createdLog.NewState["api_key"])
+	if createdLog.NewState["api_key"] != "[REDACTED]" {
+		t.Errorf("expected api_key to be redacted to '[REDACTED]', got %v", createdLog.NewState["api_key"])
 	}
-	if createdLog.NewState["token"] != "***" {
-		t.Errorf("expected token to be redacted to '***', got %v", createdLog.NewState["token"])
+	if createdLog.NewState["token"] != "[REDACTED]" {
+		t.Errorf("expected token to be redacted to '[REDACTED]', got %v", createdLog.NewState["token"])
 	}
-	if createdLog.NewState["secret"] != "***" {
-		t.Errorf("expected secret to be redacted to '***', got %v", createdLog.NewState["secret"])
+	if createdLog.NewState["secret"] != "[REDACTED]" {
+		t.Errorf("expected secret to be redacted to '[REDACTED]', got %v", createdLog.NewState["secret"])
 	}
 	if createdLog.NewState["name"] != "Production Env" {
 		t.Errorf("expected name to be 'Production Env', got %v", createdLog.NewState["name"])
 	}
 
-	if createdLog.PreviousState["password"] != "***" {
-		t.Errorf("expected password to be redacted to '***', got %v", createdLog.PreviousState["password"])
+	if createdLog.PreviousState["password"] != "[REDACTED]" {
+		t.Errorf("expected password to be redacted to '[REDACTED]', got %v", createdLog.PreviousState["password"])
 	}
 	if createdLog.PreviousState["normal"] != "value" {
 		t.Errorf("expected normal to be 'value', got %v", createdLog.PreviousState["normal"])

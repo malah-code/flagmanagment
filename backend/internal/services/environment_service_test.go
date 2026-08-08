@@ -31,6 +31,7 @@ func (m *EnvMockStore) ScheduledChangeRepo() repository.ScheduledChangeRepositor
 func (m *EnvMockStore) StalePolicyRepo() repository.StalePolicyRepository       { return nil }
 func (m *EnvMockStore) RoleRepo() repository.RoleRepository                     { return nil }
 func (m *EnvMockStore) UserRepo() repository.UserRepository                     { return nil }
+func (m *EnvMockStore) WebhookIntegrationRepo() repository.WebhookIntegrationRepository { return nil }
 func (m *EnvMockStore) WithTx(ctx context.Context, fn func(repository.Store) error) error {
 	return fn(m)
 }
@@ -118,6 +119,9 @@ func (m *EnvMockAuditRepo) ListByProject(ctx context.Context, projectID uuid.UUI
 }
 func (m *EnvMockAuditRepo) ListByEnvironment(ctx context.Context, envID uuid.UUID, limit, offset int) ([]*models.AuditLog, int, error) {
 	return nil, 0, nil
+}
+func (m *EnvMockAuditRepo) DeleteOlderThan(ctx context.Context, cutoff time.Time) error {
+	return nil
 }
 
 func TestCloneEnvironment_Success(t *testing.T) {

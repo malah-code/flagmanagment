@@ -30,6 +30,7 @@ type Store interface {
 	StalePolicyRepo() StalePolicyRepository
 	RoleRepo() RoleRepository
 	UserRepo() UserRepository
+	WebhookIntegrationRepo() WebhookIntegrationRepository
 
 	// Transaction support
 	WithTx(ctx context.Context, fn func(Store) error) error
@@ -92,6 +93,7 @@ type AuditRepository interface {
 	Create(ctx context.Context, log *models.AuditLog) error
 	ListByProject(ctx context.Context, projectID uuid.UUID, limit, offset int) ([]*models.AuditLog, int, error)
 	ListByEnvironment(ctx context.Context, envID uuid.UUID, limit, offset int) ([]*models.AuditLog, int, error)
+	DeleteOlderThan(ctx context.Context, cutoff time.Time) error
 }
 
 type ChangeRequestRepository interface {

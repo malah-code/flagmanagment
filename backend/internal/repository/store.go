@@ -61,6 +61,10 @@ func (s *store) UserRepo() UserRepository {
 	return NewUserRepository(s.db)
 }
 
+func (s *store) WebhookIntegrationRepo() WebhookIntegrationRepository {
+	return NewWebhookIntegrationRepository(s.db)
+}
+
 func (s *store) WithTx(ctx context.Context, fn func(Store) error) error {
 	// Simple non-transactional stub. Proper tx management requires extending Store to wrap *sql.Tx
 	return fn(s)

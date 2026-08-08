@@ -13,6 +13,9 @@ import (
 
 type WebhookService interface {
 	ProcessAPMAlert(ctx context.Context, envID uuid.UUID, alertIdentifier string, payload interface{}) (int, error)
+	CreateWebhook(ctx context.Context, wh *models.WebhookIntegration) error
+	ListWebhooks(ctx context.Context, projectID uuid.UUID) ([]*models.WebhookIntegration, error)
+	DeleteWebhook(ctx context.Context, id uuid.UUID) error
 }
 
 type webhookService struct {
@@ -130,4 +133,16 @@ func (s *webhookService) logAudit(ctx context.Context, txStore repository.Store,
 		ActorIP:       "webhook",
 		CreatedAt:     time.Now().UTC(),
 	})
+}
+
+func (s *webhookService) CreateWebhook(ctx context.Context, wh *models.WebhookIntegration) error {
+	return s.store.WebhookIntegrationRepo().Create(ctx, wh)
+}
+
+func (s *webhookService) ListWebhooks(ctx context.Context, projectID uuid.UUID) ([]*models.WebhookIntegration, error) {
+	return s.store.WebhookIntegrationRepo().ListByProject(ctx, projectID)
+}
+
+func (s *webhookService) DeleteWebhook(ctx context.Context, id uuid.UUID) error {
+	return s.store.WebhookIntegrationRepo().Delete(ctx, id)
 }

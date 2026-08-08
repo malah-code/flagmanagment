@@ -3,8 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/flagmanagment/backend/internal/models"
+	"time"
 
+	"github.com/flagmanagment/backend/internal/models"
 	"github.com/google/uuid"
 )
 
@@ -77,4 +78,10 @@ func (r *auditRepository) ListByEnvironment(ctx context.Context, envID uuid.UUID
 	var total int
 	err = r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM audit_logs WHERE environment_id = $1`, envID).Scan(&total)
 	return logs, total, err
+}
+
+func (r *auditRepository) DeleteOlderThan(ctx context.Context, cutoff time.Time) error {
+	query := `DELETE FROM audit_logs WHERE created_at < $1`
+	_, err := r.db.ExecContext(ctx, query, cutoff)
+	return err
 }
