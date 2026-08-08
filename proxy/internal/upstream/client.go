@@ -50,8 +50,13 @@ func (c *UpstreamClient) Run(ctx context.Context) {
 		default:
 		}
 
+		start := time.Now()
 		err := c.connectAndStream(ctx)
 		c.state.SetConnected(false)
+
+		if time.Since(start) > 1*time.Minute {
+			backoff = 1 * time.Second
+		}
 
 		if ctx.Err() != nil {
 			return

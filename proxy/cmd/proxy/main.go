@@ -99,10 +99,18 @@ func main() {
 	log.Info().Msg("Shutting down Edge Proxy gracefully...")
 
 	cancel() // Stop upstream client
-	grpcServer.GracefulStop()
-
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer shutdownCancel()
+
+	go func() {
+		<-shutdownCtx.Done()
+		if shutdownCtx.Err() == context.DeadlineExceeded {
+			log.Warn().Msg("gRPC GracefulStop timed out, forcing Stop()")
+			grpcServer.Stop()
+		}
+	}()
+	grpcServer.GracefulStop()
+
 	_ = healthServer.Shutdown(shutdownCtx)
 
 	log.Info().Msg("Edge Proxy shutdown complete")
