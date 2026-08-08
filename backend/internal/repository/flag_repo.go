@@ -110,3 +110,23 @@ func (r *flagRepository) UpdateLastEvaluatedAt(ctx context.Context, ids []uuid.U
 	// Not implementing the bulk query fully here due to simplicity
 	return nil
 }
+
+func (r *flagRepository) ListDependencyMap(ctx context.Context, projectID uuid.UUID) (map[uuid.UUID]*uuid.UUID, error) {
+	query := `SELECT id, parent_flag_id FROM feature_flags WHERE project_id = $1`
+	rows, err := r.db.QueryContext(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	dependencies := make(map[uuid.UUID]*uuid.UUID)
+	for rows.Next() {
+		var id uuid.UUID
+		var parentID *uuid.UUID
+		if err := rows.Scan(&id, &parentID); err != nil {
+			return nil, err
+		}
+		dependencies[id] = parentID
+	}
+	return dependencies, nil
+}

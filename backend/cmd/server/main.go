@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -74,18 +76,28 @@ func main() {
 	auditHandler := api.NewAuditHandler(store)
 	auditService := services.NewAuditService(store)
 	crService := services.NewChangeRequestService(store, auditService)
+	promotionService := services.NewPromotionService(store, auditService, crService)
+	scService := services.NewScheduledChangeService(store, auditService)
+
+	metricService := services.NewMetricAggregationService(store.FlagStateRepo())
+	metricService.Start(context.Background(), 10*time.Second)
+
+	staleScanner := services.NewStaleScannerService(store)
+	staleScanner.Start(context.Background(), 1*time.Hour)
 
 	projectHandler := api.NewProjectHandler(store, rbacMiddleware, auditHandler)
 	envHandler := api.NewEnvironmentHandler(store, rbacMiddleware, auditService)
 	flagHandler := api.NewFlagHandler(store, cacheClient, rbacMiddleware, auditService, crService)
 	crHandler := api.NewChangeRequestHandler(store, crService, rbacMiddleware, cacheClient)
-	sdkHandler := api.NewSDKHandler(store)
+	promotionHandler := api.NewPromotionHandler(promotionService, cacheClient, rbacMiddleware)
+	sdkHandler := api.NewSDKHandler(store, metricService)
 
 	notificationService := services.NewNotificationService(store)
 	webhookService := services.NewWebhookService(store, auditService, cacheClient, notificationService)
 	webhookHandler := api.NewWebhookHandler(webhookService)
 	ksHandler := api.NewKillSwitchHandler(store, rbacMiddleware)
 	slackHandler := api.NewSlackConfigHandler(store, rbacMiddleware)
+	scHandler := api.NewScheduledChangeHandler(store, scService, rbacMiddleware, cacheClient)
 
 	// API v1 Routes
 	router.Route("/api/v1", func(r chi.Router) {
@@ -101,11 +113,18 @@ func main() {
 				projectHandler.RegisterRoutes(r)
 			})
 
+	lifecycleHandler := api.NewLifecycleHandler(store, rbacMiddleware, auditService)
+	stalePolicyHandler := api.NewStalePolicyHandler(store, rbacMiddleware)
+
 			envHandler.RegisterRoutes(r)
 			flagHandler.RegisterRoutes(r)
+			lifecycleHandler.RegisterRoutes(r)
+			stalePolicyHandler.RegisterRoutes(r)
 			crHandler.RegisterRoutes(r)
 			ksHandler.RegisterRoutes(r)
 			slackHandler.RegisterRoutes(r)
+			promotionHandler.RegisterRoutes(r)
+			scHandler.RegisterRoutes(r)
 		})
 
 		// SDK Routes (Protected by API Key AuthMiddleware)
@@ -122,6 +141,10 @@ func main() {
 			})
 		})
 	})
+
+	// Start Background Scheduler for Scheduled Flag Changes
+	scheduler := services.NewScheduler(store, auditService, crService, cacheClient, logger)
+	go scheduler.Start(context.Background())
 
 	// Start gRPC server for SDK streaming
 	go func() {

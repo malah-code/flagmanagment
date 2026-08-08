@@ -11,10 +11,13 @@ type RulesetSnapshot struct {
 // FlagRule defines a single feature flag's evaluation configuration.
 type FlagRule struct {
 	Key              string          `json:"key"`
-	Type             string          `json:"type"` // BOOLEAN, STRING, NUMBER, JSON
+	Type             string          `json:"type"` // BOOLEAN, MULTIVARIATE, STRING, NUMBER, JSON
 	Enabled          bool            `json:"enabled"`
 	DefaultVariation string          `json:"defaultVariation"`
 	TargetingRules   json.RawMessage `json:"targetingRules,omitempty"`
+	RolloutRules     json.RawMessage `json:"rolloutRules,omitempty"`
+	Variations       json.RawMessage `json:"variations,omitempty"`
+	ParentFlagKey    string          `json:"parentFlagKey,omitempty"`
 }
 
 // EvaluationContext represents the user attributes passed for flag evaluation.

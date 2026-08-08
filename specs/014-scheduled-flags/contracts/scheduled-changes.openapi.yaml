@@ -1,0 +1,306 @@
+openapi: "3.0.3"
+info:
+  title: FlagManagment – Scheduled Changes API
+  version: "1.0.0"
+  description: >
+    REST contract for creating, listing, modifying, and cancelling scheduled
+    flag state changes and scheduled change-request applications.
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: scheduled-changes
+    description: Operations on scheduled flag or change-request actions
+
+paths:
+  /environments/{envId}/scheduled-changes:
+    post:
+      operationId: createScheduledChange
+      summary: Create a new scheduled change
+      tags: [scheduled-changes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EnvId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduledChangeRequest'
+      responses:
+        "201":
+          description: Scheduled change created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduledChange'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "409":
+          description: Conflict – a pending schedule already exists for this flag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "a pending schedule already exists for this flag"
+
+    get:
+      operationId: listScheduledChanges
+      summary: List scheduled changes for an environment
+      tags: [scheduled-changes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EnvId'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, EXECUTED, CANCELLED]
+          description: Filter by status (omit for all)
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageToken'
+      responses:
+        "200":
+          description: Paginated list of scheduled changes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScheduledChanges'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /scheduled-changes/{id}:
+    get:
+      operationId: getScheduledChange
+      summary: Get a scheduled change by ID
+      tags: [scheduled-changes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScheduledChangeId'
+      responses:
+        "200":
+          description: Scheduled change
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduledChange'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateScheduledChange
+      summary: Update the scheduled time of a pending change
+      tags: [scheduled-changes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScheduledChangeId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScheduledChangeRequest'
+      responses:
+        "200":
+          description: Updated scheduled change
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduledChange'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: cancelScheduledChange
+      summary: Cancel a pending scheduled change
+      tags: [scheduled-changes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScheduledChangeId'
+      responses:
+        "200":
+          description: Cancelled scheduled change
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduledChange'
+        "400":
+          description: Cannot cancel a non-PENDING schedule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    EnvId:
+      name: envId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ScheduledChangeId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PageSize:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+    PageToken:
+      name: page_token
+      in: query
+      schema:
+        type: string
+
+  schemas:
+    ScheduledChange:
+      type: object
+      required: [id, project_id, environment_id, target_type, target_id, action, scheduled_for, status, created_by, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        target_type:
+          type: string
+          enum: [FLAG, CHANGE_REQUEST]
+        target_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [ENABLE, DISABLE, APPLY]
+        scheduled_for:
+          type: string
+          format: date-time
+          description: UTC ISO-8601 timestamp
+        status:
+          type: string
+          enum: [PENDING, EXECUTED, CANCELLED]
+        created_by:
+          type: string
+          format: uuid
+        executed_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateScheduledChangeRequest:
+      type: object
+      required: [target_type, target_id, action, scheduled_for]
+      properties:
+        target_type:
+          type: string
+          enum: [FLAG, CHANGE_REQUEST]
+        target_id:
+          type: string
+          format: uuid
+          description: UUID of the feature flag or change request to act on
+        action:
+          type: string
+          enum: [ENABLE, DISABLE, APPLY]
+          description: >
+            ENABLE or DISABLE for FLAG targets; APPLY for CHANGE_REQUEST targets
+        scheduled_for:
+          type: string
+          format: date-time
+          description: >
+            UTC ISO-8601 timestamp; must be strictly in the future
+
+    UpdateScheduledChangeRequest:
+      type: object
+      required: [scheduled_for]
+      properties:
+        scheduled_for:
+          type: string
+          format: date-time
+          description: New UTC ISO-8601 timestamp; must be strictly in the future
+
+    PaginatedScheduledChanges:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduledChange'
+        next_page_token:
+          type: string
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden – insufficient role
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -245,7 +245,8 @@ type FlagRule struct {
 	Type               string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"` // BOOLEAN, STRING, NUMBER, JSON
 	Enabled            bool                   `protobuf:"varint,3,opt,name=enabled,proto3" json:"enabled,omitempty"`
 	DefaultVariation   string                 `protobuf:"bytes,4,opt,name=default_variation,json=defaultVariation,proto3" json:"default_variation,omitempty"`
-	TargetingRulesJson []byte                 `protobuf:"bytes,5,opt,name=targeting_rules_json,json=targetingRulesJson,proto3" json:"targeting_rules_json,omitempty"` // JSON representation of the rules
+	TargetingRulesJson []byte                 `protobuf:"bytes,5,opt,name=targeting_rules_json,json=targetingRulesJson,proto3" json:"targeting_rules_json,omitempty"`
+	ParentFlagKey      string                 `protobuf:"bytes,6,opt,name=parent_flag_key,json=parentFlagKey,proto3" json:"parent_flag_key,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -313,6 +314,13 @@ func (x *FlagRule) GetTargetingRulesJson() []byte {
 		return x.TargetingRulesJson
 	}
 	return nil
+}
+
+func (x *FlagRule) GetParentFlagKey() string {
+	if x != nil {
+		return x.ParentFlagKey
+	}
+	return ""
 }
 
 var File_api_proto_sdk_v1_sdk_proto protoreflect.FileDescriptor

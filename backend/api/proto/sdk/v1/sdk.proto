@@ -42,4 +42,5 @@ message FlagRule {
   bool enabled = 3;
   string default_variation = 4;
   bytes targeting_rules_json = 5; // JSON representation of the rules
+  string parent_flag_key = 6;
 }

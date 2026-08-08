@@ -104,8 +104,10 @@ func (s *ChangeRequestService) Approve(ctx context.Context, crID uuid.UUID, revi
 		// 3. Apply proposed changes to target environment flag state if available in proposed_changes
 		flagIDRaw, ok1 := cr.ProposedChanges["flag_id"].(string)
 		enabled, ok2 := cr.ProposedChanges["enabled"].(bool)
+		defaultVariation, _ := cr.ProposedChanges["default_variation"].(string)
 		targetingRules, _ := cr.ProposedChanges["targeting_rules"].(map[string]interface{})
 		remoteConfig, _ := cr.ProposedChanges["remote_config"].(map[string]interface{})
+		rolloutRules, _ := cr.ProposedChanges["rollout_rules"].(map[string]interface{})
 
 		if ok1 && ok2 {
 			flagID, err := uuid.Parse(flagIDRaw)
@@ -113,11 +115,17 @@ func (s *ChangeRequestService) Approve(ctx context.Context, crID uuid.UUID, revi
 				existingState, err := txStore.FlagStateRepo().GetByEnvAndFlag(ctx, cr.EnvironmentID, flagID)
 				if err == nil {
 					existingState.Enabled = enabled
+					if defaultVariation != "" {
+						existingState.DefaultVariation = defaultVariation
+					}
 					if targetingRules != nil {
 						existingState.TargetingRules = targetingRules
 					}
 					if remoteConfig != nil {
 						existingState.RemoteConfig = remoteConfig
+					}
+					if rolloutRules != nil {
+						existingState.RolloutRules = rolloutRules
 					}
 					existingState.UpdatedAt = now
 					if err := txStore.FlagStateRepo().Update(ctx, existingState); err != nil {
@@ -125,14 +133,16 @@ func (s *ChangeRequestService) Approve(ctx context.Context, crID uuid.UUID, revi
 					}
 				} else if errors.Is(err, repository.ErrNotFound) {
 					newState := &models.EnvironmentFlagState{
-						ID:             uuid.New(),
-						EnvironmentID:  cr.EnvironmentID,
-						FeatureFlagID:  flagID,
-						Enabled:        enabled,
-						TargetingRules: targetingRules,
-						RemoteConfig:   remoteConfig,
-						CreatedAt:      now,
-						UpdatedAt:      now,
+						ID:               uuid.New(),
+						EnvironmentID:    cr.EnvironmentID,
+						FeatureFlagID:    flagID,
+						Enabled:          enabled,
+						DefaultVariation: defaultVariation,
+						TargetingRules:   targetingRules,
+						RemoteConfig:     remoteConfig,
+						RolloutRules:     rolloutRules,
+						CreatedAt:        now,
+						UpdatedAt:        now,
 					}
 					if err := txStore.FlagStateRepo().Create(ctx, newState); err != nil {
 						return err
@@ -212,3 +222,94 @@ func (s *ChangeRequestService) Reject(ctx context.Context, crID uuid.UUID, revie
 
 	return nil
 }
+
+func (s *ChangeRequestService) ApplyScheduled(ctx context.Context, crID uuid.UUID) error {
+	cr, err := s.store.ChangeRequestRepo().GetByID(ctx, crID)
+	if err != nil {
+		return err
+	}
+
+	if cr.Status != models.StatusApproved {
+		return errors.New("change request is not in APPROVED state")
+	}
+
+	now := time.Now().UTC()
+
+	err = s.store.WithTx(ctx, func(txStore repository.Store) error {
+		systemID := models.SystemActor()
+		if err := txStore.ChangeRequestRepo().UpdateStatus(ctx, crID, string(models.StatusApplied), &systemID); err != nil {
+			return err
+		}
+
+		flagIDRaw, ok1 := cr.ProposedChanges["flag_id"].(string)
+		enabled, ok2 := cr.ProposedChanges["enabled"].(bool)
+		defaultVariation, _ := cr.ProposedChanges["default_variation"].(string)
+		targetingRules, _ := cr.ProposedChanges["targeting_rules"].(map[string]interface{})
+		remoteConfig, _ := cr.ProposedChanges["remote_config"].(map[string]interface{})
+		rolloutRules, _ := cr.ProposedChanges["rollout_rules"].(map[string]interface{})
+
+		if ok1 && ok2 {
+			flagID, err := uuid.Parse(flagIDRaw)
+			if err == nil {
+				existingState, err := txStore.FlagStateRepo().GetByEnvAndFlag(ctx, cr.EnvironmentID, flagID)
+				if err == nil {
+					existingState.Enabled = enabled
+					if defaultVariation != "" {
+						existingState.DefaultVariation = defaultVariation
+					}
+					if targetingRules != nil {
+						existingState.TargetingRules = targetingRules
+					}
+					if remoteConfig != nil {
+						existingState.RemoteConfig = remoteConfig
+					}
+					if rolloutRules != nil {
+						existingState.RolloutRules = rolloutRules
+					}
+					existingState.UpdatedAt = now
+					if err := txStore.FlagStateRepo().Update(ctx, existingState); err != nil {
+						return err
+					}
+				} else if errors.Is(err, repository.ErrNotFound) {
+					newState := &models.EnvironmentFlagState{
+						ID:               uuid.New(),
+						EnvironmentID:    cr.EnvironmentID,
+						FeatureFlagID:    flagID,
+						Enabled:          enabled,
+						DefaultVariation: defaultVariation,
+						TargetingRules:   targetingRules,
+						RemoteConfig:     remoteConfig,
+						RolloutRules:     rolloutRules,
+						CreatedAt:        now,
+						UpdatedAt:        now,
+					}
+					if err := txStore.FlagStateRepo().Create(ctx, newState); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if s.audit != nil {
+		s.audit.LogAction(ctx, &models.AuditLog{
+			ID:            uuid.New(),
+			ProjectID:     &cr.ProjectID,
+			EnvironmentID: &cr.EnvironmentID,
+			ActorID:       models.SystemActor(),
+			Action:        "SCHEDULED_APPLY",
+			TargetType:    "CHANGE_REQUEST",
+			TargetID:      cr.ID,
+			NewState:      cr.ProposedChanges,
+			CreatedAt:     now,
+		})
+	}
+
+	return nil
+}
+

@@ -1,24 +1,33 @@
 import { useState } from 'react';
 import { useFlags, useDeleteFlag } from '../../hooks/useFlags';
 import { CreateFlagDialog } from './CreateFlagDialog';
-import { Plus, Flag, Trash2, Loader2, Search, Tag } from 'lucide-react';
+import { StaleBadge } from './StaleBadge';
+import { FlagActions } from './FlagActions';
+import type { LifecycleState } from '../../types';
+import { Plus, Flag, Trash2, Loader2, Search, Tag, Filter, Link2 } from 'lucide-react';
 
 interface FlagsListProps {
   projectId: string;
+  environmentId?: string;
 }
 
-export const FlagsList = ({ projectId }: FlagsListProps) => {
-  const { data: flags = [], isLoading, isError, error } = useFlags(projectId);
+export const FlagsList = ({ projectId, environmentId }: FlagsListProps) => {
+  const { data: flags = [], isLoading, isError, error, refetch } = useFlags(projectId);
   const deleteMutation = useDeleteFlag(projectId);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [lifecycleFilter, setLifecycleFilter] = useState<LifecycleState | 'ALL'>('ALL');
 
-  const filteredFlags = flags.filter(
-    (f) =>
+  const filteredFlags = flags.filter((f) => {
+    const matchesSearch =
       f.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      f.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      f.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    // Assume flag has lifecycle status attached or default ACTIVE
+    const matchesLifecycle =
+      lifecycleFilter === 'ALL' || (f as any).lifecycleState === lifecycleFilter;
+    return matchesSearch && matchesLifecycle;
+  });
 
   const handleDelete = async (id: string, key: string) => {
     if (confirm(`Are you sure you want to delete feature flag "${key}"?`)) {
@@ -42,15 +51,32 @@ export const FlagsList = ({ projectId }: FlagsListProps) => {
         </button>
       </div>
 
-      <div className="flex items-center gap-3 bg-white px-3.5 py-2.5 rounded-lg border border-slate-200 shadow-sm max-w-md">
-        <Search className="w-4 h-4 text-slate-400" />
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Filter flags by key..."
-          className="w-full text-sm outline-none bg-transparent text-slate-900 placeholder:text-slate-400"
-        />
+      <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="flex items-center gap-3 bg-white px-3.5 py-2.5 rounded-lg border border-slate-200 shadow-sm max-w-md w-full">
+          <Search className="w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Filter flags by key..."
+            className="w-full text-sm outline-none bg-transparent text-slate-900 placeholder:text-slate-400"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 bg-white px-3.5 py-2.5 rounded-lg border border-slate-200 shadow-sm text-sm">
+          <Filter className="w-4 h-4 text-slate-400" />
+          <select
+            value={lifecycleFilter}
+            onChange={(e) => setLifecycleFilter(e.target.value as LifecycleState | 'ALL')}
+            className="bg-transparent text-slate-700 outline-none text-sm font-medium"
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="STALE">Stale</option>
+            <option value="DEPRECATED">Deprecated</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
+        </div>
       </div>
 
       {isLoading ? (
@@ -67,7 +93,7 @@ export const FlagsList = ({ projectId }: FlagsListProps) => {
             <Flag className="w-5 h-5" />
           </div>
           <p className="text-sm text-slate-500">
-            {searchTerm ? 'No flags match your filter.' : 'No feature flags created yet for this project.'}
+            {searchTerm || lifecycleFilter !== 'ALL' ? 'No flags match your filter.' : 'No feature flags created yet for this project.'}
           </p>
         </div>
       ) : (
@@ -77,6 +103,7 @@ export const FlagsList = ({ projectId }: FlagsListProps) => {
               <tr>
                 <th className="px-6 py-3.5">Flag Key</th>
                 <th className="px-6 py-3.5">Type</th>
+                <th className="px-6 py-3.5">Lifecycle</th>
                 <th className="px-6 py-3.5">Description</th>
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
@@ -87,6 +114,11 @@ export const FlagsList = ({ projectId }: FlagsListProps) => {
                   <td className="px-6 py-4 font-mono font-medium text-slate-900 flex items-center gap-2">
                     <Flag className="w-4 h-4 text-indigo-600 shrink-0" />
                     <span>{flag.key}</span>
+                    {flag.parentFlagId && (
+                      <span title="Depends on a parent flag" className="text-amber-500 flex items-center">
+                        <Link2 className="w-3.5 h-3.5" />
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md">
@@ -94,10 +126,19 @@ export const FlagsList = ({ projectId }: FlagsListProps) => {
                       {flag.type}
                     </span>
                   </td>
+                  <td className="px-6 py-4">
+                    <StaleBadge state={(flag as any).lifecycleState} />
+                  </td>
                   <td className="px-6 py-4 text-slate-500 max-w-md truncate">
                     {flag.description || '—'}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                    <FlagActions
+                      envId={environmentId}
+                      flagId={flag.id}
+                      currentLifecycle={(flag as any).lifecycleState}
+                      onStateChanged={refetch}
+                    />
                     <button
                       onClick={() => handleDelete(flag.id, flag.key)}
                       className="text-slate-400 hover:text-red-600 transition-colors p-1.5 rounded hover:bg-slate-100"

@@ -16,10 +16,10 @@ type SlackConfigRepository interface {
 }
 
 type slackConfigRepository struct {
-	db DBTX
+	db *sql.DB
 }
 
-func NewSlackConfigRepository(db DBTX) SlackConfigRepository {
+func NewSlackConfigRepository(db *sql.DB) SlackConfigRepository {
 	return &slackConfigRepository{db: db}
 }
 

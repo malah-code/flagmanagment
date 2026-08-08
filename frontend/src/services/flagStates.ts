@@ -2,8 +2,11 @@ import { apiClient } from './apiClient';
 import type { FlagState } from '../types';
 
 export interface UpdateFlagStatePayload {
-  isEnabled: boolean;
-  rules?: Record<string, unknown>[];
+  isEnabled?: boolean;
+  defaultVariation?: string;
+  targetingRules?: { rules: any[] } | null;
+  remoteConfig?: Record<string, any>;
+  rolloutRules?: { rules: any[] } | null;
 }
 
 export const flagStateService = {

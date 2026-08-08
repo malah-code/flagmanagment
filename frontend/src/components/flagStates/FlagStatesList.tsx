@@ -1,9 +1,17 @@
 import { useFlagStates, useUpdateFlagState } from '../../hooks/useFlagStates';
 import { useFlags } from '../../hooks/useFlags';
-import { ToggleLeft, ToggleRight, Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useEnvironments } from '../../hooks/useEnvironments';
+import { ToggleLeft, ToggleRight, Loader2, CheckCircle2, XCircle, ArrowUpRight, Target, Clock } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { KillSwitchForm } from '../KillSwitchForm';
 import { SlackConfigForm } from '../SlackConfigForm';
+import { PromoteFlagModal } from './PromoteFlagModal';
+import { TargetingRuleBuilder } from './TargetingRuleBuilder';
+import type { TargetingRule } from './TargetingRuleBuilder';
+import { ScheduledChangeBadge } from '../flags/ScheduledChangeBadge';
+import { ScheduleDialog } from '../flags/ScheduleDialog';
+import { scheduledChangesApi } from '../../services/scheduledChangesApi';
+import type { ScheduledChange } from '../../types/scheduledChange';
 
 interface FlagStatesListProps {
   projectId: string;
@@ -13,10 +21,39 @@ interface FlagStatesListProps {
 export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps) => {
   const { data: flags = [], isLoading: isLoadingFlags } = useFlags(projectId);
   const { data: flagStates = [], isLoading: isLoadingStates, isError, error } = useFlagStates(environmentId);
+  const { data: environments = [] } = useEnvironments(projectId);
   const updateMutation = useUpdateFlagState(environmentId);
   const [selectedFlagForKS, setSelectedFlagForKS] = useState<string | null>(null);
+  const [selectedFlagForPromote, setSelectedFlagForPromote] = useState<string | null>(null);
+  const [editingRulesState, setEditingRulesState] = useState<{ id: string; key: string; rules: TargetingRule[] } | null>(null);
+  const [scheduledChanges, setScheduledChanges] = useState<Record<string, ScheduledChange>>({});
+  const [selectedFlagForSchedule, setSelectedFlagForSchedule] = useState<{ id: string; name: string } | null>(null);
+
+  const loadSchedules = useCallback(async () => {
+    if (!environmentId) return;
+    try {
+      const res = await scheduledChangesApi.list(environmentId, 'PENDING');
+      const map: Record<string, ScheduledChange> = {};
+      if (res.data) {
+        res.data.forEach((sc) => {
+          if (sc.target_type === 'FLAG') {
+            map[sc.target_id] = sc;
+          }
+        });
+      }
+      setScheduledChanges(map);
+    } catch {
+      // Ignore list error
+    }
+  }, [environmentId]);
+
+  useEffect(() => {
+    loadSchedules();
+  }, [loadSchedules]);
 
   const isLoading = isLoadingFlags || isLoadingStates;
+
+  const currentEnv = environments.find(e => e.id === environmentId);
 
   const handleToggle = async (stateId: string, currentEnabled: boolean) => {
     await updateMutation.mutateAsync({
@@ -70,7 +107,10 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
                 return (
                   <tr key={flag.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-mono font-medium text-slate-900">
-                      {flag.key}
+                      <div className="flex items-center gap-2">
+                        <span>{flag.key}</span>
+                        <ScheduledChangeBadge scheduledChange={scheduledChanges[flag.id]} />
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md">
@@ -92,7 +132,32 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
                     </td>
                     <td className="px-6 py-4 text-right">
                       {state ? (
-                        <div className="flex items-center justify-end gap-4">
+                        <div className="flex items-center justify-end gap-3">
+                          <button
+                            onClick={() => {
+                              const existingRules = (state.targetingRules?.rules as TargetingRule[]) || [];
+                              setEditingRulesState({
+                                id: state.id,
+                                key: flag.key,
+                                rules: existingRules,
+                              });
+                            }}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded transition-colors"
+                          >
+                            <Target className="w-3.5 h-3.5" /> Targeting
+                          </button>
+                          <button
+                            onClick={() => setSelectedFlagForSchedule({ id: flag.id, name: flag.key })}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2.5 py-1.5 rounded transition-colors"
+                          >
+                            <Clock className="w-3.5 h-3.5" /> Schedule
+                          </button>
+                          <button
+                            onClick={() => setSelectedFlagForPromote(flag.id)}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded transition-colors"
+                          >
+                            <ArrowUpRight className="w-3.5 h-3.5" /> Promote
+                          </button>
                           <button
                             onClick={() => setSelectedFlagForKS(flag.id)}
                             className="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded transition-colors"
@@ -102,7 +167,7 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
                           <button
                             onClick={() => handleToggle(state.id, isEnabled)}
                             disabled={updateMutation.isPending}
-                            className="focus:outline-none transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0"
+                            className="focus:outline-none transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0 ml-1"
                             title={isEnabled ? 'Turn OFF' : 'Turn ON'}
                           >
                             {isEnabled ? (
@@ -128,7 +193,42 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
         <KillSwitchForm envId={environmentId} flagId={selectedFlagForKS} />
       )}
 
+      <PromoteFlagModal
+        isOpen={selectedFlagForPromote !== null}
+        onClose={() => setSelectedFlagForPromote(null)}
+        projectId={projectId}
+        flagId={selectedFlagForPromote!}
+        sourceEnvId={environmentId}
+        sourceEnvName={currentEnv?.name || 'Current Environment'}
+        onSuccess={() => {
+          // Re-fetch states if needed
+        }}
+      />
+
+      <ScheduleDialog
+        isOpen={selectedFlagForSchedule !== null}
+        onClose={() => setSelectedFlagForSchedule(null)}
+        flagId={selectedFlagForSchedule?.id || ''}
+        flagName={selectedFlagForSchedule?.name || ''}
+        environmentId={environmentId}
+        existingSchedule={selectedFlagForSchedule ? scheduledChanges[selectedFlagForSchedule.id] : null}
+        onSuccess={loadSchedules}
+      />
+
       <SlackConfigForm environmentId={environmentId} />
+
+      {editingRulesState && (
+        <TargetingRuleBuilder
+          isOpen={true}
+          onClose={() => setEditingRulesState(null)}
+          envId={environmentId}
+          flagStateId={editingRulesState.id}
+          flagKey={editingRulesState.key}
+          initialRules={editingRulesState.rules}
+        />
+      )}
     </div>
   );
 };
+
+

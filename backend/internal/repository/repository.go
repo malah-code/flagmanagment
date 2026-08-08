@@ -3,15 +3,17 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/flagmanagment/backend/internal/models"
 )
 
 var (
-	ErrNotFound      = errors.New("resource not found")
-	ErrAlreadyExists = errors.New("resource already exists")
-	ErrConflict      = errors.New("resource conflict")
+	ErrNotFound             = errors.New("resource not found")
+	ErrAlreadyExists        = errors.New("resource already exists")
+	ErrConflict             = errors.New("resource conflict")
+	ErrPendingScheduleExists = errors.New("a pending schedule already exists for this flag")
 )
 
 // Store provides access to all repository operations.
@@ -24,6 +26,8 @@ type Store interface {
 	ChangeRequestRepo() ChangeRequestRepository
 	KillSwitchRepo() KillSwitchRepository
 	SlackConfigRepo() SlackConfigRepository
+	ScheduledChangeRepo() ScheduledChangeRepository
+	StalePolicyRepo() StalePolicyRepository
 	RoleRepo() RoleRepository
 	UserRepo() UserRepository
 
@@ -61,6 +65,7 @@ type FlagRepository interface {
 	Update(ctx context.Context, flag *models.FeatureFlag) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	UpdateLastEvaluatedAt(ctx context.Context, ids []uuid.UUID) error
+	ListDependencyMap(ctx context.Context, projectID uuid.UUID) (map[uuid.UUID]*uuid.UUID, error)
 }
 
 type FlagStateRepository interface {
@@ -68,7 +73,17 @@ type FlagStateRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*models.EnvironmentFlagState, error)
 	GetByEnvAndFlag(ctx context.Context, envID, flagID uuid.UUID) (*models.EnvironmentFlagState, error)
 	ListByEnvironment(ctx context.Context, envID uuid.UUID) ([]*models.EnvironmentFlagState, error)
+	ListByEnvironmentAndLifecycle(ctx context.Context, envID uuid.UUID, lifecycle models.FlagLifecycleState) ([]*models.EnvironmentFlagState, error)
 	Update(ctx context.Context, state *models.EnvironmentFlagState) error
+	UpdateLifecycleState(ctx context.Context, id uuid.UUID, state models.FlagLifecycleState) error
+	UpdateLastEvaluatedAtBatch(ctx context.Context, updates map[uuid.UUID]time.Time) error
+	FindActiveFlagsForStalenessScan(ctx context.Context, limit int) ([]*models.EnvironmentFlagState, error)
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
+type StalePolicyRepository interface {
+	GetByEnvironment(ctx context.Context, projectID, envID uuid.UUID) (*models.StaleFlagPolicy, error)
+	Upsert(ctx context.Context, policy *models.StaleFlagPolicy) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -85,6 +100,17 @@ type ChangeRequestRepository interface {
 	UpdateStatus(ctx context.Context, id uuid.UUID, status string, appliedBy *uuid.UUID) error
 	AddApproval(ctx context.Context, approval *models.ChangeRequestApproval) error
 	ListApprovals(ctx context.Context, crID uuid.UUID) ([]*models.ChangeRequestApproval, error)
+}
+
+type ScheduledChangeRepository interface {
+	Create(ctx context.Context, sc *models.ScheduledChange) error
+	GetByID(ctx context.Context, id uuid.UUID) (*models.ScheduledChange, error)
+	ListByEnvironment(ctx context.Context, envID uuid.UUID, status string, limit, offset int) ([]*models.ScheduledChange, int, error)
+	GetPendingByTargetID(ctx context.Context, targetID uuid.UUID) (*models.ScheduledChange, error)
+	GetDueSchedules(ctx context.Context, now time.Time, limit int) ([]*models.ScheduledChange, error)
+	MarkExecuted(ctx context.Context, id uuid.UUID, executedAt time.Time) error
+	MarkCancelled(ctx context.Context, id uuid.UUID, cancelledAt time.Time) error
+	UpdateScheduledFor(ctx context.Context, id uuid.UUID, newTime time.Time) error
 }
 
 type RoleRepository interface {

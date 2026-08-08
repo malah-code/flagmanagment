@@ -37,25 +37,28 @@ type CreateEnvironmentResponse struct {
 
 // Feature Flag Responses
 type FeatureFlagResponse struct {
-	ID           string    `json:"id"`
-	ProjectID    string    `json:"projectId"`
-	Key          string    `json:"key"`
-	Name         string    `json:"name"`
-	Description  string    `json:"description"`
-	Type         string    `json:"type"`
-	ParentFlagID *string   `json:"parentFlagId,omitempty"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	ID           string         `json:"id"`
+	ProjectID    string         `json:"projectId"`
+	Key          string         `json:"key"`
+	Name         string         `json:"name"`
+	Description  string         `json:"description"`
+	Type         string         `json:"type"`
+	Variations   []VariationDTO `json:"variations,omitempty"`
+	ParentFlagID *string        `json:"parentFlagId,omitempty"`
+	CreatedAt    time.Time      `json:"createdAt"`
+	UpdatedAt    time.Time      `json:"updatedAt"`
 }
 
 // Flag State Responses
 type FlagStateResponse struct {
-	EnvironmentID  string                 `json:"environmentId"`
-	FeatureFlagID  string                 `json:"featureFlagId"`
-	Enabled        bool                   `json:"enabled"`
-	TargetingRules map[string]interface{} `json:"targetingRules"`
-	RemoteConfig   map[string]interface{} `json:"remoteConfig"`
-	UpdatedAt      time.Time              `json:"updatedAt"`
+	EnvironmentID    string                 `json:"environmentId"`
+	FeatureFlagID    string                 `json:"featureFlagId"`
+	Enabled          bool                   `json:"enabled"`
+	DefaultVariation string                 `json:"defaultVariation,omitempty"`
+	TargetingRules   map[string]interface{} `json:"targetingRules"`
+	RemoteConfig     map[string]interface{} `json:"remoteConfig"`
+	RolloutRules     map[string]interface{} `json:"rolloutRules,omitempty"`
+	UpdatedAt        time.Time              `json:"updatedAt"`
 }
 
 // SDK Responses

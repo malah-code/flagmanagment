@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
-	"malah-code/flagmanagment/backend/internal/models"
+	"github.com/flagmanagment/backend/internal/models"
 )
 
 type KillSwitchRepository interface {
@@ -17,10 +17,10 @@ type KillSwitchRepository interface {
 }
 
 type killSwitchRepository struct {
-	db DBTX
+	db *sql.DB
 }
 
-func NewKillSwitchRepository(db DBTX) KillSwitchRepository {
+func NewKillSwitchRepository(db *sql.DB) KillSwitchRepository {
 	return &killSwitchRepository{db: db}
 }
 

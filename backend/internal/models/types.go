@@ -15,6 +15,15 @@ const (
 	FlagTypeJSON         FlagType = "JSON"
 )
 
+func (f FlagType) IsValid() bool {
+	switch f {
+	case FlagTypeBoolean, FlagTypeMultivariate, FlagTypeJSON:
+		return true
+	default:
+		return false
+	}
+}
+
 // ChangeRequestStatus defines the state of a change request
 type ChangeRequestStatus string
 

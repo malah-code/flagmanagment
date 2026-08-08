@@ -6,6 +6,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type Variation struct {
+	ID          string      `json:"id"`
+	Name        string      `json:"name"`
+	Description string      `json:"description,omitempty"`
+	Value       interface{} `json:"value"`
+}
+
 type FeatureFlag struct {
 	ID              uuid.UUID  `json:"id" db:"id"`
 	ProjectID       uuid.UUID  `json:"project_id" db:"project_id"`
@@ -13,6 +20,7 @@ type FeatureFlag struct {
 	Name            string     `json:"name" db:"name"`
 	Description     string     `json:"description" db:"description"`
 	Type            FlagType   `json:"type" db:"type"`
+	Variations      JSONB      `json:"variations,omitempty" db:"variations"`
 	ParentFlagID    *uuid.UUID `json:"parent_flag_id,omitempty" db:"parent_flag_id"`
 	LastEvaluatedAt *time.Time `json:"last_evaluated_at,omitempty" db:"last_evaluated_at"`
 	CreatedAt       time.Time  `json:"created_at" db:"created_at"`

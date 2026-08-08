@@ -28,6 +28,10 @@ func (m *MockStore) ChangeRequestRepo() repository.ChangeRequestRepository {
 }
 func (m *MockStore) RoleRepo() repository.RoleRepository { return nil }
 func (m *MockStore) UserRepo() repository.UserRepository { return nil }
+func (m *MockStore) KillSwitchRepo() repository.KillSwitchRepository { return nil }
+func (m *MockStore) SlackConfigRepo() repository.SlackConfigRepository { return nil }
+func (m *MockStore) ScheduledChangeRepo() repository.ScheduledChangeRepository { return nil }
+func (m *MockStore) StalePolicyRepo() repository.StalePolicyRepository { return nil }
 
 func (m *MockStore) WithTx(ctx context.Context, fn func(repository.Store) error) error {
 	return fn(m)

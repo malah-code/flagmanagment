@@ -7,20 +7,23 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"time"
 
 	"github.com/flagmanagment/backend/internal/dto"
 	"github.com/flagmanagment/backend/internal/models"
 	"github.com/flagmanagment/backend/internal/repository"
 	"github.com/flagmanagment/backend/internal/sdk"
+	"github.com/flagmanagment/backend/internal/services"
 	"github.com/go-chi/chi/v5"
 )
 
 type SDKHandler struct {
-	store repository.Store
+	store         repository.Store
+	metricService services.MetricAggregationService
 }
 
-func NewSDKHandler(store repository.Store) *SDKHandler {
-	return &SDKHandler{store: store}
+func NewSDKHandler(store repository.Store, metricService services.MetricAggregationService) *SDKHandler {
+	return &SDKHandler{store: store, metricService: metricService}
 }
 
 func (h *SDKHandler) RegisterRoutes(r chi.Router) {
@@ -81,9 +84,12 @@ func (h *SDKHandler) EvaluateFlags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Build the response payload
+	// Build the response payload (excluding ARCHIVED flags)
 	resFlags := make(map[string]dto.SDKFlag)
 	for _, s := range states {
+		if s.LifecycleState == models.LifecycleArchived {
+			continue
+		}
 		f, ok := flagMap[s.FeatureFlagID.String()]
 		if !ok {
 			continue
@@ -143,12 +149,16 @@ func (h *SDKHandler) EvaluateSingleFlag(w http.ResponseWriter, r *http.Request) 
 	}
 
 	state, err := h.store.FlagStateRepo().GetByEnvAndFlag(r.Context(), env.ID, targetFlag.ID)
-	if err != nil {
+	if err != nil || state.LifecycleState == models.LifecycleArchived {
 		RespondWithJSON(w, http.StatusOK, map[string]interface{}{
 			"value":  false,
 			"reason": "NO_STATE",
 		})
 		return
+	}
+
+	if h.metricService != nil {
+		h.metricService.RecordEvaluation(state.ID, time.Now())
 	}
 
 	// PII Hashing per Constitution VII
@@ -161,16 +171,82 @@ func (h *SDKHandler) EvaluateSingleFlag(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	var rolloutRules json.RawMessage
+	if state.RolloutRules != nil {
+		if b, err := json.Marshal(state.RolloutRules); err == nil {
+			rolloutRules = b
+		}
+	}
+
+	var variations json.RawMessage
+	if targetFlag.Variations != nil {
+		if b, err := json.Marshal(targetFlag.Variations); err == nil {
+			variations = b
+		}
+	}
+
+	defaultVar := "false"
+	if state.DefaultVariation != "" {
+		defaultVar = state.DefaultVariation
+	}
+
 	// Create models.FlagRule
 	flagRule := &models.FlagRule{
 		Key:              targetFlag.Key,
 		Type:             string(targetFlag.Type),
 		Enabled:          state.Enabled,
-		DefaultVariation: "false", // Or remoteConfig base string
+		DefaultVariation: defaultVar,
 		TargetingRules:   targetingRules,
+		RolloutRules:     rolloutRules,
+		Variations:       variations,
 	}
 
-	result := sdk.EvaluateFlag(flagRule, hashedContext)
+	// We need to pass rulesMap. Since we are in EvaluateSingleFlag, we can build it.
+	rulesMap := make(map[string]*models.FlagRule)
+	for _, f := range flags {
+		fState, err := h.store.FlagStateRepo().GetByEnvAndFlag(r.Context(), env.ID, f.ID)
+		if err == nil && fState.LifecycleState != models.LifecycleArchived {
+			var tRules, rRules, vars json.RawMessage
+			if fState.TargetingRules != nil {
+				b, _ := json.Marshal(fState.TargetingRules)
+				tRules = b
+			}
+			if fState.RolloutRules != nil {
+				b, _ := json.Marshal(fState.RolloutRules)
+				rRules = b
+			}
+			if f.Variations != nil {
+				b, _ := json.Marshal(f.Variations)
+				vars = b
+			}
+			defVar := "false"
+			if fState.DefaultVariation != "" {
+				defVar = fState.DefaultVariation
+			}
+			parentKey := ""
+			if f.ParentFlagID != nil {
+				// find parent key
+				for _, pf := range flags {
+					if pf.ID == *f.ParentFlagID {
+						parentKey = pf.Key
+						break
+					}
+				}
+			}
+			rulesMap[f.Key] = &models.FlagRule{
+				Key:              f.Key,
+				Type:             string(f.Type),
+				Enabled:          fState.Enabled,
+				DefaultVariation: defVar,
+				TargetingRules:   tRules,
+				RolloutRules:     rRules,
+				Variations:       vars,
+				ParentFlagKey:    parentKey,
+			}
+		}
+	}
+
+	result := sdk.EvaluateFlag(flagRule, hashedContext, rulesMap)
 
 	RespondWithJSON(w, http.StatusOK, map[string]interface{}{
 		"value":  result.Value,

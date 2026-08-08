@@ -45,6 +45,14 @@ func (s *store) SlackConfigRepo() SlackConfigRepository {
 	return NewSlackConfigRepository(s.db)
 }
 
+func (s *store) ScheduledChangeRepo() ScheduledChangeRepository {
+	return NewScheduledChangeRepository(s.db)
+}
+
+func (s *store) StalePolicyRepo() StalePolicyRepository {
+	return NewStalePolicyRepository(s.db)
+}
+
 func (s *store) RoleRepo() RoleRepository {
 	return NewRoleRepository(s.db)
 }
