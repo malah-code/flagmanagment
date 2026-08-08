@@ -85,8 +85,10 @@ func main() {
 	staleScanner := services.NewStaleScannerService(store)
 	staleScanner.Start(context.Background(), 1*time.Hour)
 
+	envService := services.NewEnvironmentService(store, auditService)
+
 	projectHandler := api.NewProjectHandler(store, rbacMiddleware, auditHandler)
-	envHandler := api.NewEnvironmentHandler(store, rbacMiddleware, auditService)
+	envHandler := api.NewEnvironmentHandler(store, rbacMiddleware, auditService, envService)
 	flagHandler := api.NewFlagHandler(store, cacheClient, rbacMiddleware, auditService, crService)
 	crHandler := api.NewChangeRequestHandler(store, crService, rbacMiddleware, cacheClient)
 	promotionHandler := api.NewPromotionHandler(promotionService, cacheClient, rbacMiddleware)

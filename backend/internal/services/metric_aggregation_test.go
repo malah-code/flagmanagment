@@ -24,6 +24,7 @@ func (m *MetricMockFlagStateRepo) ListByEnvironmentAndLifecycle(ctx context.Cont
 func (m *MetricMockFlagStateRepo) Update(ctx context.Context, state *models.EnvironmentFlagState) error { return nil }
 func (m *MetricMockFlagStateRepo) UpdateLifecycleState(ctx context.Context, id uuid.UUID, state models.FlagLifecycleState) error { return nil }
 func (m *MetricMockFlagStateRepo) FindActiveFlagsForStalenessScan(ctx context.Context, limit int) ([]*models.EnvironmentFlagState, error) { return nil, nil }
+func (m *MetricMockFlagStateRepo) CloneEnvironmentState(ctx context.Context, sourceEnvID, targetEnvID uuid.UUID) error { return nil }
 func (m *MetricMockFlagStateRepo) Delete(ctx context.Context, id uuid.UUID) error { return nil }
 
 func (m *MetricMockFlagStateRepo) UpdateLastEvaluatedAtBatch(ctx context.Context, updates map[uuid.UUID]time.Time) error {

@@ -120,6 +120,11 @@ func (m *WebhookMockFlagStateRepo) FindActiveFlagsForStalenessScan(ctx context.C
 	return args.Get(0).([]*models.EnvironmentFlagState), args.Error(1)
 }
 
+func (m *WebhookMockFlagStateRepo) CloneEnvironmentState(ctx context.Context, sourceEnvID, targetEnvID uuid.UUID) error {
+	args := m.Called(ctx, sourceEnvID, targetEnvID)
+	return args.Error(0)
+}
+
 type WebhookMockAuditRepo struct {
 	mock.Mock
 }

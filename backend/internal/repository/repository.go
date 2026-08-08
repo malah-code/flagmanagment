@@ -78,6 +78,7 @@ type FlagStateRepository interface {
 	UpdateLifecycleState(ctx context.Context, id uuid.UUID, state models.FlagLifecycleState) error
 	UpdateLastEvaluatedAtBatch(ctx context.Context, updates map[uuid.UUID]time.Time) error
 	FindActiveFlagsForStalenessScan(ctx context.Context, limit int) ([]*models.EnvironmentFlagState, error)
+	CloneEnvironmentState(ctx context.Context, sourceEnvID, targetEnvID uuid.UUID) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 

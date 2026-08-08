@@ -1,0 +1,111 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Environment Cloning API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/projects/{projectId}/environments/{sourceEnvId}/clone": {
+      "post": {
+        "summary": "Clone an existing environment",
+        "description": "Deep copies an environment and all its feature flag states into a new ephemeral environment.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sourceEnvId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "PR-123-Test"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Environment cloned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "api_key": {
+                      "type": "string",
+                      "description": "The plaintext SDK token. Only returned once upon creation."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/environments/{envId}": {
+      "delete": {
+        "summary": "Delete an environment",
+        "description": "Permanently deletes an environment and all its associated state.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "envId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Environment deleted successfully"
+          },
+          "403": {
+            "description": "Forbidden (Environment is protected)"
+          }
+        }
+      }
+    }
+  }
+}

@@ -125,6 +125,11 @@ func (m *MockFlagStateRepo) FindActiveFlagsForStalenessScan(ctx context.Context,
 	return args.Get(0).([]*models.EnvironmentFlagState), args.Error(1)
 }
 
+func (m *MockFlagStateRepo) CloneEnvironmentState(ctx context.Context, sourceEnvID, targetEnvID uuid.UUID) error {
+	args := m.Called(ctx, sourceEnvID, targetEnvID)
+	return args.Error(0)
+}
+
 type PromoMockStore struct {
 	mock.Mock
 	crRepo *MockChangeRequestRepo

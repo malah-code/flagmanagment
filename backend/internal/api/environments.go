@@ -21,24 +21,27 @@ import (
 )
 
 type EnvironmentHandler struct {
-	store    repository.Store
-	validate *validator.Validate
-	rbac     *RBACMiddleware
-	audit    *services.AuditService
+	store      repository.Store
+	validate   *validator.Validate
+	rbac       *RBACMiddleware
+	audit      *services.AuditService
+	envService *services.EnvironmentService
 }
 
-func NewEnvironmentHandler(store repository.Store, rbac *RBACMiddleware, audit *services.AuditService) *EnvironmentHandler {
+func NewEnvironmentHandler(store repository.Store, rbac *RBACMiddleware, audit *services.AuditService, envService *services.EnvironmentService) *EnvironmentHandler {
 	return &EnvironmentHandler{
-		store:    store,
-		validate: validator.New(),
-		rbac:     rbac,
-		audit:    audit,
+		store:      store,
+		validate:   validator.New(),
+		rbac:       rbac,
+		audit:      audit,
+		envService: envService,
 	}
 }
 
 func (h *EnvironmentHandler) RegisterRoutes(r chi.Router) {
 	// Nested under projects
 	r.With(h.rbac.RequireRole("EDITOR")).Post("/projects/{projectId}/environments", h.Create)
+	r.With(h.rbac.RequireRole("EDITOR")).Post("/projects/{projectId}/environments/{sourceEnvId}/clone", h.Clone)
 	r.With(h.rbac.RequireRole("VIEWER")).Get("/projects/{projectId}/environments", h.List)
 
 	// Direct access
@@ -273,6 +276,60 @@ func (h *EnvironmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *EnvironmentHandler) Clone(w http.ResponseWriter, r *http.Request) {
+	projectIDStr := chi.URLParam(r, "projectId")
+	projectID, err := uuid.Parse(projectIDStr)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid project ID")
+		return
+	}
+
+	sourceEnvIDStr := chi.URLParam(r, "sourceEnvId")
+	sourceEnvID, err := uuid.Parse(sourceEnvIDStr)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid source environment ID")
+		return
+	}
+
+	var req dto.CloneEnvironmentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	if err := h.validate.Struct(req); err != nil {
+		RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	actorIDStr := r.Context().Value(UserIDKey).(string)
+	actorID, _ := uuid.Parse(actorIDStr)
+
+	env, apiKey, err := h.envService.CloneEnvironment(r.Context(), projectID, sourceEnvID, req.Name, actorID, r.RemoteAddr)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			RespondWithError(w, http.StatusNotFound, "Source environment not found")
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, "Failed to clone environment")
+		return
+	}
+
+	res := dto.CreateEnvironmentResponse{
+		EnvironmentResponse: dto.EnvironmentResponse{
+			ID:          env.ID.String(),
+			ProjectID:   env.ProjectID.String(),
+			Name:        env.Name,
+			IsProtected: env.IsProtected,
+			CreatedAt:   env.CreatedAt,
+			UpdatedAt:   env.UpdatedAt,
+		},
+		APIKey: apiKey,
+	}
+
+	RespondWithJSON(w, http.StatusCreated, res)
+}
+
 func (h *EnvironmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "envId")
 	id, err := uuid.Parse(idStr)
@@ -281,27 +338,21 @@ func (h *EnvironmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.store.EnvironmentRepo().Delete(r.Context(), id); err != nil {
+	actorIDStr := r.Context().Value(UserIDKey).(string)
+	actorID, _ := uuid.Parse(actorIDStr)
+
+	if err := h.envService.DeleteEnvironment(r.Context(), id, actorID, r.RemoteAddr); err != nil {
 		if err == repository.ErrNotFound {
 			RespondWithError(w, http.StatusNotFound, "Environment not found")
+			return
+		}
+		if err == services.ErrProtectedEnvironment {
+			RespondWithError(w, http.StatusForbidden, "Cannot delete protected environment")
 			return
 		}
 		RespondWithError(w, http.StatusInternalServerError, "Failed to delete environment")
 		return
 	}
-
-	actorIDStr := r.Context().Value(UserIDKey).(string)
-	actorID, _ := uuid.Parse(actorIDStr)
-
-	h.audit.LogAction(r.Context(), &models.AuditLog{
-		ID:         uuid.New(),
-		ActorID:    actorID,
-		Action:     "DELETE",
-		TargetType: "ENVIRONMENT",
-		TargetID:      id,
-		ActorIP:    r.RemoteAddr,
-		CreatedAt:  time.Now().UTC(),
-	})
 
 	w.WriteHeader(http.StatusNoContent)
 }

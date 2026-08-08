@@ -23,6 +23,10 @@ type UpdateEnvironmentRequest struct {
 	IsProtected bool   `json:"isProtected"`
 }
 
+type CloneEnvironmentRequest struct {
+	Name string `json:"name" validate:"required,min=3,max=100"`
+}
+
 type VariationDTO struct {
 	ID          string      `json:"id"`
 	Name        string      `json:"name"`

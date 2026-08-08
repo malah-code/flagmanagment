@@ -177,6 +177,18 @@ func (r *flagStateRepository) FindActiveFlagsForStalenessScan(ctx context.Contex
 	return states, nil
 }
 
+func (r *flagStateRepository) CloneEnvironmentState(ctx context.Context, sourceEnvID, targetEnvID uuid.UUID) error {
+	query := `INSERT INTO environment_flag_states (
+		id, environment_id, feature_flag_id, enabled, targeting_rules, remote_config, variations, lifecycle_state, last_evaluated_at, last_state_change_at, created_at, updated_at
+	)
+	SELECT 
+		gen_random_uuid(), $2, feature_flag_id, enabled, targeting_rules, remote_config, variations, 'ACTIVE', NULL, NOW(), NOW(), NOW()
+	FROM environment_flag_states
+	WHERE environment_id = $1`
+	_, err := r.db.ExecContext(ctx, query, sourceEnvID, targetEnvID)
+	return err
+}
+
 func (r *flagStateRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM environment_flag_states WHERE id = $1`
 	res, err := r.db.ExecContext(ctx, query, id)
