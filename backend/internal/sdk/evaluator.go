@@ -9,15 +9,70 @@ import (
 	"sync"
 
 	"github.com/flagmanagment/backend/internal/models"
+	"github.com/flagmanagment/backend/internal/sdk/hooks"
 	"github.com/spaolacci/murmur3"
 )
 
+var (
+	regexCache     sync.Map
+	hooksMu        sync.RWMutex
+	registeredHooks []hooks.Hook
+)
+
+// RegisterHook adds an OpenFeature Hook to the evaluator pipeline
+func RegisterHook(hook hooks.Hook) {
+	hooksMu.Lock()
+	defer hooksMu.Unlock()
+	registeredHooks = append(registeredHooks, hook)
+}
+
+// ClearHooks clears all registered hooks (primarily for testing)
+func ClearHooks() {
+	hooksMu.Lock()
+	defer hooksMu.Unlock()
+	registeredHooks = nil
+}
+
+// executeAfterHooks runs the After hooks asynchronously
+func executeAfterHooks(ctx hooks.HookContext, details hooks.EvaluationDetails) {
+	hooksMu.RLock()
+	hooksToRun := make([]hooks.Hook, len(registeredHooks))
+	copy(hooksToRun, registeredHooks)
+	hooksMu.RUnlock()
+
+	for _, hook := range hooksToRun {
+		go func(h hooks.Hook) {
+			defer func() {
+				if r := recover(); r != nil {
+					// recover from hook panic safely
+				}
+			}()
+			h.After(ctx, details)
+		}(hook)
+	}
+}
+
+// executeErrorHooks runs the Error hooks asynchronously
+func executeErrorHooks(ctx hooks.HookContext, err error) {
+	hooksMu.RLock()
+	hooksToRun := make([]hooks.Hook, len(registeredHooks))
+	copy(hooksToRun, registeredHooks)
+	hooksMu.RUnlock()
+
+	for _, hook := range hooksToRun {
+		go func(h hooks.Hook) {
+			defer func() {
+				if r := recover(); r != nil {
+					// recover from hook panic safely
+				}
+			}()
+			h.Error(ctx, err)
+		}(hook)
+	}
+}
+
 // EvaluationContext represents the stringified context for internal evaluation matching
 type EvaluationContext map[string]string
-
-var (
-	regexCache sync.Map
-)
 
 // HashPII creates a shallow copy of the EvaluationContext and hashes PII fields
 func HashPII(ctx *models.EvaluationContext) *models.EvaluationContext {
@@ -83,11 +138,23 @@ func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON mod
 
 // EvaluateFlag orchestrates the evaluation of a single flag against the context
 func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rulesMap map[string]*models.FlagRule) models.EvaluationResult {
+	hookCtx := hooks.HookContext{
+		FlagKey:           flagRule.Key,
+		FlagType:          flagRule.Type,
+		EvaluationContext: ctx,
+	}
+
 	if !flagRule.Enabled {
-		return models.EvaluationResult{
+		res := models.EvaluationResult{
 			Value:  flagRule.DefaultVariation,
 			Reason: "FLAG_DISABLED",
 		}
+		executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+			FlagKey: flagRule.Key,
+			Value:   res.Value,
+			Reason:  res.Reason,
+		})
+		return res
 	}
 
 	if flagRule.ParentFlagKey != "" && rulesMap != nil {
@@ -95,10 +162,16 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 		if exists && parentRule != nil {
 			parentResult := EvaluateFlag(parentRule, ctx, rulesMap)
 			if parentResult.Reason == "FLAG_DISABLED" || parentResult.Value == "false" || parentResult.Value == false {
-				return models.EvaluationResult{
+				res := models.EvaluationResult{
 					Value:  flagRule.DefaultVariation,
 					Reason: "PARENT_FLAG_DISABLED",
 				}
+				executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+					FlagKey: flagRule.Key,
+					Value:   res.Value,
+					Reason:  res.Reason,
+				})
+				return res
 			}
 		}
 	}
@@ -124,10 +197,16 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 		if err := json.Unmarshal(flagRule.TargetingRules, &rulesMap); err == nil {
 			variation, matched := EvaluateContextualRules(rulesMap, evalCtx)
 			if matched {
-				return models.EvaluationResult{
+				res := models.EvaluationResult{
 					Value:  variation,
 					Reason: "TARGETING_MATCH",
 				}
+				executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+					FlagKey: flagRule.Key,
+					Value:   res.Value,
+					Reason:  res.Reason,
+				})
+				return res
 			}
 		}
 	}
@@ -137,18 +216,30 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 		if err := json.Unmarshal(flagRule.RolloutRules, &rolloutMap); err == nil {
 			variationID, matched := EvaluateRolloutSplit(flagRule.Key, entityKey, rolloutMap)
 			if matched {
-				return models.EvaluationResult{
+				res := models.EvaluationResult{
 					Value:  variationID,
 					Reason: "PERCENTAGE_ROLLOUT",
 				}
+				executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+					FlagKey: flagRule.Key,
+					Value:   res.Value,
+					Reason:  res.Reason,
+				})
+				return res
 			}
 		}
 	}
 
-	return models.EvaluationResult{
+	res := models.EvaluationResult{
 		Value:  flagRule.DefaultVariation,
 		Reason: "DEFAULT",
 	}
+	executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+		FlagKey: flagRule.Key,
+		Value:   res.Value,
+		Reason:  res.Reason,
+	})
+	return res
 }
 
 // getCompiledRegex retrieves a compiled regex from the cache or compiles and caches it

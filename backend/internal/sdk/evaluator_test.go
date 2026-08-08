@@ -2,7 +2,10 @@ package sdk
 
 import (
 	"github.com/flagmanagment/backend/internal/models"
+	"github.com/flagmanagment/backend/internal/sdk/hooks"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func TestEvaluateContextualRules(t *testing.T) {
@@ -185,3 +188,64 @@ func TestEvaluateFlag_SequentialDependencies(t *testing.T) {
 		t.Errorf("expected true/PARENT_FLAG_DISABLED, got %v/%s", res3.Value, res3.Reason)
 	}
 }
+
+type MockHook struct {
+	afterCalled int32
+	errorCalled int32
+	ch          chan struct{}
+}
+
+func (h *MockHook) After(ctx hooks.HookContext, details hooks.EvaluationDetails) {
+	atomic.StoreInt32(&h.afterCalled, 1)
+	if h.ch != nil {
+		select {
+		case h.ch <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func (h *MockHook) Error(ctx hooks.HookContext, err error) {
+	atomic.StoreInt32(&h.errorCalled, 1)
+}
+
+
+
+func TestEvaluateFlag_Hooks(t *testing.T) {
+	// Reset registered hooks
+	ClearHooks()
+
+	mockHook := &MockHook{ch: make(chan struct{}, 1)}
+	RegisterHook(mockHook)
+
+	rulesMap := map[string]*models.FlagRule{
+		"flag-1": {
+			Key:              "flag-1",
+			Enabled:          true,
+			DefaultVariation: "true",
+		},
+	}
+
+	ctx := &models.EvaluationContext{EntityKey: "user-1"}
+
+	res := EvaluateFlag(rulesMap["flag-1"], ctx, rulesMap)
+	if res.Value != "true" {
+		t.Errorf("expected true, got %v", res.Value)
+	}
+
+	// Wait for hook or timeout
+	select {
+	case <-mockHook.ch:
+		// success
+	case <-time.After(1 * time.Second):
+		t.Errorf("timeout waiting for mock hook After to be called")
+	}
+
+	if atomic.LoadInt32(&mockHook.afterCalled) != 1 {
+		t.Errorf("expected mock hook After to be called")
+	}
+
+	// Clean up
+	ClearHooks()
+}
+
