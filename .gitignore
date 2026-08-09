@@ -18,3 +18,30 @@ vendor/
 *.zip*
 wget-log
 tmp/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Java
+target/
+*.class
+*.jar
+.gradle/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+
+# Mobile (iOS/Android)
+.build/
+DerivedData/
+*.swiftpm/
+Packages/
+*.iml
+out/

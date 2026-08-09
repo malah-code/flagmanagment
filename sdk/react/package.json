@@ -1,0 +1,19 @@
+{
+  "name": "@flagmanagment/react-sdk",
+  "version": "1.0.0",
+  "description": "FlagManagment React SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "@openfeature/react-sdk": ">=1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "react": "^18.2.0",
+    "@types/react": "^18.2.0"
+  }
+}
