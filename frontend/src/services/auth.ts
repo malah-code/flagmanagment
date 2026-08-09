@@ -26,7 +26,16 @@ export const authService = {
     return localStorage.getItem('auth_token');
   },
 
+  setToken(token: string) {
+    localStorage.setItem('auth_token', token);
+  },
+
   isAuthenticated(): boolean {
     return !!this.getToken();
   },
+
+  ssoLogin(provider: 'oidc' | 'saml') {
+    // Redirects browser to the backend SSO endpoint
+    window.location.href = `/api/v1/auth/sso/login?provider=${provider}`;
+  }
 };

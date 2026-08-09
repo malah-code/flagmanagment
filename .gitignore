@@ -13,6 +13,7 @@ backend/tmp/
 *.test
 vendor/
 *.out
+backend/server
 *.tar.gz*
 *.tgz
 *.zip*
@@ -45,3 +46,8 @@ DerivedData/
 Packages/
 *.iml
 out/
+# Terraform
+.terraform/
+*.tfstate*
+*.tfvars
+.terraform.lock.hcl

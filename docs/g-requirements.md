@@ -20,6 +20,12 @@ The core problem with current open-source feature flag tools is the vulnerabilit
 
 * **License Type:** Business Source License (BSL) or a comparable "Fair-Source" model.
 * **Corporate Freedom:** Organizations can self-host, modify, and utilize the entire platform internally for their own business operations with zero licensing costs and zero artificial feature caps.
+* **Integrations & Ecosystem**
+  - Webhooks for flag changes (creation, modification, deletion, toggle).
+  - OpenFeature compliant SDKs for seamless integration.
+  - Supported Language SDKs:
+    - **Server-side**: Go, Java, Python, .NET (Node.js/TypeScript native)
+    - **Client-side**: React (Web), iOS (Swift), Android (Kotlin)
 * **Commercial Protection:** The license explicitly and legally prohibits third-party managed service providers (e.g., major cloud vendors) from wrapping the codebase and reselling it as a competing public Software-as-a-Service (SaaS).
 * **Monetization Strategy:** The founding organization will offer a fully managed SaaS cloud version. Revenue will be generated through managed hosting, high-throughput API SLAs, and premium integrations, rather than intentionally limiting the fundamental security and governance tools needed by modern engineering teams.
 

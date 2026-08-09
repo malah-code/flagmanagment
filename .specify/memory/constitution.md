@@ -66,9 +66,10 @@ to solve.
 Server-side SDK flag evaluation MUST execute in under 1 millisecond on
 commodity hardware. All evaluations MUST occur in-memory within the SDK
 with zero outbound network calls during evaluation. SDKs MUST bootstrap
-by downloading a complete ruleset snapshot, receive lightweight delta
 updates over persistent streaming connections, and continue evaluating
 accurately using the last known good state if the connection drops.
+- Uses Server-Sent Events (SSE) for rule distribution.
+- OpenFeature compatible evaluation engine natively embedded in all SDKs (Node.js, Go, Java, Python, .NET, React, iOS, Android).
 
 **Rationale:** Network latency in the hot path is unacceptable for
 enterprise-scale applications serving millions of requests. This

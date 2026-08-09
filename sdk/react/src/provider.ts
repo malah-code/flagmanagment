@@ -1,5 +1,6 @@
 import { Provider, ResolutionDetails, EvaluationContext, JsonValue, StandardResolutionReasons, ErrorCode } from '@openfeature/react-sdk';
 import { FlagClient } from './client';
+import { evaluateFlag } from './evaluator';
 
 export class FlagManagmentWebProvider implements Provider {
   readonly metadata = {
@@ -23,11 +24,26 @@ export class FlagManagmentWebProvider implements Provider {
         };
       }
 
-      const val = (flag.variants?.[flag.defaultVariant] as unknown as T) ?? defaultValue;
+      const targetingKey = context?.targetingKey ?? this.client.getContext()?.targetingKey;
+      const result = evaluateFlag(flag, targetingKey);
+
+      if (result.value !== undefined && result.value !== null) {
+        const expectedType = typeof defaultValue;
+        const actualType = typeof result.value;
+
+        if (expectedType !== 'object' && actualType !== expectedType) {
+          return {
+            value: defaultValue,
+            reason: StandardResolutionReasons.ERROR,
+            errorCode: ErrorCode.TYPE_MISMATCH,
+          };
+        }
+      }
 
       return {
-        value: val,
-        reason: StandardResolutionReasons.STATIC,
+        value: (result.value as unknown as T) ?? defaultValue,
+        variant: result.variant,
+        reason: result.reason,
       };
     } catch (e) {
       return {

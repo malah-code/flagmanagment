@@ -97,6 +97,7 @@ func (m *fullMockStore) AuditRepo() repository.AuditRepository {
 
 func (m *fullMockStore) RoleRepo() repository.RoleRepository { return nil }
 func (m *fullMockStore) UserRepo() repository.UserRepository { return nil }
+func (m *fullMockStore) ServiceAccountRepo() repository.ServiceAccountRepository { return nil }
 func (m *fullMockStore) WebhookIntegrationRepo() repository.WebhookIntegrationRepository { return nil }
 
 func TestScheduledChangeService_Create(t *testing.T) {

@@ -29,6 +29,7 @@ public class Provider implements FeatureProvider {
             return ProviderEvaluation.<Boolean>builder()
                 .value(defaultValue)
                 .reason(Reason.ERROR.toString())
+                .errorCode(ErrorCode.FLAG_NOT_FOUND)
                 .build();
         }
         if (result.value instanceof Boolean) {
@@ -41,6 +42,7 @@ public class Provider implements FeatureProvider {
         return ProviderEvaluation.<Boolean>builder()
             .value(defaultValue)
             .reason(Reason.ERROR.toString())
+            .errorCode(ErrorCode.TYPE_MISMATCH)
             .build();
     }
 
@@ -48,36 +50,36 @@ public class Provider implements FeatureProvider {
     public ProviderEvaluation<String> getStringEvaluation(String key, String defaultValue, EvaluationContext ctx) {
         EvalResult result = evaluate(key, ctx);
         if (result == null) {
-            return ProviderEvaluation.<String>builder().value(defaultValue).reason(Reason.ERROR.toString()).build();
+            return ProviderEvaluation.<String>builder().value(defaultValue).reason(Reason.ERROR.toString()).errorCode(ErrorCode.FLAG_NOT_FOUND).build();
         }
         if (result.value instanceof String) {
             return ProviderEvaluation.<String>builder().value((String) result.value).variant(result.variant).reason(result.reason).build();
         }
-        return ProviderEvaluation.<String>builder().value(defaultValue).reason(Reason.ERROR.toString()).build();
+        return ProviderEvaluation.<String>builder().value(defaultValue).reason(Reason.ERROR.toString()).errorCode(ErrorCode.TYPE_MISMATCH).build();
     }
 
     @Override
     public ProviderEvaluation<Integer> getIntegerEvaluation(String key, Integer defaultValue, EvaluationContext ctx) {
         EvalResult result = evaluate(key, ctx);
         if (result == null) {
-            return ProviderEvaluation.<Integer>builder().value(defaultValue).reason(Reason.ERROR.toString()).build();
+            return ProviderEvaluation.<Integer>builder().value(defaultValue).reason(Reason.ERROR.toString()).errorCode(ErrorCode.FLAG_NOT_FOUND).build();
         }
         if (result.value instanceof Number) {
             return ProviderEvaluation.<Integer>builder().value(((Number) result.value).intValue()).variant(result.variant).reason(result.reason).build();
         }
-        return ProviderEvaluation.<Integer>builder().value(defaultValue).reason(Reason.ERROR.toString()).build();
+        return ProviderEvaluation.<Integer>builder().value(defaultValue).reason(Reason.ERROR.toString()).errorCode(ErrorCode.TYPE_MISMATCH).build();
     }
 
     @Override
     public ProviderEvaluation<Double> getDoubleEvaluation(String key, Double defaultValue, EvaluationContext ctx) {
         EvalResult result = evaluate(key, ctx);
         if (result == null) {
-            return ProviderEvaluation.<Double>builder().value(defaultValue).reason(Reason.ERROR.toString()).build();
+            return ProviderEvaluation.<Double>builder().value(defaultValue).reason(Reason.ERROR.toString()).errorCode(ErrorCode.FLAG_NOT_FOUND).build();
         }
         if (result.value instanceof Number) {
             return ProviderEvaluation.<Double>builder().value(((Number) result.value).doubleValue()).variant(result.variant).reason(result.reason).build();
         }
-        return ProviderEvaluation.<Double>builder().value(defaultValue).reason(Reason.ERROR.toString()).build();
+        return ProviderEvaluation.<Double>builder().value(defaultValue).reason(Reason.ERROR.toString()).errorCode(ErrorCode.TYPE_MISMATCH).build();
     }
 
     @Override

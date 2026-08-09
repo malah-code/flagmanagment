@@ -69,6 +69,23 @@ export const Login: React.FC = () => {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-700"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-slate-900 px-2 text-slate-400">Or continue with</span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => authService.ssoLogin('oidc')}
+          disabled={loading}
+          className="w-full rounded-md bg-slate-800 px-4 py-2 font-medium text-slate-100 border border-slate-700 hover:bg-slate-700 disabled:opacity-50"
+        >
+          Log in with SSO (OIDC)
+        </button>
       </div>
     </div>
   );

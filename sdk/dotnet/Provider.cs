@@ -42,7 +42,7 @@ namespace FlagManagment.Sdk
                     flagKey, boolVal, variant: result.Value.Variant, reason: result.Value.Reason));
             }
             return Task.FromResult(new ResolutionDetails<bool>(
-                flagKey, defaultValue, reason: "ERROR"));
+                flagKey, defaultValue, ErrorType.TypeMismatch, reason: "ERROR"));
         }
 
         public override Task<ResolutionDetails<string>> ResolveStringValueAsync(
@@ -51,7 +51,7 @@ namespace FlagManagment.Sdk
             var result = Evaluate(flagKey, context);
             if (result == null)
             {
-                return Task.FromResult(new ResolutionDetails<string>(flagKey, defaultValue, reason: "ERROR"));
+                return Task.FromResult(new ResolutionDetails<string>(flagKey, defaultValue, ErrorType.FlagNotFound, reason: "ERROR"));
             }
 
             if (result.Value.Value is string strVal)
@@ -59,31 +59,39 @@ namespace FlagManagment.Sdk
                 return Task.FromResult(new ResolutionDetails<string>(
                     flagKey, strVal, variant: result.Value.Variant, reason: result.Value.Reason));
             }
-            return Task.FromResult(new ResolutionDetails<string>(flagKey, defaultValue, reason: "ERROR"));
+            return Task.FromResult(new ResolutionDetails<string>(flagKey, defaultValue, ErrorType.TypeMismatch, reason: "ERROR"));
         }
 
         public override Task<ResolutionDetails<int>> ResolveIntegerValueAsync(
             string flagKey, int defaultValue, EvaluationContext context = null)
         {
             var result = Evaluate(flagKey, context);
-            if (result?.Value.Value is JsonElement je && je.ValueKind == JsonValueKind.Number)
+            if (result == null)
+            {
+                return Task.FromResult(new ResolutionDetails<int>(flagKey, defaultValue, ErrorType.FlagNotFound, reason: "ERROR"));
+            }
+            if (result.Value.Value is JsonElement je && je.ValueKind == JsonValueKind.Number)
             {
                 return Task.FromResult(new ResolutionDetails<int>(
                     flagKey, je.GetInt32(), variant: result.Value.Variant, reason: result.Value.Reason));
             }
-            return Task.FromResult(new ResolutionDetails<int>(flagKey, defaultValue, reason: "ERROR"));
+            return Task.FromResult(new ResolutionDetails<int>(flagKey, defaultValue, ErrorType.TypeMismatch, reason: "ERROR"));
         }
 
         public override Task<ResolutionDetails<double>> ResolveDoubleValueAsync(
             string flagKey, double defaultValue, EvaluationContext context = null)
         {
             var result = Evaluate(flagKey, context);
-            if (result?.Value.Value is JsonElement je && je.ValueKind == JsonValueKind.Number)
+            if (result == null)
+            {
+                return Task.FromResult(new ResolutionDetails<double>(flagKey, defaultValue, ErrorType.FlagNotFound, reason: "ERROR"));
+            }
+            if (result.Value.Value is JsonElement je && je.ValueKind == JsonValueKind.Number)
             {
                 return Task.FromResult(new ResolutionDetails<double>(
                     flagKey, je.GetDouble(), variant: result.Value.Variant, reason: result.Value.Reason));
             }
-            return Task.FromResult(new ResolutionDetails<double>(flagKey, defaultValue, reason: "ERROR"));
+            return Task.FromResult(new ResolutionDetails<double>(flagKey, defaultValue, ErrorType.TypeMismatch, reason: "ERROR"));
         }
 
         public override Task<ResolutionDetails<Value>> ResolveStructureValueAsync(

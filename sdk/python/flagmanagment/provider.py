@@ -23,6 +23,7 @@ class FlagManagmentProvider(AbstractProvider):
         self,
         flag_key: str,
         default_value: Any,
+        expected_type: Optional[type] = None,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails:
         flag = self._client.get_flag(flag_key)
@@ -44,6 +45,16 @@ class FlagManagmentProvider(AbstractProvider):
         if value is None:
             value = default_value
 
+        if expected_type is not None:
+            if expected_type is bool and not isinstance(value, bool):
+                return FlagResolutionDetails(value=default_value, reason=Reason.ERROR, error_code=ErrorCode.TYPE_MISMATCH)
+            elif expected_type is str and not isinstance(value, str):
+                return FlagResolutionDetails(value=default_value, reason=Reason.ERROR, error_code=ErrorCode.TYPE_MISMATCH)
+            elif expected_type is int and (not isinstance(value, int) or isinstance(value, bool)):
+                return FlagResolutionDetails(value=default_value, reason=Reason.ERROR, error_code=ErrorCode.TYPE_MISMATCH)
+            elif expected_type is float and (not isinstance(value, (float, int)) or isinstance(value, bool)):
+                return FlagResolutionDetails(value=default_value, reason=Reason.ERROR, error_code=ErrorCode.TYPE_MISMATCH)
+
         # Map reason string to OpenFeature Reason enum
         reason_map = {
             "DISABLED": Reason.DISABLED,
@@ -60,7 +71,7 @@ class FlagManagmentProvider(AbstractProvider):
         default_value: bool,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[bool]:
-        return self._evaluate(flag_key, default_value, evaluation_context)
+        return self._evaluate(flag_key, default_value, bool, evaluation_context)
 
     def resolve_string_details(
         self,
@@ -68,7 +79,7 @@ class FlagManagmentProvider(AbstractProvider):
         default_value: str,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[str]:
-        return self._evaluate(flag_key, default_value, evaluation_context)
+        return self._evaluate(flag_key, default_value, str, evaluation_context)
 
     def resolve_integer_details(
         self,
@@ -76,7 +87,7 @@ class FlagManagmentProvider(AbstractProvider):
         default_value: int,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[int]:
-        return self._evaluate(flag_key, default_value, evaluation_context)
+        return self._evaluate(flag_key, default_value, int, evaluation_context)
 
     def resolve_float_details(
         self,
@@ -84,7 +95,7 @@ class FlagManagmentProvider(AbstractProvider):
         default_value: float,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[float]:
-        return self._evaluate(flag_key, default_value, evaluation_context)
+        return self._evaluate(flag_key, default_value, float, evaluation_context)
 
     def resolve_object_details(
         self,
@@ -92,4 +103,4 @@ class FlagManagmentProvider(AbstractProvider):
         default_value: dict,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[dict]:
-        return self._evaluate(flag_key, default_value, evaluation_context)
+        return self._evaluate(flag_key, default_value, dict, evaluation_context)

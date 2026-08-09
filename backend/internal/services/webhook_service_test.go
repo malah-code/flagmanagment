@@ -170,6 +170,7 @@ func (m *WebhookMockStore) FlagRepo() repository.FlagRepository           { retu
 func (m *WebhookMockStore) ChangeRequestRepo() repository.ChangeRequestRepository { return nil }
 func (m *WebhookMockStore) RoleRepo() repository.RoleRepository           { return nil }
 func (m *WebhookMockStore) UserRepo() repository.UserRepository           { return nil }
+func (m *WebhookMockStore) ServiceAccountRepo() repository.ServiceAccountRepository { return nil }
 func (m *WebhookMockStore) WebhookIntegrationRepo() repository.WebhookIntegrationRepository { return nil }
 func (m *WebhookMockStore) SlackConfigRepo() repository.SlackConfigRepository { return nil }
 func (m *WebhookMockStore) ScheduledChangeRepo() repository.ScheduledChangeRepository { return nil }

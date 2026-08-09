@@ -30,6 +30,7 @@ type Store interface {
 	StalePolicyRepo() StalePolicyRepository
 	RoleRepo() RoleRepository
 	UserRepo() UserRepository
+	ServiceAccountRepo() ServiceAccountRepository
 	WebhookIntegrationRepo() WebhookIntegrationRepository
 
 	// Transaction support
@@ -124,10 +125,20 @@ type RoleRepository interface {
 	AssignUserRole(ctx context.Context, ur *models.UserRole) error
 	RemoveUserRole(ctx context.Context, id uuid.UUID) error
 	GetUserRoles(ctx context.Context, userID uuid.UUID, projectID *uuid.UUID) ([]*models.UserRole, error)
+	GetServiceAccountRoles(ctx context.Context, saID uuid.UUID, projectID *uuid.UUID) ([]*models.ServiceAccountRole, error)
 }
 
 type UserRepository interface {
 	Create(ctx context.Context, user *models.User) error
 	GetByEmail(ctx context.Context, email string) (*models.User, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*models.User, error)
+	GetByExternalID(ctx context.Context, provider string, externalID string) (*models.User, error)
+}
+
+type ServiceAccountRepository interface {
+	Create(ctx context.Context, sa *models.ServiceAccount) error
+	GetByID(ctx context.Context, id uuid.UUID) (*models.ServiceAccount, error)
+	CreateKey(ctx context.Context, key *models.ServiceAccountKey) error
+	GetKeyByHash(ctx context.Context, keyHash string) (*models.ServiceAccountKey, error)
+	ListKeys(ctx context.Context, saID uuid.UUID) ([]*models.ServiceAccountKey, error)
 }

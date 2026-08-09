@@ -13,6 +13,13 @@ type Config struct {
 	DBName      string
 	RedisHost   string
 	RedisPort   string
+	
+	// SSO Config
+	OIDCIssuerURL   string
+	OIDCClientID    string
+	OIDCClientSecret string
+	SAMLMetadataURL string
+	SAMLEntityID    string
 }
 
 func Load() *Config {
@@ -27,6 +34,12 @@ func Load() *Config {
 		DBName:      getEnv("FM_DB_NAME", "flagmanagment"),
 		RedisHost:   getEnv("FM_REDIS_HOST", "localhost"),
 		RedisPort:   getEnv("FM_REDIS_PORT", "6379"),
+
+		OIDCIssuerURL:   getEnv("OIDC_ISSUER_URL", ""),
+		OIDCClientID:    getEnv("OIDC_CLIENT_ID", ""),
+		OIDCClientSecret: getEnv("OIDC_CLIENT_SECRET", ""),
+		SAMLMetadataURL: getEnv("SAML_IDP_METADATA_URL", ""),
+		SAMLEntityID:    getEnv("SAML_ENTITY_ID", ""),
 	}
 }
 

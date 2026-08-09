@@ -102,3 +102,29 @@ func (r *roleRepository) GetUserRoles(ctx context.Context, userID uuid.UUID, pro
 	}
 	return userRoles, nil
 }
+
+func (r *roleRepository) GetServiceAccountRoles(ctx context.Context, saID uuid.UUID, projectID *uuid.UUID) ([]*models.ServiceAccountRole, error) {
+	query := `
+		SELECT sar.id, sar.service_account_id, sar.role_id, sar.project_id, sar.environment_id, sar.created_at, sar.updated_at, ro.name as role_name
+		FROM service_account_roles sar
+		JOIN roles ro ON sar.role_id = ro.id
+		WHERE sar.service_account_id = $1 AND (sar.project_id = $2 OR sar.project_id IS NULL)
+	`
+	rows, err := r.db.QueryContext(ctx, query, saID, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var saRoles []*models.ServiceAccountRole
+	for rows.Next() {
+		var sar models.ServiceAccountRole
+		var roleName string
+		if err := rows.Scan(&sar.ID, &sar.ServiceAccountID, &sar.RoleID, &sar.ProjectID, &sar.EnvironmentID, &sar.CreatedAt, &sar.UpdatedAt, &roleName); err != nil {
+			return nil, err
+		}
+		sar.Role = &models.Role{Name: roleName}
+		saRoles = append(saRoles, &sar)
+	}
+	return saRoles, nil
+}

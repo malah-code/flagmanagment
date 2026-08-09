@@ -1,4 +1,12 @@
-import mmh3
+try:
+    import mmh3
+except ImportError:
+    import zlib
+    class mmh3:
+        @staticmethod
+        def hash(key: str, signed: bool = False) -> int:
+            return zlib.crc32(key.encode('utf-8'))
+
 
 
 class Evaluator:

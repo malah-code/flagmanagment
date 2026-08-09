@@ -28,6 +28,7 @@ func (m *MockStore) ChangeRequestRepo() repository.ChangeRequestRepository {
 }
 func (m *MockStore) RoleRepo() repository.RoleRepository { return nil }
 func (m *MockStore) UserRepo() repository.UserRepository { return nil }
+func (m *MockStore) ServiceAccountRepo() repository.ServiceAccountRepository { return nil }
 func (m *MockStore) WebhookIntegrationRepo() repository.WebhookIntegrationRepository { return nil }
 func (m *MockStore) KillSwitchRepo() repository.KillSwitchRepository { return nil }
 func (m *MockStore) SlackConfigRepo() repository.SlackConfigRepository { return nil }

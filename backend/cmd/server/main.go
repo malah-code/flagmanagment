@@ -100,6 +100,7 @@ func main() {
 	ksHandler := api.NewKillSwitchHandler(store, rbacMiddleware)
 	slackHandler := api.NewSlackConfigHandler(store, rbacMiddleware)
 	scHandler := api.NewScheduledChangeHandler(store, scService, rbacMiddleware, cacheClient)
+	saHandler := api.NewServiceAccountHandler(store)
 
 	// API v1 Routes
 	router.Route("/api/v1", func(r chi.Router) {
@@ -109,10 +110,14 @@ func main() {
 
 		// Dashboard API Routes (Protected by UserAuthMiddleware)
 		r.Group(func(r chi.Router) {
-			r.Use(api.UserAuthMiddleware)
+			r.Use(api.UserAuthMiddleware(store))
 
 			r.Route("/projects", func(r chi.Router) {
 				projectHandler.RegisterRoutes(r)
+			})
+
+			r.Route("/service-accounts", func(r chi.Router) {
+				saHandler.RegisterRoutes(r)
 			})
 
 	lifecycleHandler := api.NewLifecycleHandler(store, rbacMiddleware, auditService)

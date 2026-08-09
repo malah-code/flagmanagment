@@ -6,3 +6,8 @@ require (
 	github.com/open-feature/go-sdk v1.11.0
 	github.com/spaolacci/murmur3 v1.1.0
 )
+
+require (
+	github.com/go-logr/logr v1.4.1 // indirect
+	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
+)

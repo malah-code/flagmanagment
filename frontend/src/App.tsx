@@ -4,6 +4,8 @@ import { Layout } from './components/shared/Layout';
 
 import { ProjectsList } from './pages/ProjectsList';
 import { ProjectDetail } from './pages/ProjectDetail';
+import { Login } from './pages/Login';
+import { SSOSuccess } from './pages/SSOSuccess';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,6 +21,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/sso-success" element={<SSOSuccess />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Navigate to="/projects" replace />} />
             <Route path="projects" element={<ProjectsList />} />

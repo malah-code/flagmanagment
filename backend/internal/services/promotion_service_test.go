@@ -145,6 +145,7 @@ func (m *PromoMockStore) AuditRepo() repository.AuditRepository             { re
 func (m *PromoMockStore) ChangeRequestRepo() repository.ChangeRequestRepository { return m.crRepo }
 func (m *PromoMockStore) RoleRepo() repository.RoleRepository { return nil }
 func (m *PromoMockStore) UserRepo() repository.UserRepository { return nil }
+func (m *PromoMockStore) ServiceAccountRepo() repository.ServiceAccountRepository { return nil }
 func (m *PromoMockStore) WebhookIntegrationRepo() repository.WebhookIntegrationRepository { return nil }
 func (m *PromoMockStore) SlackConfigRepo() repository.SlackConfigRepository { return nil }
 func (m *PromoMockStore) ScheduledChangeRepo() repository.ScheduledChangeRepository { return nil }
