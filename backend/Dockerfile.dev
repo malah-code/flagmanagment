@@ -3,7 +3,7 @@ FROM golang:1.23-bookworm
 WORKDIR /app
 
 # Install air for hot-reload
-RUN go install github.com/air-verse/air@latest
+RUN go install github.com/air-verse/air@v1.52.3
 
 # Pre-download dependencies (cached layer)
 COPY go.mod go.sum ./
