@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type Variation struct {
@@ -19,10 +20,11 @@ type FeatureFlag struct {
 	Key             string     `json:"key" db:"key"`
 	Name            string     `json:"name" db:"name"`
 	Description     string     `json:"description" db:"description"`
-	Type            FlagType   `json:"type" db:"type"`
-	Variations      JSONB      `json:"variations,omitempty" db:"variations"`
-	ParentFlagID    *uuid.UUID `json:"parent_flag_id,omitempty" db:"parent_flag_id"`
-	LastEvaluatedAt *time.Time `json:"last_evaluated_at,omitempty" db:"last_evaluated_at"`
-	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at" db:"updated_at"`
+	Type            FlagType        `json:"type" db:"type"`
+	Variations      JSONB           `json:"variations,omitempty" db:"variations"`
+	Tags            pq.StringArray  `json:"tags,omitempty" db:"tags"`
+	ParentFlagID    *uuid.UUID      `json:"parent_flag_id,omitempty" db:"parent_flag_id"`
+	LastEvaluatedAt *time.Time      `json:"last_evaluated_at,omitempty" db:"last_evaluated_at"`
+	CreatedAt       time.Time       `json:"created_at" db:"created_at"`
+	UpdatedAt       time.Time       `json:"updated_at" db:"updated_at"`
 }

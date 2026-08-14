@@ -9,12 +9,38 @@ export interface UpdateFlagStatePayload {
   rolloutRules?: { rules: any[] } | null;
 }
 
+function mapApiFlagStateToUI(apiData: any): FlagState {
+  return {
+    ...apiData,
+    id: apiData.id || `${apiData.featureFlagId}-${apiData.environmentId}`,
+    flagId: apiData.featureFlagId,
+    isEnabled: apiData.enabled,
+    rules: apiData.rules || [],
+  };
+}
+
+function mapUIFlagStateToApi(data: UpdateFlagStatePayload): any {
+  return {
+    ...data,
+    enabled: data.isEnabled,
+  };
+}
+
 export const flagStateService = {
   async getByEnvironment(environmentId: string): Promise<FlagState[]> {
-    return apiClient.get<FlagState[]>(`/environments/${environmentId}/flag-states`);
+    const res = await apiClient.get<{ data: any[] }>(`/environments/${environmentId}/flag-states`);
+    return (res.data || []).map(mapApiFlagStateToUI);
   },
 
-  async update(id: string, data: UpdateFlagStatePayload): Promise<FlagState> {
-    return apiClient.put<FlagState>(`/flag-states/${id}`, data);
+  async update(environmentId: string, flagId: string, data: UpdateFlagStatePayload): Promise<FlagState> {
+    const apiData = mapUIFlagStateToApi(data);
+    const res = await apiClient.put<any>(`/environments/${environmentId}/flags/${flagId}/state`, apiData);
+    return mapApiFlagStateToUI(res);
+  },
+
+  async createOrUpdateByEnvAndFlag(environmentId: string, flagId: string, data: UpdateFlagStatePayload): Promise<FlagState> {
+    const apiData = mapUIFlagStateToApi(data);
+    const res = await apiClient.put<any>(`/environments/${environmentId}/flags/${flagId}/state`, apiData);
+    return mapApiFlagStateToUI(res);
   },
 };

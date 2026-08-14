@@ -44,6 +44,7 @@ func (h *FlagHandler) RegisterRoutes(r chi.Router) {
 
 	// State specific to environment (envId route doesn't have projectId, might need to rely on env's projectId internally or apply general editor role)
 	// For now, applying editor level at global scope
+	r.With(h.rbac.RequireRole("VIEWER")).Get("/environments/{envId}/flag-states", h.ListFlagStates)
 	r.With(h.rbac.RequireRole("VIEWER")).Get("/environments/{envId}/flags/{flagId}/state", h.GetFlagState)
 	r.With(h.rbac.RequireRole("EDITOR")).Put("/environments/{envId}/flags/{flagId}/state", h.UpdateFlagState)
 }
@@ -94,6 +95,7 @@ func (h *FlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
 		Description:  req.Description,
 		Type:         models.FlagType(req.Type),
 		Variations:   varsJSON,
+		Tags:         req.Tags,
 		ParentFlagID: parentFlagID,
 		CreatedAt:    now,
 		UpdatedAt:    now,
@@ -115,6 +117,28 @@ func (h *FlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
 	if err := h.store.FlagRepo().Create(r.Context(), flag); err != nil {
 		RespondWithError(w, http.StatusInternalServerError, "Failed to create flag")
 		return
+	}
+
+	// Auto-initialize flag state across all environments
+	envs, err := h.store.EnvironmentRepo().ListByProject(r.Context(), projectID)
+	if err == nil {
+		enabled := false
+		if req.EnabledByDefault != nil && *req.EnabledByDefault {
+			enabled = true
+		}
+		for _, env := range envs {
+			state := &models.EnvironmentFlagState{
+				ID:               uuid.New(),
+				EnvironmentID:    env.ID,
+				FeatureFlagID:    flag.ID,
+				Enabled:          enabled,
+				TargetingRules:   models.JSONB{"rules": []interface{}{}},
+				RemoteConfig:     models.JSONB{},
+				CreatedAt:        now,
+				UpdatedAt:        now,
+			}
+			_ = h.store.FlagStateRepo().Create(r.Context(), state)
+		}
 	}
 
 	actorIDStr := r.Context().Value(UserIDKey).(string)
@@ -150,6 +174,7 @@ func (h *FlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
 		Description:  flag.Description,
 		Type:         string(flag.Type),
 		Variations:   req.Variations,
+		Tags:         flag.Tags,
 		ParentFlagID: parentStr,
 		CreatedAt:    flag.CreatedAt,
 		UpdatedAt:    flag.UpdatedAt,
@@ -169,7 +194,7 @@ func (h *FlagHandler) ListFlags(w http.ResponseWriter, r *http.Request) {
 
 	flags, total, err := h.store.FlagRepo().ListByProject(r.Context(), projectID, pagination.PageSize, offset)
 	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, "Failed to list flags")
+		RespondWithError(w, http.StatusInternalServerError, "Failed to list flags: " + err.Error())
 		return
 	}
 
@@ -197,6 +222,7 @@ func (h *FlagHandler) ListFlags(w http.ResponseWriter, r *http.Request) {
 			Description:  f.Description,
 			Type:         string(f.Type),
 			Variations:   varDTOs,
+			Tags:         f.Tags,
 			ParentFlagID: parentStr,
 			CreatedAt:    f.CreatedAt,
 			UpdatedAt:    f.UpdatedAt,
@@ -284,6 +310,7 @@ func (h *FlagHandler) UpdateFlag(w http.ResponseWriter, r *http.Request) {
 
 	flag.Name = req.Name
 	flag.Description = req.Description
+	flag.Tags = req.Tags
 	flag.ParentFlagID = newParentFlagID
 	flag.UpdatedAt = time.Now().UTC()
 
@@ -334,10 +361,45 @@ func (h *FlagHandler) UpdateFlag(w http.ResponseWriter, r *http.Request) {
 		Description:  flag.Description,
 		Type:         string(flag.Type),
 		Variations:   varDTOs,
+		Tags:         flag.Tags,
 		ParentFlagID: parentStr,
 		CreatedAt:    flag.CreatedAt,
 		UpdatedAt:    flag.UpdatedAt,
 	})
+}
+
+func (h *FlagHandler) ListFlagStates(w http.ResponseWriter, r *http.Request) {
+	envIDStr := chi.URLParam(r, "envId")
+	envID, err := uuid.Parse(envIDStr)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid environment ID")
+		return
+	}
+
+	states, err := h.store.FlagStateRepo().ListByEnvironment(r.Context(), envID)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Failed to retrieve flag states")
+		return
+	}
+
+	var responses []dto.FlagStateResponse
+	for _, s := range states {
+		responses = append(responses, dto.FlagStateResponse{
+			EnvironmentID:    s.EnvironmentID.String(),
+			FeatureFlagID:    s.FeatureFlagID.String(),
+			Enabled:          s.Enabled,
+			DefaultVariation: s.DefaultVariation,
+			TargetingRules:   s.TargetingRules,
+			RemoteConfig:     s.RemoteConfig,
+			RolloutRules:     s.RolloutRules,
+			UpdatedAt:        s.UpdatedAt,
+		})
+	}
+	if responses == nil {
+		responses = []dto.FlagStateResponse{}
+	}
+
+	RespondWithJSON(w, http.StatusOK, dto.PaginatedResponse{Data: responses})
 }
 
 func (h *FlagHandler) GetFlagState(w http.ResponseWriter, r *http.Request) {

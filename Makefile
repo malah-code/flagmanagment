@@ -61,3 +61,12 @@ migrate-up:
 # Run database migrations down
 migrate-down:
 	migrate -path backend/migrations -database "postgres://flagmgmt:flagmgmt_dev@localhost:5432/flagmanagment?sslmode=disable" down -all
+
+# Seed database with realistic sample projects, environments, and feature flags
+seed:
+	@node scripts/seed.js
+
+# Wipe all existing projects/flags and seed fresh enterprise sample data
+seed-reset: reseed
+reseed:
+	@node scripts/reset-seed.js

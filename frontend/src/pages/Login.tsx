@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
+import { AlertCircle } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -32,12 +33,6 @@ export const Login: React.FC = () => {
           <p className="text-sm text-slate-400">Sign in to your account</p>
         </div>
 
-        {error && (
-          <div className="rounded-md bg-red-950/50 p-3 border border-red-800 text-sm text-red-400">
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300">Email</label>
@@ -45,7 +40,10 @@ export const Login: React.FC = () => {
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError(null);
+              }}
               className="mt-1 block w-full rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100 focus:border-indigo-500 focus:outline-none"
             />
           </div>
@@ -56,9 +54,18 @@ export const Login: React.FC = () => {
               type="password"
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(null);
+              }}
               className="mt-1 block w-full rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100 focus:border-indigo-500 focus:outline-none"
             />
+            {error && (
+              <div className="mt-3 p-3 bg-red-950/60 border border-red-800/80 rounded-lg flex items-center gap-2 text-xs font-medium text-red-300">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <span>{error === 'API Error' ? 'Invalid email or password. Please try again.' : error}</span>
+              </div>
+            )}
           </div>
 
           <button

@@ -43,6 +43,11 @@ func (h *EnvironmentHandler) RegisterRoutes(r chi.Router) {
 	r.With(h.rbac.RequireRole("VIEWER")).Get("/environments/{envId}", h.Get)
 	r.With(h.rbac.RequireRole("EDITOR")).Put("/environments/{envId}", h.Update)
 	r.With(h.rbac.RequireRole("ADMIN")).Delete("/environments/{envId}", h.Delete)
+
+	// Server Keys management
+	r.With(h.rbac.RequireRole("EDITOR")).Post("/projects/{projectId}/environments/{envId}/server-keys", h.CreateServerKey)
+	r.With(h.rbac.RequireRole("VIEWER")).Get("/projects/{projectId}/environments/{envId}/server-keys", h.ListServerKeys)
+	r.With(h.rbac.RequireRole("ADMIN")).Delete("/projects/{projectId}/environments/{envId}/server-keys/{keyId}", h.DeleteServerKey)
 }
 
 
@@ -82,6 +87,7 @@ func (h *EnvironmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 			IsProtected: env.IsProtected,
 			CreatedAt:   env.CreatedAt,
 			UpdatedAt:   env.UpdatedAt,
+			SdkSettings: env.SDKSettings,
 		},
 		APIKey: apiKey,
 	}
@@ -112,6 +118,7 @@ func (h *EnvironmentHandler) List(w http.ResponseWriter, r *http.Request) {
 			IsProtected: e.IsProtected,
 			CreatedAt:   e.CreatedAt,
 			UpdatedAt:   e.UpdatedAt,
+			SdkSettings: e.SDKSettings,
 		})
 	}
 	if dtos == nil {
@@ -148,6 +155,7 @@ func (h *EnvironmentHandler) Get(w http.ResponseWriter, r *http.Request) {
 		IsProtected: env.IsProtected,
 		CreatedAt:   env.CreatedAt,
 		UpdatedAt:   env.UpdatedAt,
+		SdkSettings: env.SDKSettings,
 	})
 }
 
@@ -188,6 +196,9 @@ func (h *EnvironmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 	env.Key = strings.ToLower(strings.ReplaceAll(req.Name, " ", "-"))
 	env.IsProtected = req.IsProtected
 	env.UpdatedAt = time.Now().UTC()
+	if req.SdkSettings != nil {
+		env.SDKSettings = req.SdkSettings
+	}
 
 	if err := h.store.EnvironmentRepo().Update(r.Context(), env); err != nil {
 		RespondWithError(w, http.StatusInternalServerError, "Failed to update environment")
@@ -222,6 +233,7 @@ func (h *EnvironmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 		IsProtected: env.IsProtected,
 		CreatedAt:   env.CreatedAt,
 		UpdatedAt:   env.UpdatedAt,
+		SdkSettings: env.SDKSettings,
 	})
 }
 
@@ -272,6 +284,7 @@ func (h *EnvironmentHandler) Clone(w http.ResponseWriter, r *http.Request) {
 			IsProtected: env.IsProtected,
 			CreatedAt:   env.CreatedAt,
 			UpdatedAt:   env.UpdatedAt,
+			SdkSettings: env.SDKSettings,
 		},
 		APIKey: apiKey,
 	}
@@ -300,6 +313,115 @@ func (h *EnvironmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		RespondWithError(w, http.StatusInternalServerError, "Failed to delete environment")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *EnvironmentHandler) CreateServerKey(w http.ResponseWriter, r *http.Request) {
+	envIDStr := chi.URLParam(r, "envId")
+	envID, err := uuid.Parse(envIDStr)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid environment ID")
+		return
+	}
+
+	var req dto.CreateServerKeyRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	if err := h.validate.Struct(req); err != nil {
+		RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	actorIDStr := r.Context().Value(UserIDKey).(string)
+	actorID, _ := uuid.Parse(actorIDStr)
+
+	keyModel, apiKey, err := h.envService.CreateServerKey(r.Context(), envID, req.Name, actorID, r.RemoteAddr)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			RespondWithError(w, http.StatusNotFound, "Environment not found")
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, "Failed to create server key")
+		return
+	}
+
+	res := dto.CreateServerKeyResponse{
+		ServerKeyResponse: dto.ServerKeyResponse{
+			ID:            keyModel.ID.String(),
+			EnvironmentID: keyModel.EnvironmentID.String(),
+			Name:          keyModel.Name,
+			CreatedAt:     keyModel.CreatedAt,
+			LastUsedAt:    keyModel.LastUsedAt,
+		},
+		Key: apiKey,
+	}
+
+	RespondWithJSON(w, http.StatusCreated, res)
+}
+
+func (h *EnvironmentHandler) ListServerKeys(w http.ResponseWriter, r *http.Request) {
+	envIDStr := chi.URLParam(r, "envId")
+	envID, err := uuid.Parse(envIDStr)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid environment ID")
+		return
+	}
+
+	keys, err := h.envService.ListServerKeys(r.Context(), envID)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Failed to list server keys")
+		return
+	}
+
+	var dtos []dto.ServerKeyResponse
+	for _, k := range keys {
+		dtos = append(dtos, dto.ServerKeyResponse{
+			ID:            k.ID.String(),
+			EnvironmentID: k.EnvironmentID.String(),
+			Name:          k.Name,
+			CreatedAt:     k.CreatedAt,
+			LastUsedAt:    k.LastUsedAt,
+		})
+	}
+	if dtos == nil {
+		dtos = []dto.ServerKeyResponse{}
+	}
+
+	RespondWithJSON(w, http.StatusOK, dto.PaginatedResponse{
+		Data: dtos,
+	})
+}
+
+func (h *EnvironmentHandler) DeleteServerKey(w http.ResponseWriter, r *http.Request) {
+	envIDStr := chi.URLParam(r, "envId")
+	envID, err := uuid.Parse(envIDStr)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid environment ID")
+		return
+	}
+
+	keyIDStr := chi.URLParam(r, "keyId")
+	keyID, err := uuid.Parse(keyIDStr)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid server key ID")
+		return
+	}
+
+	actorIDStr := r.Context().Value(UserIDKey).(string)
+	actorID, _ := uuid.Parse(actorIDStr)
+
+	if err := h.envService.DeleteServerKey(r.Context(), envID, keyID, actorID, r.RemoteAddr); err != nil {
+		if err == repository.ErrNotFound {
+			RespondWithError(w, http.StatusNotFound, "Server key not found")
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, "Failed to delete server key")
 		return
 	}
 

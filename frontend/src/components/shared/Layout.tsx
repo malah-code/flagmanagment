@@ -1,7 +1,12 @@
-import { Link, Outlet } from 'react-router-dom';
+import { Navigate, Link, Outlet } from 'react-router-dom';
 import { Flag } from 'lucide-react';
+import { authService } from '../../services/auth';
 
 export const Layout = () => {
+  if (!authService.isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">

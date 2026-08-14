@@ -55,6 +55,18 @@ func (m *MockEnvironmentRepo) Update(ctx context.Context, env *models.Environmen
 	args := m.Called(ctx, env)
 	return args.Error(0)
 }
+func (m *MockEnvironmentRepo) CreateServerKey(ctx context.Context, key *models.EnvironmentServerKey) error {
+	return nil
+}
+func (m *MockEnvironmentRepo) GetServerKeyByHash(ctx context.Context, keyHash string) (*models.EnvironmentServerKey, error) {
+	return nil, nil
+}
+func (m *MockEnvironmentRepo) ListServerKeys(ctx context.Context, envID uuid.UUID) ([]*models.EnvironmentServerKey, error) {
+	return nil, nil
+}
+func (m *MockEnvironmentRepo) DeleteServerKey(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
 
 type MockFlagStateRepo struct {
 	mock.Mock

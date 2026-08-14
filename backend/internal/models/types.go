@@ -55,6 +55,10 @@ func (j JSONB) Value() (driver.Value, error) {
 
 // Scan implements sql.Scanner interface
 func (j *JSONB) Scan(value interface{}) error {
+	if value == nil {
+		*j = nil
+		return nil
+	}
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")

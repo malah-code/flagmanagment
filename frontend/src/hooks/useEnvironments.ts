@@ -26,6 +26,17 @@ export function useCreateEnvironment() {
   });
 }
 
+export function useUpdateEnvironment(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: import('../services/environments').UpdateEnvironmentPayload) => environmentService.update(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ENVIRONMENT_KEYS.byProject(projectId) });
+    },
+  });
+}
+
 export function useDeleteEnvironment(projectId: string) {
   const queryClient = useQueryClient();
 

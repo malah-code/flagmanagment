@@ -18,7 +18,7 @@ interface TargetingRuleBuilderProps {
   isOpen: boolean;
   onClose: () => void;
   envId: string;
-  flagStateId: string;
+  flagId: string;
   initialRules: TargetingRule[];
   flagKey: string;
 }
@@ -27,7 +27,7 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
   isOpen,
   onClose,
   envId,
-  flagStateId,
+  flagId,
   initialRules,
   flagKey,
 }) => {
@@ -105,7 +105,7 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
 
   const handleSave = async () => {
     await updateMutation.mutateAsync({
-      id: flagStateId,
+      flagId,
       payload: {
         targetingRules: { rules },
       },

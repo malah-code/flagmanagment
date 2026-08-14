@@ -22,17 +22,31 @@ type ProjectResponse struct {
 
 // Environment Responses
 type EnvironmentResponse struct {
-	ID          string    `json:"id"`
-	ProjectID   string    `json:"projectId"`
-	Name        string    `json:"name"`
-	IsProtected bool      `json:"isProtected"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	ID          string                 `json:"id"`
+	ProjectID   string                 `json:"projectId"`
+	Name        string                 `json:"name"`
+	IsProtected bool                   `json:"isProtected"`
+	CreatedAt   time.Time              `json:"createdAt"`
+	UpdatedAt   time.Time              `json:"updatedAt"`
+	SdkSettings map[string]interface{} `json:"sdkSettings,omitempty"`
 }
 
 type CreateEnvironmentResponse struct {
 	EnvironmentResponse
 	APIKey string `json:"apiKey"` // Only returned on creation
+}
+
+type ServerKeyResponse struct {
+	ID            string     `json:"id"`
+	EnvironmentID string     `json:"environmentId"`
+	Name          string     `json:"name"`
+	CreatedAt     time.Time  `json:"createdAt"`
+	LastUsedAt    *time.Time `json:"lastUsedAt,omitempty"`
+}
+
+type CreateServerKeyResponse struct {
+	ServerKeyResponse
+	Key string `json:"key"` // Only returned on creation
 }
 
 // Feature Flag Responses
@@ -44,6 +58,7 @@ type FeatureFlagResponse struct {
 	Description  string         `json:"description"`
 	Type         string         `json:"type"`
 	Variations   []VariationDTO `json:"variations,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
 	ParentFlagID *string        `json:"parentFlagId,omitempty"`
 	CreatedAt    time.Time      `json:"createdAt"`
 	UpdatedAt    time.Time      `json:"updatedAt"`

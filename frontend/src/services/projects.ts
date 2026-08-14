@@ -13,7 +13,8 @@ export interface UpdateProjectPayload {
 
 export const projectService = {
   async getAll(): Promise<Project[]> {
-    return apiClient.get<Project[]>('/projects');
+    const res = await apiClient.get<{ data: Project[] }>('/projects');
+    return res.data || [];
   },
 
   async getById(id: string): Promise<Project> {

@@ -82,10 +82,29 @@ func (s *EnvironmentService) CreateEnvironment(ctx context.Context, projectID uu
 		IsProtected: isProtected,
 		CreatedAt:   now,
 		UpdatedAt:   now,
+		SDKSettings: models.JSONB{},
 	}
 
 	if err := s.store.EnvironmentRepo().Create(ctx, env); err != nil {
 		return nil, "", err
+	}
+
+	// Auto-initialize flag states for this new environment
+	flags, _, err := s.store.FlagRepo().ListByProject(ctx, projectID, 10000, 0)
+	if err == nil {
+		for _, f := range flags {
+			state := &models.EnvironmentFlagState{
+				ID:               uuid.New(),
+				EnvironmentID:    env.ID,
+				FeatureFlagID:    f.ID,
+				Enabled:          false,
+				TargetingRules:   models.JSONB{"rules": []interface{}{}},
+				RemoteConfig:     models.JSONB{},
+				CreatedAt:        now,
+				UpdatedAt:        now,
+			}
+			_ = s.store.FlagStateRepo().Create(ctx, state)
+		}
 	}
 
 	bNew, _ := json.Marshal(env)
@@ -197,6 +216,77 @@ func (s *EnvironmentService) DeleteEnvironment(ctx context.Context, envID uuid.U
 		Action:        "DELETE",
 		TargetType:    "ENVIRONMENT",
 		TargetID:      envID,
+		ActorIP:       actorIP,
+		CreatedAt:     time.Now().UTC(),
+	})
+
+	return nil
+}
+
+func (s *EnvironmentService) CreateServerKey(ctx context.Context, envID uuid.UUID, name string, actorID uuid.UUID, actorIP string) (*models.EnvironmentServerKey, string, error) {
+	env, err := s.store.EnvironmentRepo().GetByID(ctx, envID)
+	if err != nil {
+		return nil, "", err
+	}
+
+	apiKey, hashHex, err := generateKeyAndHash()
+	if err != nil {
+		return nil, "", err
+	}
+
+	now := time.Now().UTC()
+	serverKey := &models.EnvironmentServerKey{
+		ID:            uuid.New(),
+		EnvironmentID: envID,
+		Name:          name,
+		KeyHash:       hashHex,
+		CreatedAt:     now,
+	}
+
+	if err := s.store.EnvironmentRepo().CreateServerKey(ctx, serverKey); err != nil {
+		return nil, "", err
+	}
+
+	s.audit.LogAction(ctx, &models.AuditLog{
+		ID:            uuid.New(),
+		ProjectID:     &env.ProjectID,
+		EnvironmentID: &envID,
+		ActorID:       actorID,
+		Action:        "CREATE",
+		TargetType:    "SERVER_KEY",
+		TargetID:      serverKey.ID,
+		NewState: models.JSONB{
+			"name": name,
+		},
+		ActorIP:   actorIP,
+		CreatedAt: now,
+	})
+
+	return serverKey, apiKey, nil
+}
+
+func (s *EnvironmentService) ListServerKeys(ctx context.Context, envID uuid.UUID) ([]*models.EnvironmentServerKey, error) {
+	return s.store.EnvironmentRepo().ListServerKeys(ctx, envID)
+}
+
+func (s *EnvironmentService) DeleteServerKey(ctx context.Context, envID, keyID uuid.UUID, actorID uuid.UUID, actorIP string) error {
+	env, err := s.store.EnvironmentRepo().GetByID(ctx, envID)
+	if err != nil {
+		return err
+	}
+
+	if err := s.store.EnvironmentRepo().DeleteServerKey(ctx, keyID); err != nil {
+		return err
+	}
+
+	s.audit.LogAction(ctx, &models.AuditLog{
+		ID:            uuid.New(),
+		ProjectID:     &env.ProjectID,
+		EnvironmentID: &envID,
+		ActorID:       actorID,
+		Action:        "DELETE",
+		TargetType:    "SERVER_KEY",
+		TargetID:      keyID,
 		ActorIP:       actorIP,
 		CreatedAt:     time.Now().UTC(),
 	})

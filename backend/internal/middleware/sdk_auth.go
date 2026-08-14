@@ -30,10 +30,17 @@ func ValidateSDKToken(ctx context.Context, store repository.Store, token string)
 	hashHex := hex.EncodeToString(hash[:])
 
 	env, err := store.EnvironmentRepo().GetByAPIKeyHash(ctx, hashHex)
+	if err == nil {
+		return env, nil
+	}
+
+	// Fallback to checking environment_server_keys
+	serverKey, err := store.EnvironmentRepo().GetServerKeyByHash(ctx, hashHex)
 	if err != nil {
 		return nil, errors.New("invalid SDK token")
 	}
-	return env, nil
+
+	return store.EnvironmentRepo().GetByID(ctx, serverKey.EnvironmentID)
 }
 
 // SDKHTTPAuthMiddleware checks the SDK token for REST HTTP requests.

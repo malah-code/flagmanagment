@@ -40,7 +40,7 @@ export const ProjectsList = () => {
         </button>
       </div>
 
-      <div className="flex items-center gap-3 bg-white px-3.5 py-2.5 rounded-lg border border-slate-200 shadow-sm max-w-md">
+      <div className="flex items-center gap-3 bg-white px-3.5 py-2.5 rounded-lg border border-slate-200 shadow-sm max-w-md focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all">
         <Search className="w-4 h-4 text-slate-400" />
         <input
           type="text"

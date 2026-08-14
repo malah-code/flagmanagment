@@ -39,7 +39,7 @@ export const AuditLogs: React.FC = () => {
       {loading ? (
         <div className="text-slate-400">Loading audit logs...</div>
       ) : (
-        <div className="rounded-lg border border-slate-800 bg-slate-900 overflow-hidden">
+        <div className="rounded-lg border border-slate-800 bg-slate-900 overflow-hidden overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-950 text-xs text-slate-400 uppercase">
               <tr>

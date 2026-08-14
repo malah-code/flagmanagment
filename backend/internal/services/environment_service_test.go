@@ -67,6 +67,28 @@ func (m *EnvMockRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
+func (m *EnvMockRepo) CreateServerKey(ctx context.Context, key *models.EnvironmentServerKey) error {
+	args := m.Called(ctx, key)
+	return args.Error(0)
+}
+func (m *EnvMockRepo) GetServerKeyByHash(ctx context.Context, keyHash string) (*models.EnvironmentServerKey, error) {
+	args := m.Called(ctx, keyHash)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.EnvironmentServerKey), args.Error(1)
+}
+func (m *EnvMockRepo) ListServerKeys(ctx context.Context, envID uuid.UUID) ([]*models.EnvironmentServerKey, error) {
+	args := m.Called(ctx, envID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*models.EnvironmentServerKey), args.Error(1)
+}
+func (m *EnvMockRepo) DeleteServerKey(ctx context.Context, id uuid.UUID) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
 
 type EnvMockFlagStateRepo struct {
 	mock.Mock
@@ -226,4 +248,81 @@ func TestDeleteEnvironment_Success(t *testing.T) {
 	assert.NoError(t, err)
 	envRepo.AssertExpectations(t)
 	auditRepo.AssertExpectations(t)
+}
+
+func TestCreateServerKey_Success(t *testing.T) {
+	store := new(EnvMockStore)
+	envRepo := new(EnvMockRepo)
+	auditRepo := new(EnvMockAuditRepo)
+	store.envRepo = envRepo
+	store.auditRepo = auditRepo
+
+	auditService := NewAuditService(store)
+	service := NewEnvironmentService(store, auditService)
+
+	envID := uuid.New()
+	actorID := uuid.New()
+	env := &models.Environment{
+		ID:        envID,
+		ProjectID: uuid.New(),
+		Name:      "Production",
+	}
+
+	envRepo.On("GetByID", mock.Anything, envID).Return(env, nil)
+	envRepo.On("CreateServerKey", mock.Anything, mock.AnythingOfType("*models.EnvironmentServerKey")).Return(nil)
+	auditRepo.On("Create", mock.Anything, mock.AnythingOfType("*models.AuditLog")).Return(nil).Maybe()
+
+	key, rawKey, err := service.CreateServerKey(context.Background(), envID, "SDK Key 1", actorID, "127.0.0.1")
+	assert.NoError(t, err)
+	assert.NotNil(t, key)
+	assert.Equal(t, "SDK Key 1", key.Name)
+	assert.True(t, len(rawKey) > 0)
+	assert.Contains(t, rawKey, "env_")
+}
+
+func TestListServerKeys_Success(t *testing.T) {
+	store := new(EnvMockStore)
+	envRepo := new(EnvMockRepo)
+	store.envRepo = envRepo
+
+	auditService := NewAuditService(store)
+	service := NewEnvironmentService(store, auditService)
+
+	envID := uuid.New()
+	expectedKeys := []*models.EnvironmentServerKey{
+		{ID: uuid.New(), EnvironmentID: envID, Name: "Key 1"},
+	}
+
+	envRepo.On("ListServerKeys", mock.Anything, envID).Return(expectedKeys, nil)
+
+	keys, err := service.ListServerKeys(context.Background(), envID)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(keys))
+	assert.Equal(t, "Key 1", keys[0].Name)
+}
+
+func TestDeleteServerKey_Success(t *testing.T) {
+	store := new(EnvMockStore)
+	envRepo := new(EnvMockRepo)
+	auditRepo := new(EnvMockAuditRepo)
+	store.envRepo = envRepo
+	store.auditRepo = auditRepo
+
+	auditService := NewAuditService(store)
+	service := NewEnvironmentService(store, auditService)
+
+	keyID := uuid.New()
+	envID := uuid.New()
+	actorID := uuid.New()
+
+	envRepo.On("GetByID", mock.Anything, mock.Anything).Return(&models.Environment{
+		ID:        envID,
+		ProjectID: uuid.New(),
+		Name:      "Production",
+	}, nil)
+	envRepo.On("DeleteServerKey", mock.Anything, mock.Anything).Return(nil)
+	auditRepo.On("Create", mock.Anything, mock.AnythingOfType("*models.AuditLog")).Return(nil).Maybe()
+
+	err := service.DeleteServerKey(context.Background(), envID, keyID, actorID, "127.0.0.1")
+	assert.NoError(t, err)
 }

@@ -57,6 +57,11 @@ type EnvironmentRepository interface {
 	ListByProject(ctx context.Context, projectID uuid.UUID) ([]*models.Environment, error)
 	Update(ctx context.Context, env *models.Environment) error
 	Delete(ctx context.Context, id uuid.UUID) error
+
+	CreateServerKey(ctx context.Context, key *models.EnvironmentServerKey) error
+	GetServerKeyByHash(ctx context.Context, keyHash string) (*models.EnvironmentServerKey, error)
+	ListServerKeys(ctx context.Context, envID uuid.UUID) ([]*models.EnvironmentServerKey, error)
+	DeleteServerKey(ctx context.Context, id uuid.UUID) error
 }
 
 type FlagRepository interface {

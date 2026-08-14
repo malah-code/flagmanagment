@@ -14,17 +14,22 @@ type UpdateProjectRequest struct {
 
 // Environment Requests
 type CreateEnvironmentRequest struct {
-	Name        string `json:"name" validate:"required,min=3,max=100"`
+	Name        string `json:"name" validate:"required,min=1,max=100"`
 	IsProtected bool   `json:"isProtected"`
 }
 
 type UpdateEnvironmentRequest struct {
-	Name        string `json:"name" validate:"required,min=3,max=100"`
-	IsProtected bool   `json:"isProtected"`
+	Name        string                 `json:"name" validate:"required,min=1,max=100"`
+	IsProtected bool                   `json:"isProtected"`
+	SdkSettings map[string]interface{} `json:"sdkSettings,omitempty"`
 }
 
 type CloneEnvironmentRequest struct {
-	Name string `json:"name" validate:"required,min=3,max=100"`
+	Name string `json:"name" validate:"required,min=1,max=100"`
+}
+
+type CreateServerKeyRequest struct {
+	Name string `json:"name" validate:"required,min=1,max=100"`
 }
 
 type VariationDTO struct {
@@ -39,14 +44,17 @@ type CreateFeatureFlagRequest struct {
 	Key          string         `json:"key" validate:"required,min=3,max=100"`
 	Name         string         `json:"name" validate:"required,min=3,max=100"`
 	Description  string         `json:"description"`
-	Type         string         `json:"type" validate:"required"`
-	Variations   []VariationDTO `json:"variations,omitempty"`
-	ParentFlagID *string        `json:"parentFlagId" validate:"omitempty,uuid"`
+	Type             string         `json:"type" validate:"required"`
+	EnabledByDefault *bool          `json:"enabledByDefault,omitempty"`
+	Variations       []VariationDTO `json:"variations,omitempty"`
+	Tags             []string       `json:"tags,omitempty"`
+	ParentFlagID     *string        `json:"parentFlagId" validate:"omitempty,uuid"`
 }
 
 type UpdateFeatureFlagRequest struct {
 	Name         string         `json:"name" validate:"required,min=3,max=100"`
 	Description  string         `json:"description"`
+	Tags         []string       `json:"tags,omitempty"`
 	ParentFlagID *string        `json:"parentFlagId" validate:"omitempty,uuid"`
 }
 

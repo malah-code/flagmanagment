@@ -7,7 +7,7 @@ interface RolloutRuleBuilderProps {
   isOpen: boolean;
   onClose: () => void;
   envId: string;
-  flagStateId: string;
+  flagId: string;
   flagKey: string;
   variations: Variation[];
   initialRollouts?: RolloutRule[];
@@ -19,7 +19,7 @@ export const RolloutRuleBuilder: React.FC<RolloutRuleBuilderProps> = ({
   isOpen,
   onClose,
   envId,
-  flagStateId,
+  flagId,
   flagKey,
   variations = [],
   initialRollouts = [],
@@ -70,7 +70,7 @@ export const RolloutRuleBuilder: React.FC<RolloutRuleBuilderProps> = ({
     try {
       setError(null);
       await updateMutation.mutateAsync({
-        id: flagStateId,
+        flagId,
         payload: {
           targetingRules,
           remoteConfig,

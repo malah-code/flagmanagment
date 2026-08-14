@@ -14,11 +14,14 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
   const [key, setKey] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<FlagType>('BOOLEAN');
+  const [tags, setTags] = useState('');
   const [variations, setVariations] = useState<Variation[]>([
     { id: 'var_a', name: 'Variation A', value: 'Option A' },
     { id: 'var_b', name: 'Variation B', value: 'Option B' },
   ]);
   const [parentFlagId, setParentFlagId] = useState<string>('');
+  const [enabledByDefault, setEnabledByDefault] = useState<boolean>(false);
+  const [initialValue, setInitialValue] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   const { data: flagsResponse } = useFlags(projectId);
@@ -82,15 +85,21 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
       await createMutation.mutateAsync({
         projectId,
         key: key.trim(),
+        name: key.trim(),
         description: description.trim(),
         type,
+        enabledByDefault,
         variations: parsedVariations,
+        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
         parentFlagId: parentFlagId || undefined,
       });
       setKey('');
       setDescription('');
+      setTags('');
+      setInitialValue('');
       setType('BOOLEAN');
       setParentFlagId('');
+      setEnabledByDefault(false);
       setVariations([
         { id: 'var_a', name: 'Variation A', value: 'Option A' },
         { id: 'var_b', name: 'Variation B', value: 'Option B' },
@@ -138,6 +147,40 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
             <p className="text-xs text-slate-400 mt-1">Unique key used by SDKs to evaluate this flag.</p>
           </div>
 
+          <div className="flex items-center justify-between p-3 border border-slate-200 rounded-lg bg-slate-50">
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Enabled by default</label>
+              <p className="text-xs text-slate-500">This will initialize the flag as ON across all environments.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEnabledByDefault(!enabledByDefault)}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                enabledByDefault ? 'bg-indigo-600' : 'bg-slate-200'
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  enabledByDefault ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Tags (comma separated)
+            </label>
+            <input
+              type="text"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="e.g. frontend, beta, UI"
+              className="w-full px-3.5 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 placeholder:text-slate-400 text-sm transition-all"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Flag Value Type</label>
             <select
@@ -165,6 +208,20 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
               <option value="NUMBER">Number (Numeric)</option>
               <option value="JSON">JSON Object</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Initial Value (Optional)
+            </label>
+            <input
+              type="text"
+              value={initialValue}
+              onChange={(e) => setInitialValue(e.target.value)}
+              placeholder={type === 'BOOLEAN' ? 'e.g. true' : 'e.g. "dark-mode" or 42'}
+              className="w-full px-3.5 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 placeholder:text-slate-400 text-sm transition-all"
+            />
+            <p className="text-xs text-slate-400 mt-1">Default value or variation payload served when enabled.</p>
           </div>
 
           {(type === 'MULTIVARIATE' || type === 'JSON') && (

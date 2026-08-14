@@ -68,7 +68,7 @@ export const PromoteFlagModal: React.FC<PromoteFlagModalProps> = ({
           <h3 className="text-lg font-medium text-gray-900">Promote Flag</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 focus:outline-none"
+            className="text-gray-400 hover:text-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
           >
             <span className="sr-only">Close</span>
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

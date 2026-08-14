@@ -19,8 +19,20 @@ export function useUpdateFlagState(environmentId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateFlagStatePayload }) =>
-      flagStateService.update(id, payload),
+    mutationFn: ({ flagId, payload }: { flagId: string; payload: UpdateFlagStatePayload }) =>
+      flagStateService.update(environmentId, flagId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FLAG_STATE_KEYS.byEnvironment(environmentId) });
+    },
+  });
+}
+
+export function useInitFlagState(environmentId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ flagId, payload }: { flagId: string; payload: UpdateFlagStatePayload }) =>
+      flagStateService.createOrUpdateByEnvAndFlag(environmentId, flagId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FLAG_STATE_KEYS.byEnvironment(environmentId) });
     },

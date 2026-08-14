@@ -13,9 +13,27 @@ export interface Environment {
   projectId: string;
   name: string;
   isProtected?: boolean;
-  apiKey?: string; // Only returned on creation
+  apiKey?: string;
+  clientKey?: string;
+  sdkSettings?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ServerKey {
+  id: string;
+  environmentId: string;
+  name: string;
+  createdAt: string;
+  lastUsedAt?: string;
+}
+
+export interface CreateServerKeyResponse {
+  id: string;
+  environmentId: string;
+  name: string;
+  key: string;
+  createdAt: string;
 }
 
 export type FlagType = 'BOOLEAN' | 'MULTIVARIATE' | 'STRING' | 'NUMBER' | 'JSON';
@@ -35,6 +53,7 @@ export interface FeatureFlag {
   description: string;
   type: FlagType;
   variations?: Variation[];
+  tags?: string[];
   parentFlagId?: string;
   createdAt: string;
   updatedAt: string;
@@ -73,6 +92,7 @@ export interface FlagState {
   lastStateChangeAt?: string;
   rules: FlagRule[];
   targetingRules?: { rules: unknown[] };
+  remoteConfig?: Record<string, unknown>;
   defaultVariation?: string;
   rolloutRules?: RolloutRule[];
   createdAt: string;

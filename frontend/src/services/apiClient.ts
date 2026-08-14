@@ -19,23 +19,39 @@ async function handleResponse<T>(response: Response): Promise<T> {
     } catch {
       // Ignored if not JSON
     }
+    
+    // If unauthorized, could clear token or redirect to login here
+    if (response.status === 401) {
+      localStorage.removeItem('auth_token');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
     throw new ApiError(response.status, message);
   }
 
-  // Handle empty responses (like 204 No Content)
   if (response.status === 204) {
     return {} as T;
   }
   return response.json();
 }
 
+function getHeaders(): HeadersInit {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export const apiClient = {
   async get<T>(path: string): Promise<T> {
     const response = await fetch(`${API_BASE}${path}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
     });
     return handleResponse<T>(response);
   },
@@ -43,9 +59,7 @@ export const apiClient = {
   async post<T>(path: string, data: unknown): Promise<T> {
     const response = await fetch(`${API_BASE}${path}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return handleResponse<T>(response);
@@ -54,9 +68,7 @@ export const apiClient = {
   async put<T>(path: string, data: unknown): Promise<T> {
     const response = await fetch(`${API_BASE}${path}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return handleResponse<T>(response);
@@ -65,9 +77,7 @@ export const apiClient = {
   async patch<T>(path: string, data: unknown): Promise<T> {
     const response = await fetch(`${API_BASE}${path}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return handleResponse<T>(response);
@@ -76,10 +86,9 @@ export const apiClient = {
   async delete<T>(path: string): Promise<T> {
     const response = await fetch(`${API_BASE}${path}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
     });
     return handleResponse<T>(response);
   },
 };
+

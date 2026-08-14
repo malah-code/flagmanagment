@@ -17,17 +17,17 @@ func NewFlagRepository(db *sql.DB) FlagRepository {
 }
 
 func (r *flagRepository) Create(ctx context.Context, flag *models.FeatureFlag) error {
-	query := `INSERT INTO feature_flags (id, project_id, key, name, description, type, parent_flag_id, last_evaluated_at, created_at, updated_at) 
-	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
-	_, err := r.db.ExecContext(ctx, query, flag.ID, flag.ProjectID, flag.Key, flag.Name, flag.Description, flag.Type, flag.ParentFlagID, flag.LastEvaluatedAt, flag.CreatedAt, flag.UpdatedAt)
+	query := `INSERT INTO feature_flags (id, project_id, key, name, description, type, variations, tags, parent_flag_id, last_evaluated_at, created_at, updated_at) 
+	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
+	_, err := r.db.ExecContext(ctx, query, flag.ID, flag.ProjectID, flag.Key, flag.Name, flag.Description, flag.Type, flag.Variations, flag.Tags, flag.ParentFlagID, flag.LastEvaluatedAt, flag.CreatedAt, flag.UpdatedAt)
 	return err
 }
 
 func (r *flagRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.FeatureFlag, error) {
-	query := `SELECT id, project_id, key, name, description, type, parent_flag_id, last_evaluated_at, created_at, updated_at FROM feature_flags WHERE id = $1`
+	query := `SELECT id, project_id, key, name, description, type, variations, COALESCE(tags, '{}'::text[]), parent_flag_id, last_evaluated_at, created_at, updated_at FROM feature_flags WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 	var f models.FeatureFlag
-	if err := row.Scan(&f.ID, &f.ProjectID, &f.Key, &f.Name, &f.Description, &f.Type, &f.ParentFlagID, &f.LastEvaluatedAt, &f.CreatedAt, &f.UpdatedAt); err != nil {
+	if err := row.Scan(&f.ID, &f.ProjectID, &f.Key, &f.Name, &f.Description, &f.Type, &f.Variations, &f.Tags, &f.ParentFlagID, &f.LastEvaluatedAt, &f.CreatedAt, &f.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
 		}
@@ -37,10 +37,10 @@ func (r *flagRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.Fea
 }
 
 func (r *flagRepository) GetByKey(ctx context.Context, projectID uuid.UUID, key string) (*models.FeatureFlag, error) {
-	query := `SELECT id, project_id, key, name, description, type, parent_flag_id, last_evaluated_at, created_at, updated_at FROM feature_flags WHERE project_id = $1 AND key = $2`
+	query := `SELECT id, project_id, key, name, description, type, variations, COALESCE(tags, '{}'::text[]), parent_flag_id, last_evaluated_at, created_at, updated_at FROM feature_flags WHERE project_id = $1 AND key = $2`
 	row := r.db.QueryRowContext(ctx, query, projectID, key)
 	var f models.FeatureFlag
-	if err := row.Scan(&f.ID, &f.ProjectID, &f.Key, &f.Name, &f.Description, &f.Type, &f.ParentFlagID, &f.LastEvaluatedAt, &f.CreatedAt, &f.UpdatedAt); err != nil {
+	if err := row.Scan(&f.ID, &f.ProjectID, &f.Key, &f.Name, &f.Description, &f.Type, &f.Variations, &f.Tags, &f.ParentFlagID, &f.LastEvaluatedAt, &f.CreatedAt, &f.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
 		}
@@ -50,7 +50,7 @@ func (r *flagRepository) GetByKey(ctx context.Context, projectID uuid.UUID, key 
 }
 
 func (r *flagRepository) ListByProject(ctx context.Context, projectID uuid.UUID, limit, offset int) ([]*models.FeatureFlag, int, error) {
-	query := `SELECT id, project_id, key, name, description, type, parent_flag_id, last_evaluated_at, created_at, updated_at FROM feature_flags WHERE project_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`
+	query := `SELECT id, project_id, key, name, description, type, variations, COALESCE(tags, '{}'::text[]), parent_flag_id, last_evaluated_at, created_at, updated_at FROM feature_flags WHERE project_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`
 	rows, err := r.db.QueryContext(ctx, query, projectID, limit, offset)
 	if err != nil {
 		return nil, 0, err
@@ -60,7 +60,7 @@ func (r *flagRepository) ListByProject(ctx context.Context, projectID uuid.UUID,
 	var flags []*models.FeatureFlag
 	for rows.Next() {
 		var f models.FeatureFlag
-		if err := rows.Scan(&f.ID, &f.ProjectID, &f.Key, &f.Name, &f.Description, &f.Type, &f.ParentFlagID, &f.LastEvaluatedAt, &f.CreatedAt, &f.UpdatedAt); err != nil {
+		if err := rows.Scan(&f.ID, &f.ProjectID, &f.Key, &f.Name, &f.Description, &f.Type, &f.Variations, &f.Tags, &f.ParentFlagID, &f.LastEvaluatedAt, &f.CreatedAt, &f.UpdatedAt); err != nil {
 			return nil, 0, err
 		}
 		flags = append(flags, &f)
@@ -75,8 +75,8 @@ func (r *flagRepository) ListByProject(ctx context.Context, projectID uuid.UUID,
 }
 
 func (r *flagRepository) Update(ctx context.Context, flag *models.FeatureFlag) error {
-	query := `UPDATE feature_flags SET name = $1, description = $2, type = $3, parent_flag_id = $4, updated_at = $5 WHERE id = $6`
-	res, err := r.db.ExecContext(ctx, query, flag.Name, flag.Description, flag.Type, flag.ParentFlagID, flag.UpdatedAt, flag.ID)
+	query := `UPDATE feature_flags SET name = $1, description = $2, type = $3, variations = $4, tags = $5, parent_flag_id = $6, updated_at = $7 WHERE id = $8`
+	res, err := r.db.ExecContext(ctx, query, flag.Name, flag.Description, flag.Type, flag.Variations, flag.Tags, flag.ParentFlagID, flag.UpdatedAt, flag.ID)
 	if err != nil {
 		return err
 	}

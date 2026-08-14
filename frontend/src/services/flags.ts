@@ -4,23 +4,30 @@ import type { FeatureFlag, FlagType, Variation } from '../types';
 export interface CreateFlagPayload {
   projectId: string;
   key: string;
+  name?: string;
   description?: string;
   type: FlagType;
   variations?: Variation[];
+  tags?: string[];
   parentFlagId?: string;
+  enabledByDefault?: boolean;
 }
 
 export const flagService = {
   async getByProject(projectId: string): Promise<FeatureFlag[]> {
-    return apiClient.get<FeatureFlag[]>(`/projects/${projectId}/flags`);
+    const res = await apiClient.get<{ data: FeatureFlag[] }>(`/projects/${projectId}/flags`);
+    return res.data || [];
   },
 
   async create(data: CreateFlagPayload): Promise<FeatureFlag> {
     return apiClient.post<FeatureFlag>(`/projects/${data.projectId}/flags`, {
       key: data.key,
+      name: data.name || data.key,
       description: data.description,
       type: data.type,
+      enabledByDefault: data.enabledByDefault,
       variations: data.variations,
+      tags: data.tags,
       parentFlagId: data.parentFlagId,
     });
   },
