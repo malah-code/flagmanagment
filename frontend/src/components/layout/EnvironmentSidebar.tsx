@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Server, Flag, Settings, Folder, Activity, Plus } from 'lucide-react';
+import { ArrowLeft, Server, Flag, Settings, Folder, Activity, Plus, Shield, GitPullRequest } from 'lucide-react';
 import type { Environment } from '../../types';
 
 interface EnvironmentSidebarProps {
@@ -115,20 +115,53 @@ export const EnvironmentSidebar: React.FC<EnvironmentSidebarProps> = ({
         </div>
 
         {/* Settings */}
-        <div>
+        <div className="space-y-1">
           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">
             Management
           </div>
           <Link
             to={`/projects/${projectId}/settings`}
             className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-              location.pathname.startsWith(`/projects/${projectId}/settings`)
+              location.pathname === `/projects/${projectId}/settings`
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                 : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
             }`}
           >
             <Settings className="w-4 h-4" />
             <span>Environment Settings</span>
+          </Link>
+          <Link
+            to={`/projects/${projectId}/project-settings`}
+            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              location.pathname === `/projects/${projectId}/project-settings`
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+            }`}
+          >
+            <Folder className="w-4 h-4 text-indigo-400" />
+            <span>Project Settings</span>
+          </Link>
+          <Link
+            to={`/projects/${projectId}/audit-logs`}
+            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              location.pathname === `/projects/${projectId}/audit-logs`
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+            }`}
+          >
+            <Shield className="w-4 h-4 text-indigo-400" />
+            <span>Audit Logs</span>
+          </Link>
+          <Link
+            to={`/projects/${projectId}/change-requests`}
+            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              location.pathname === `/projects/${projectId}/change-requests`
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+            }`}
+          >
+            <GitPullRequest className="w-4 h-4 text-indigo-400" />
+            <span>Change Requests</span>
           </Link>
         </div>
       </nav>

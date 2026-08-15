@@ -47,3 +47,15 @@ export function useDeleteEnvironment(projectId: string) {
     },
   });
 }
+
+export function useCloneEnvironment(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ envId, name }: { envId: string; name: string }) => 
+      environmentService.clone(projectId, envId, { name }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ENVIRONMENT_KEYS.byProject(projectId) });
+    },
+  });
+}

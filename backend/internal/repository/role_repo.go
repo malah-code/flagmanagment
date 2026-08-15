@@ -77,6 +77,12 @@ func (r *roleRepository) RemoveUserRole(ctx context.Context, id uuid.UUID) error
 	return err
 }
 
+func (r *roleRepository) RemoveAllUserRoles(ctx context.Context, userID uuid.UUID) error {
+	query := `DELETE FROM user_roles WHERE user_id = $1`
+	_, err := r.db.ExecContext(ctx, query, userID)
+	return err
+}
+
 func (r *roleRepository) GetUserRoles(ctx context.Context, userID uuid.UUID, projectID *uuid.UUID) ([]*models.UserRole, error) {
 	query := `
 		SELECT ur.id, ur.user_id, ur.role_id, ur.project_id, ur.environment_id, ur.created_at, ur.updated_at, r.name as role_name

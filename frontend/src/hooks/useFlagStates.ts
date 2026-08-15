@@ -7,32 +7,32 @@ export const FLAG_STATE_KEYS = {
   byEnvironment: (environmentId: string) => [...FLAG_STATE_KEYS.all, 'environment', environmentId] as const,
 };
 
-export function useFlagStates(environmentId: string) {
+export function useFlagStates(projectId: string, environmentId: string) {
   return useQuery({
     queryKey: FLAG_STATE_KEYS.byEnvironment(environmentId),
-    queryFn: () => flagStateService.getByEnvironment(environmentId),
-    enabled: Boolean(environmentId),
+    queryFn: () => flagStateService.getByEnvironment(projectId, environmentId),
+    enabled: Boolean(environmentId) && Boolean(projectId),
   });
 }
 
-export function useUpdateFlagState(environmentId: string) {
+export function useUpdateFlagState(projectId: string, environmentId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ flagId, payload }: { flagId: string; payload: UpdateFlagStatePayload }) =>
-      flagStateService.update(environmentId, flagId, payload),
+      flagStateService.update(projectId, environmentId, flagId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FLAG_STATE_KEYS.byEnvironment(environmentId) });
     },
   });
 }
 
-export function useInitFlagState(environmentId: string) {
+export function useInitFlagState(projectId: string, environmentId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ flagId, payload }: { flagId: string; payload: UpdateFlagStatePayload }) =>
-      flagStateService.createOrUpdateByEnvAndFlag(environmentId, flagId, payload),
+      flagStateService.createOrUpdateByEnvAndFlag(projectId, environmentId, flagId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FLAG_STATE_KEYS.byEnvironment(environmentId) });
     },

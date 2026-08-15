@@ -26,8 +26,8 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
   const [lifecycleFilter, setLifecycleFilter] = useState<LifecycleState | 'ALL'>('ALL');
   const [tagFilter, setTagFilter] = useState('');
   
-  const { data: flagStates = [] } = useFlagStates(environmentId || '');
-  const updateMutation = useUpdateFlagState(environmentId || '');
+  const { data: flagStates = [] } = useFlagStates(projectId, environmentId || '');
+  const updateMutation = useUpdateFlagState(projectId, environmentId || '');
   const [togglingStateId, setTogglingStateId] = useState<string | null>(null);
 
   const handleToggle = async (flagId: string, currentEnabled: boolean) => {

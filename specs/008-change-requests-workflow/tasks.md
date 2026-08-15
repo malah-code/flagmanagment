@@ -155,3 +155,11 @@
 
 - [x] T028 Add `CurrentState` JSONB to `ChangeRequest` model and repository, and populate it when creating a change request per spec.md: Key Entities (missing)
 - [x] T029 Implement true visual diffing (e.g., using `react-diff-viewer`) in `ChangeRequestDiff.tsx` consuming `CurrentState` and `ProposedChanges` per FR-004 (partial)
+
+---
+
+## Phase 8: Convergence
+
+**Purpose**: Addressing unbuilt work identified during the comprehensive codebase audit.
+
+- [x] T030: Wire the existing `ChangeRequestsPage.tsx` page into the application routing `App.tsx` and sidebar navigation. links per US2 (missing)

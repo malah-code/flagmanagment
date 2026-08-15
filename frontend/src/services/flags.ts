@@ -13,6 +13,13 @@ export interface CreateFlagPayload {
   enabledByDefault?: boolean;
 }
 
+export interface UpdateFlagPayload {
+  name: string;
+  description?: string;
+  tags?: string[];
+  parentFlagId?: string;
+}
+
 export const flagService = {
   async getByProject(projectId: string): Promise<FeatureFlag[]> {
     const res = await apiClient.get<{ data: FeatureFlag[] }>(`/projects/${projectId}/flags`);
@@ -34,6 +41,11 @@ export const flagService = {
 
   async delete(id: string): Promise<void> {
     return apiClient.delete<void>(`/flags/${id}`);
+  },
+
+  async update(projectId: string, flagId: string, payload: UpdateFlagPayload): Promise<FeatureFlag> {
+    const res = await apiClient.put<{ data: FeatureFlag }>(`/projects/${projectId}/flags/${flagId}`, payload);
+    return res.data;
   },
 
   async promote(projectId: string, flagId: string, sourceEnvId: string, targetEnvId: string): Promise<any> {

@@ -18,6 +18,7 @@ interface TargetingRuleBuilderProps {
   isOpen: boolean;
   onClose: () => void;
   envId: string;
+  projectId: string;
   flagId: string;
   initialRules: TargetingRule[];
   flagKey: string;
@@ -27,12 +28,13 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
   isOpen,
   onClose,
   envId,
+  projectId,
   flagId,
   initialRules,
   flagKey,
 }) => {
   const [rules, setRules] = useState<TargetingRule[]>(initialRules || []);
-  const updateMutation = useUpdateFlagState(envId);
+  const updateMutation = useUpdateFlagState(projectId, envId);
 
   if (!isOpen) return null;
 

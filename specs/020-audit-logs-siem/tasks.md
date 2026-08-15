@@ -130,3 +130,11 @@
 3. Add User Story 2 (Sanitization) → Test independently
 4. Add User Story 3 (Webhooks) → Test independently
 5. Each story adds value without breaking previous stories
+
+---
+
+## Phase 7: Convergence
+
+**Purpose**: Addressing unbuilt work identified during the comprehensive codebase audit.
+
+- [x] T020: Ensure `AuditLogs.tsx` is wired into the application routing and reachable via the sidebar.

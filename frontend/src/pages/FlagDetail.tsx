@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useFlags } from '../hooks/useFlags';
+import { useFlags, useUpdateFlag } from '../hooks/useFlags';
 import { useEnvironments } from '../hooks/useEnvironments';
 import { useFlagStates, useUpdateFlagState, useInitFlagState } from '../hooks/useFlagStates';
 import { ArrowLeft, Sliders, Settings, LayoutTemplate, Save, Loader2, CheckCircle2, XCircle } from 'lucide-react';
@@ -19,11 +19,43 @@ export const FlagDetail = () => {
   const flag = flags.find(f => f.id === flagId);
   const currentEnvId = selectedEnvId || (environments[0]?.id ?? '');
   
-  const { data: flagStates = [], isLoading: isLoadingStates } = useFlagStates(currentEnvId);
-  const updateMutation = useUpdateFlagState(currentEnvId);
-  const initMutation = useInitFlagState(currentEnvId);
+  const { data: flagStates = [], isLoading: isLoadingStates } = useFlagStates(projectId, currentEnvId);
+  const updateMutation = useUpdateFlagState(projectId, currentEnvId);
+  const initMutation = useInitFlagState(projectId, currentEnvId);
+  const updateFlagMutation = useUpdateFlag(projectId);
 
   const flagState = flagStates.find(s => s.flagId === flagId);
+
+  const [settingsName, setSettingsName] = useState('');
+  const [settingsDescription, setSettingsDescription] = useState('');
+  const [settingsTags, setSettingsTags] = useState('');
+
+  useEffect(() => {
+    if (flag) {
+      setSettingsName(flag.name || flag.key);
+      setSettingsDescription(flag.description || '');
+      setSettingsTags(flag.tags?.join(', ') || '');
+    }
+  }, [flag]);
+
+  const handleUpdateSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!flag) return;
+    
+    try {
+      await updateFlagMutation.mutateAsync({
+        flagId: flag.id,
+        payload: {
+          name: settingsName.trim(),
+          description: settingsDescription.trim(),
+          tags: settingsTags.split(',').map(t => t.trim()).filter(Boolean),
+        }
+      });
+      toast.success('Flag settings updated');
+    } catch (err) {
+      toast.error('Failed to update flag settings');
+    }
+  };
 
   if (isLoadingFlags) {
     return (
@@ -242,7 +274,7 @@ export const FlagDetail = () => {
         )}
 
         {activeTab === 'settings' && (
-          <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 max-w-2xl">
+          <form onSubmit={handleUpdateSettings} className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 max-w-2xl">
             <h3 className="text-base font-semibold text-slate-900 mb-6">Flag Settings</h3>
             <div className="space-y-4">
               <div>
@@ -260,15 +292,18 @@ export const FlagDetail = () => {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
                 <input
                   type="text"
-                  defaultValue={flag.name || flag.key}
+                  value={settingsName}
+                  onChange={(e) => setSettingsName(e.target.value)}
                   className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
                 <textarea
-                  defaultValue={flag.description}
+                  value={settingsDescription}
+                  onChange={(e) => setSettingsDescription(e.target.value)}
                   rows={3}
                   className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
@@ -278,21 +313,24 @@ export const FlagDetail = () => {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Tags (comma separated)</label>
                 <input
                   type="text"
-                  defaultValue={flag.tags?.join(', ')}
+                  value={settingsTags}
+                  onChange={(e) => setSettingsTags(e.target.value)}
                   className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex justify-end">
                 <button
-                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition-colors"
-                  onClick={() => toast.success('Settings saved (Mock)')}
+                  type="submit"
+                  disabled={updateFlagMutation.isPending}
+                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition-colors"
                 >
-                  <Save className="w-4 h-4" /> Save Settings
+                  {updateFlagMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Save Settings
                 </button>
               </div>
             </div>
-          </div>
+          </form>
         )}
       </div>
     </div>

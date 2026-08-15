@@ -33,7 +33,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
   if (response.status === 204) {
     return {} as T;
   }
-  return response.json();
+  const text = await response.text();
+  if (!text) {
+    return {} as T;
+  }
+  return JSON.parse(text) as T;
 }
 
 function getHeaders(): HeadersInit {

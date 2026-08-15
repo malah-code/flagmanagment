@@ -96,3 +96,11 @@
 
 1. Add User Story 1 → Test independently
 2. Add User Story 2 → Test independently (create and delete)
+
+---
+
+## Phase 6: Convergence
+
+**Purpose**: Addressing unbuilt work identified during the comprehensive codebase audit.
+
+- [x] T011: Build UI action "Clone Environment" in `EnvironmentsList.tsx` and wire to the backend endpoint.tsx` or `ProjectSettings.tsx` and connect it to the backend cloning API per US1 (missing)

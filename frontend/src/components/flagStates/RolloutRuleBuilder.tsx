@@ -7,6 +7,7 @@ interface RolloutRuleBuilderProps {
   isOpen: boolean;
   onClose: () => void;
   envId: string;
+  projectId: string;
   flagId: string;
   flagKey: string;
   variations: Variation[];
@@ -19,6 +20,7 @@ export const RolloutRuleBuilder: React.FC<RolloutRuleBuilderProps> = ({
   isOpen,
   onClose,
   envId,
+  projectId,
   flagId,
   flagKey,
   variations = [],
@@ -43,7 +45,7 @@ export const RolloutRuleBuilder: React.FC<RolloutRuleBuilderProps> = ({
   });
 
   const [error, setError] = useState<string | null>(null);
-  const updateMutation = useUpdateFlagState(envId);
+  const updateMutation = useUpdateFlagState(projectId, envId);
 
   if (!isOpen) return null;
 

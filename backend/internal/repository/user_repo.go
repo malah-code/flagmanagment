@@ -76,3 +76,30 @@ func (r *userRepository) GetByExternalID(ctx context.Context, provider string, e
 	}
 	return &user, nil
 }
+
+func (r *userRepository) List(ctx context.Context, limit, offset int) ([]*models.User, int, error) {
+	var total int
+	err := r.db.QueryRowContext(ctx, "SELECT count(*) FROM users").Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query := `SELECT id, email, password_hash, auth_provider, external_id, created_at, updated_at FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2`
+	rows, err := r.db.QueryContext(ctx, query, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var users []*models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.ID, &user.Email, &user.PasswordHash, &user.AuthProvider, &user.ExternalID, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			return nil, 0, err
+		}
+		users = append(users, &user)
+	}
+
+	return users, total, nil
+}

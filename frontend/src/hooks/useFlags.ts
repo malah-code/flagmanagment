@@ -36,3 +36,15 @@ export function useDeleteFlag(projectId: string) {
     },
   });
 }
+
+export function useUpdateFlag(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ flagId, payload }: { flagId: string; payload: import('../services/flags').UpdateFlagPayload }) => 
+      flagService.update(projectId, flagId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FLAG_KEYS.byProject(projectId) });
+    },
+  });
+}

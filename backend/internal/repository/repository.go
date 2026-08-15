@@ -30,6 +30,8 @@ type Store interface {
 	StalePolicyRepo() StalePolicyRepository
 	RoleRepo() RoleRepository
 	UserRepo() UserRepository
+	InvitationRepo() InvitationRepository
+	SystemConfigRepo() SystemConfigRepository
 	ServiceAccountRepo() ServiceAccountRepository
 	WebhookIntegrationRepo() WebhookIntegrationRepository
 
@@ -129,6 +131,7 @@ type RoleRepository interface {
 	List(ctx context.Context) ([]*models.Role, error)
 	AssignUserRole(ctx context.Context, ur *models.UserRole) error
 	RemoveUserRole(ctx context.Context, id uuid.UUID) error
+	RemoveAllUserRoles(ctx context.Context, userID uuid.UUID) error
 	GetUserRoles(ctx context.Context, userID uuid.UUID, projectID *uuid.UUID) ([]*models.UserRole, error)
 	GetServiceAccountRoles(ctx context.Context, saID uuid.UUID, projectID *uuid.UUID) ([]*models.ServiceAccountRole, error)
 }
@@ -138,6 +141,19 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*models.User, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*models.User, error)
 	GetByExternalID(ctx context.Context, provider string, externalID string) (*models.User, error)
+	List(ctx context.Context, limit, offset int) ([]*models.User, int, error)
+}
+
+type InvitationRepository interface {
+	Create(ctx context.Context, inv *models.Invitation) error
+	GetByEmail(ctx context.Context, email string) (*models.Invitation, error)
+	GetByTokenHash(ctx context.Context, tokenHash string) (*models.Invitation, error)
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
+type SystemConfigRepository interface {
+	GetByKey(ctx context.Context, key string) (*models.SystemConfig, error)
+	Upsert(ctx context.Context, config *models.SystemConfig) error
 }
 
 type ServiceAccountRepository interface {

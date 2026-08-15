@@ -87,10 +87,13 @@ export const ProjectsList = () => {
             >
               <div>
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2.5 font-semibold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">
+                  <Link 
+                    to={`/projects/${project.id}`}
+                    className="flex items-center gap-2.5 font-semibold text-slate-900 text-lg group-hover:text-indigo-600 hover:underline transition-colors cursor-pointer"
+                  >
                     <Folder className="w-5 h-5 text-indigo-500 shrink-0" />
                     <span className="truncate">{project.name}</span>
-                  </div>
+                  </Link>
                   <button
                     onClick={() => handleDelete(project.id, project.name)}
                     className="text-slate-400 hover:text-red-600 transition-colors p-1 rounded hover:bg-slate-50"

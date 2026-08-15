@@ -42,11 +42,10 @@ func (h *FlagHandler) RegisterRoutes(r chi.Router) {
 	r.With(h.rbac.RequireRole("EDITOR")).Put("/projects/{projectId}/flags/{flagId}", h.UpdateFlag)
 	r.With(h.rbac.RequireRole("VIEWER")).Get("/projects/{projectId}/flags", h.ListFlags)
 
-	// State specific to environment (envId route doesn't have projectId, might need to rely on env's projectId internally or apply general editor role)
-	// For now, applying editor level at global scope
-	r.With(h.rbac.RequireRole("VIEWER")).Get("/environments/{envId}/flag-states", h.ListFlagStates)
-	r.With(h.rbac.RequireRole("VIEWER")).Get("/environments/{envId}/flags/{flagId}/state", h.GetFlagState)
-	r.With(h.rbac.RequireRole("EDITOR")).Put("/environments/{envId}/flags/{flagId}/state", h.UpdateFlagState)
+	// State specific to environment, including projectId for RBAC
+	r.With(h.rbac.RequireRole("VIEWER")).Get("/projects/{projectId}/environments/{envId}/flag-states", h.ListFlagStates)
+	r.With(h.rbac.RequireRole("VIEWER")).Get("/projects/{projectId}/environments/{envId}/flags/{flagId}/state", h.GetFlagState)
+	r.With(h.rbac.RequireRole("EDITOR")).Put("/projects/{projectId}/environments/{envId}/flags/{flagId}/state", h.UpdateFlagState)
 }
 
 func (h *FlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
@@ -527,11 +526,15 @@ func (h *FlagHandler) UpdateFlagState(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == repository.ErrNotFound {
 			now := time.Now().UTC()
+			enabledVal := false
+			if req.Enabled != nil {
+				enabledVal = *req.Enabled
+			}
 			state = &models.EnvironmentFlagState{
 				ID:               uuid.New(),
 				EnvironmentID:    envID,
 				FeatureFlagID:    flagID,
-				Enabled:          req.Enabled,
+				Enabled:          enabledVal,
 				DefaultVariation: req.DefaultVariation,
 				TargetingRules:   req.TargetingRules,
 				RemoteConfig:     req.RemoteConfig,
@@ -575,11 +578,21 @@ func (h *FlagHandler) UpdateFlagState(w http.ResponseWriter, r *http.Request) {
 		var prevState models.JSONB
 		json.Unmarshal(bPrev, &prevState)
 		
-		state.Enabled = req.Enabled
-		state.DefaultVariation = req.DefaultVariation
-		state.TargetingRules = req.TargetingRules
-		state.RemoteConfig = req.RemoteConfig
-		state.RolloutRules = req.RolloutRules
+		if req.Enabled != nil {
+			state.Enabled = *req.Enabled
+		}
+		if req.DefaultVariation != "" {
+			state.DefaultVariation = req.DefaultVariation
+		}
+		if req.TargetingRules != nil {
+			state.TargetingRules = req.TargetingRules
+		}
+		if req.RemoteConfig != nil {
+			state.RemoteConfig = req.RemoteConfig
+		}
+		if req.RolloutRules != nil {
+			state.RolloutRules = req.RolloutRules
+		}
 		state.UpdatedAt = time.Now().UTC()
 
 		if err := state.Validate(); err != nil {

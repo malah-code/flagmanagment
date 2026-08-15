@@ -7,6 +7,8 @@ import { ProjectDetail } from './pages/ProjectDetail';
 import { Login } from './pages/Login';
 import { SSOSuccess } from './pages/SSOSuccess';
 import { FlagDetail } from './pages/FlagDetail';
+import { UsersManagement } from './pages/UsersManagement';
+import { SystemSettings } from './pages/SystemSettings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +34,8 @@ function App() {
             <Route path="projects" element={<ProjectsList />} />
             <Route path="projects/:projectId/*" element={<ProjectDetail />} />
             <Route path="projects/:projectId/flags/:flagId" element={<FlagDetail />} />
+            <Route path="settings/users" element={<UsersManagement />} />
+            <Route path="settings/system" element={<SystemSettings />} />
           </Route>
         </Routes>
       </BrowserRouter>

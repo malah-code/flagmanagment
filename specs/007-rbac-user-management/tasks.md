@@ -98,3 +98,13 @@
 - [x] T023 Ensure all backend endpoints return standardized error formats (e.g., `401 Unauthorized`, `403 Forbidden`)
 - [x] T024 Write or update unit tests for the RBAC middleware and JWT generation
 - [x] T025 Run `quickstart.md` validation scenarios manually
+
+---
+
+## Phase 7: Convergence
+
+**Purpose**: Addressing unbuilt work identified during the comprehensive codebase audit.
+
+- [x] T026: Add Global Navigation Profile Menu with working Logout button in `Layout.tsx`
+- [x] T027: Build UI for User and Role Management (e.g. `UsersList.tsx`, `RoleAssignment.tsx`) and wire into router.
+- [x] T028: Wire the existing `AuditLogs.tsx` page into the application routing `App.tsx` and sidebar navigation. per FR-007 (partial)

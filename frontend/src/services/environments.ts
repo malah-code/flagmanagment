@@ -37,6 +37,10 @@ export const environmentService = {
     return apiClient.delete<void>(`/environments/${id}`);
   },
 
+  async clone(projectId: string, envId: string, data: { name: string }): Promise<Environment> {
+    return apiClient.post<Environment>(`/projects/${projectId}/environments/${envId}/clone`, data);
+  },
+
   async listServerKeys(projectId: string, envId: string) {
     const res = await apiClient.get<{ data: import('../types').ServerKey[] }>(
       `/projects/${projectId}/environments/${envId}/server-keys`

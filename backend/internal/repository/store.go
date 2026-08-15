@@ -61,6 +61,14 @@ func (s *store) UserRepo() UserRepository {
 	return NewUserRepository(s.db)
 }
 
+func (s *store) InvitationRepo() InvitationRepository {
+	return NewInvitationRepository(s.db)
+}
+
+func (s *store) SystemConfigRepo() SystemConfigRepository {
+	return NewSystemConfigRepository(s.db)
+}
+
 func (s *store) WebhookIntegrationRepo() WebhookIntegrationRepository {
 	return NewWebhookIntegrationRepository(s.db)
 }

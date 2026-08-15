@@ -102,6 +102,15 @@ func main() {
 	scHandler := api.NewScheduledChangeHandler(store, scService, rbacMiddleware, cacheClient)
 	saHandler := api.NewServiceAccountHandler(store)
 
+	cryptoService := services.NewCryptoService()
+	emailService := services.NewEmailService(store)
+	userService := services.NewUserService(store, cryptoService, emailService)
+	usersHandler := api.NewUsersHandler(userService)
+	configHandler := api.NewConfigHandler(store, cryptoService, emailService)
+
+	lifecycleHandler := api.NewLifecycleHandler(store, rbacMiddleware, auditService)
+	stalePolicyHandler := api.NewStalePolicyHandler(store, rbacMiddleware)
+
 	// API v1 Routes
 	router.Route("/api/v1", func(r chi.Router) {
 		r.Route("/auth", func(r chi.Router) {
@@ -120,8 +129,14 @@ func main() {
 				saHandler.RegisterRoutes(r)
 			})
 
-	lifecycleHandler := api.NewLifecycleHandler(store, rbacMiddleware, auditService)
-	stalePolicyHandler := api.NewStalePolicyHandler(store, rbacMiddleware)
+			r.Route("/users", func(r chi.Router) {
+				usersHandler.RegisterRoutes(r)
+			})
+
+			r.Route("/config", func(r chi.Router) {
+				r.Use(rbacMiddleware.RequireRole("ADMIN"))
+				configHandler.RegisterRoutes(r)
+			})
 
 			envHandler.RegisterRoutes(r)
 			flagHandler.RegisterRoutes(r)
@@ -141,7 +156,7 @@ func main() {
 			r.Use(api.AuthMiddleware(store))
 			sdkHandler.RegisterRoutes(r)
 		})
-		
+
 		// Webhook Routes (Protected by API Key AuthMiddleware for environment identification)
 		r.Group(func(r chi.Router) {
 			r.Use(api.AuthMiddleware(store))

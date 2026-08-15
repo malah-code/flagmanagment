@@ -3,6 +3,7 @@ import { useFlagStates, useUpdateFlagState, useInitFlagState } from '../../hooks
 import { useFlags } from '../../hooks/useFlags';
 import { useEnvironments } from '../../hooks/useEnvironments';
 import { Loader2, CheckCircle2, XCircle, ArrowUpRight, Target, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Switch } from '../ui/Switch';
 import { useState, useEffect, useCallback } from 'react';
 import { KillSwitchForm } from '../KillSwitchForm';
@@ -22,10 +23,10 @@ interface FlagStatesListProps {
 
 export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps) => {
   const { data: flags = [], isLoading: isLoadingFlags } = useFlags(projectId);
-  const { data: flagStates = [], isLoading: isLoadingStates, isError, error } = useFlagStates(environmentId);
+  const { data: flagStates = [], isLoading: isLoadingStates, isError, error } = useFlagStates(projectId, environmentId);
   const { data: environments = [] } = useEnvironments(projectId);
-  const updateMutation = useUpdateFlagState(environmentId);
-  const initMutation = useInitFlagState(environmentId);
+  const updateMutation = useUpdateFlagState(projectId, environmentId);
+  const initMutation = useInitFlagState(projectId, environmentId);
   const [selectedFlagForKS, setSelectedFlagForKS] = useState<string | null>(null);
   const [selectedFlagForPromote, setSelectedFlagForPromote] = useState<string | null>(null);
   const [editingRulesState, setEditingRulesState] = useState<{ flagId: string; key: string; rules: TargetingRule[] } | null>(null);
@@ -154,7 +155,12 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
                   <tr key={flag.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-mono font-medium text-slate-900">
                       <div className="flex items-center gap-2">
-                        <span>{flag.key}</span>
+                        <Link 
+                          to={`/projects/${projectId}/flags/${flag.id}`} 
+                          className="text-indigo-600 hover:text-indigo-800 hover:underline"
+                        >
+                          {flag.key}
+                        </Link>
                         <ScheduledChangeBadge scheduledChange={scheduledChanges[flag.id]} />
                       </div>
                     </td>
@@ -273,6 +279,7 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
           isOpen={true}
           onClose={() => setEditingRulesState(null)}
           envId={environmentId}
+          projectId={projectId}
           flagId={editingRulesState.flagId}
           flagKey={editingRulesState.key}
           initialRules={editingRulesState.rules}

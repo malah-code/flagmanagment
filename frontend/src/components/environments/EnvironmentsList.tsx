@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useEnvironments, useDeleteEnvironment } from '../../hooks/useEnvironments';
+import { useEnvironments, useDeleteEnvironment, useCloneEnvironment } from '../../hooks/useEnvironments';
 import { CreateEnvironmentDialog } from './CreateEnvironmentDialog';
 import { SDKIntegrationModal } from './SDKIntegrationModal';
 import { EnvironmentSettingsTabs } from './EnvironmentSettingsTabs';
@@ -17,6 +17,7 @@ interface EnvironmentsListProps {
 export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
   const { data: environments = [], isLoading, isError, error } = useEnvironments(projectId);
   const deleteMutation = useDeleteEnvironment(projectId);
+  const cloneMutation = useCloneEnvironment(projectId);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
   const [selectedEnvForGuide, setSelectedEnvForGuide] = useState<{ name: string; key: string } | null>(null);
@@ -25,6 +26,17 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
   const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete environment "${name}"? Active flag configurations for this environment will be removed.`)) {
       await deleteMutation.mutateAsync(id);
+    }
+  };
+
+  const handleClone = async (envId: string, envName: string) => {
+    const cloneName = prompt(`Enter a name for the clone of "${envName}":`, `${envName} (Clone)`);
+    if (cloneName) {
+      toast.promise(cloneMutation.mutateAsync({ envId, name: cloneName }), {
+        loading: 'Cloning environment...',
+        success: 'Environment cloned successfully!',
+        error: 'Failed to clone environment',
+      });
     }
   };
 
@@ -144,13 +156,22 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDelete(env.id, env.name)}
-                    className="text-slate-400 hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
-                    title="Delete Environment"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleClone(env.id, env.name)}
+                      className="text-slate-400 hover:text-indigo-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
+                      title="Clone Environment"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(env.id, env.name)}
+                      className="text-slate-400 hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
+                      title="Delete Environment"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Permanent Client Key Box */}

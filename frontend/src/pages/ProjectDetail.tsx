@@ -2,10 +2,13 @@ import { useParams, Link, Routes, Route, useNavigate, Navigate } from 'react-rou
 import { useProject } from '../hooks/useProjects';
 import { useEnvironments } from '../hooks/useEnvironments';
 import { EnvironmentsList } from '../components/environments/EnvironmentsList';
+import { ProjectSettings } from '../components/projects/ProjectSettings';
 import { FlagsList } from '../components/flags/FlagsList';
 import { FlagStatesList } from '../components/flagStates/FlagStatesList';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { EnvironmentSidebar } from '../components/layout/EnvironmentSidebar';
+import { AuditLogs } from './AuditLogs';
+import { ChangeRequestsPage } from './ChangeRequestsPage';
 
 export const ProjectDetail = () => {
   const { projectId = '' } = useParams<{ projectId: string }>();
@@ -70,6 +73,18 @@ export const ProjectDetail = () => {
           <Route 
             path="settings" 
             element={<EnvironmentsList projectId={projectId} />} 
+          />
+          <Route 
+            path="project-settings" 
+            element={<ProjectSettings projectId={projectId} />} 
+          />
+          <Route 
+            path="audit-logs" 
+            element={<AuditLogs projectId={projectId} />} 
+          />
+          <Route 
+            path="change-requests" 
+            element={<ChangeRequestsPage environments={environments} />} 
           />
         </Routes>
       </div>

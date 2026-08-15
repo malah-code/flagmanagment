@@ -59,10 +59,10 @@ type UpdateFeatureFlagRequest struct {
 }
 
 type UpdateFlagStateRequest struct {
-	Enabled          bool                   `json:"enabled"`
+	Enabled          *bool                  `json:"enabled,omitempty"`
 	DefaultVariation string                 `json:"defaultVariation,omitempty"`
-	TargetingRules   map[string]interface{} `json:"targetingRules" validate:"required"`
-	RemoteConfig     map[string]interface{} `json:"remoteConfig" validate:"required"`
+	TargetingRules   map[string]interface{} `json:"targetingRules,omitempty"`
+	RemoteConfig     map[string]interface{} `json:"remoteConfig,omitempty"`
 	RolloutRules     map[string]interface{} `json:"rolloutRules,omitempty"`
 }
 
