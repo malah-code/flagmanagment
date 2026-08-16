@@ -75,9 +75,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build backend image
-        run: docker build -t flagmanagment/backend:ci -f backend/Dockerfile backend/
+        run: docker build --progress=plain -t flagmanagment/backend:ci -f backend/Dockerfile backend/
       - name: Build frontend image
-        run: docker build -t flagmanagment/frontend:ci -f frontend/Dockerfile frontend/
+        run: docker build --progress=plain -t flagmanagment/frontend:ci -f frontend/Dockerfile frontend/
 
   security-scan:
     runs-on: ubuntu-latest
