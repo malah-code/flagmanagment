@@ -17,6 +17,8 @@ jobs:
           cache-dependency-path: backend/go.sum
       - name: Download Go dependencies
         run: cd backend && go mod download
+      - name: Go vet
+        run: cd backend && go vet ./...
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
