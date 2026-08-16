@@ -74,8 +74,6 @@ jobs:
     needs: [test-backend, test-frontend]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
       - name: Build backend image
         run: docker build -t flagmanagment/backend:ci -f backend/Dockerfile backend/
       - name: Build frontend image
