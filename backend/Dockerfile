@@ -1,7 +1,5 @@
 FROM golang:alpine AS builder
 
-RUN apk add --no-cache git ca-certificates
-
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -9,11 +7,11 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X github.com/flagmanagment/backend/internal/health.Version=0.1.0" -o /app/server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server ./cmd/server
 
 FROM alpine:latest
 
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates
 
 COPY --from=builder /app/server /server
 COPY --from=builder /app/migrations /migrations
