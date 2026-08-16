@@ -32,8 +32,8 @@ func ClearHooks() {
 	registeredHooks = nil
 }
 
-// executeAfterHooks runs the After hooks asynchronously
-func executeAfterHooks(ctx hooks.HookContext, details hooks.EvaluationDetails) {
+// ExecuteAfterHooks runs the After hooks asynchronously
+func ExecuteAfterHooks(ctx hooks.HookContext, details hooks.EvaluationDetails) {
 	hooksMu.RLock()
 	hooksToRun := make([]hooks.Hook, len(registeredHooks))
 	copy(hooksToRun, registeredHooks)
@@ -42,17 +42,15 @@ func executeAfterHooks(ctx hooks.HookContext, details hooks.EvaluationDetails) {
 	for _, hook := range hooksToRun {
 		go func(h hooks.Hook) {
 			defer func() {
-				if r := recover(); r != nil {
-					// recover from hook panic safely
-				}
+				_ = recover()
 			}()
 			h.After(ctx, details)
 		}(hook)
 	}
 }
 
-// executeErrorHooks runs the Error hooks asynchronously
-func executeErrorHooks(ctx hooks.HookContext, err error) {
+// ExecuteErrorHooks runs the Error hooks asynchronously
+func ExecuteErrorHooks(ctx hooks.HookContext, err error) {
 	hooksMu.RLock()
 	hooksToRun := make([]hooks.Hook, len(registeredHooks))
 	copy(hooksToRun, registeredHooks)
@@ -61,9 +59,7 @@ func executeErrorHooks(ctx hooks.HookContext, err error) {
 	for _, hook := range hooksToRun {
 		go func(h hooks.Hook) {
 			defer func() {
-				if r := recover(); r != nil {
-					// recover from hook panic safely
-				}
+				_ = recover()
 			}()
 			h.Error(ctx, err)
 		}(hook)
@@ -104,11 +100,11 @@ func HashPII(ctx *models.EvaluationContext, salt string) *models.EvaluationConte
 }
 
 // EvaluateRolloutSplit evaluates percentage rollout using MurmurHash3 and an environment salt
-func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON models.JSONB, salt string) (string, bool) {
-	if rolloutRulesJSON == nil || entityKey == "" {
+func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRules map[string]interface{}, salt string) (string, bool) {
+	if rolloutRules == nil || entityKey == "" {
 		return "", false
 	}
-	rulesInterface, ok := rolloutRulesJSON["rules"]
+	rulesInterface, ok := rolloutRules["rules"]
 	if !ok {
 		return "", false
 	}
@@ -136,15 +132,16 @@ func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON mod
 }
 
 func murmurHash3_32(key []byte, seed uint32) uint32 {
-	var h1 uint32 = seed
+	h1 := seed
 	c1 := uint32(0xcc9e2d51)
 	c2 := uint32(0x1b873593)
 
-	length := len(key)
-	nblocks := length / 4
-
+	nblocks := len(key) / 4
 	for i := 0; i < nblocks; i++ {
-		k1 := uint32(key[i*4]) | uint32(key[i*4+1])<<8 | uint32(key[i*4+2])<<16 | uint32(key[i*4+3])<<24
+		k1 := uint32(key[i*4]) |
+			uint32(key[i*4+1])<<8 |
+			uint32(key[i*4+2])<<16 |
+			uint32(key[i*4+3])<<24
 
 		k1 *= c1
 		k1 = (k1 << 15) | (k1 >> 17)
@@ -157,7 +154,7 @@ func murmurHash3_32(key []byte, seed uint32) uint32 {
 
 	tail := key[nblocks*4:]
 	var k1 uint32
-	switch len(tail) {
+	switch len(tail) & 3 {
 	case 3:
 		k1 ^= uint32(tail[2]) << 16
 		fallthrough
@@ -172,7 +169,7 @@ func murmurHash3_32(key []byte, seed uint32) uint32 {
 		h1 ^= k1
 	}
 
-	h1 ^= uint32(length)
+	h1 ^= uint32(len(key))
 	h1 ^= h1 >> 16
 	h1 *= 0x85ebca6b
 	h1 ^= h1 >> 13
@@ -200,7 +197,7 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 			Value:  flagRule.DefaultVariation,
 			Reason: "FLAG_DISABLED",
 		}
-		executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+		ExecuteAfterHooks(hookCtx, hooks.EvaluationDetails{
 			FlagKey: flagRule.Key,
 			Value:   res.Value,
 			Reason:  res.Reason,
@@ -217,7 +214,7 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 					Value:  flagRule.DefaultVariation,
 					Reason: "PARENT_FLAG_DISABLED",
 				}
-				executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+				ExecuteAfterHooks(hookCtx, hooks.EvaluationDetails{
 					FlagKey: flagRule.Key,
 					Value:   res.Value,
 					Reason:  res.Reason,
@@ -227,51 +224,38 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 		}
 	}
 	
-	entityKey := ""
-	if ctx != nil {
-		entityKey = ctx.EntityKey
-	}
-
+	// 1. Contextual Targeting Rules Evaluation (Top priority)
 	if flagRule.TargetingRules != nil {
-		// Convert context for the rules engine
-		evalCtx := make(EvaluationContext)
-		if ctx != nil {
-			for k, v := range ctx.Attributes {
-				if strVal, ok := v.(string); ok {
-					evalCtx[k] = strVal
+		var rulesMap map[string]interface{}
+		if err := json.Unmarshal(flagRule.TargetingRules, &rulesMap); err == nil {
+			if rules, ok := rulesMap["rules"]; ok {
+				rulesBytes, _ := json.Marshal(rules)
+				if variation, matched := EvaluateTargetingRules(rulesBytes, ctx); matched {
+					res := models.EvaluationResult{
+						Value:  variation,
+						Reason: "TARGETING_MATCH",
+					}
+					ExecuteAfterHooks(hookCtx, hooks.EvaluationDetails{
+						FlagKey: flagRule.Key,
+						Value:   res.Value,
+						Reason:  res.Reason,
+					})
+					return res
 				}
 			}
 		}
+	}
 
-		// Convert JSONRawMessage to JSONB map structure for our internal evaluator
-		var rulesMap models.JSONB
-		if err := json.Unmarshal(flagRule.TargetingRules, &rulesMap); err == nil {
-			variation, matched := EvaluateContextualRules(rulesMap, evalCtx)
-			if matched {
+	// 2. Percentage Rollout Evaluation (Second priority)
+	if flagRule.RolloutRules != nil && ctx != nil {
+		var rolloutMap map[string]interface{}
+		if err := json.Unmarshal(flagRule.RolloutRules, &rolloutMap); err == nil {
+			if variation, matched := EvaluateRolloutSplit(flagRule.Key, ctx.EntityKey, rolloutMap, sVal); matched {
 				res := models.EvaluationResult{
 					Value:  variation,
-					Reason: "TARGETING_MATCH",
-				}
-				executeAfterHooks(hookCtx, hooks.EvaluationDetails{
-					FlagKey: flagRule.Key,
-					Value:   res.Value,
-					Reason:  res.Reason,
-				})
-				return res
-			}
-		}
-	}
-
-	if flagRule.RolloutRules != nil && entityKey != "" {
-		var rolloutMap models.JSONB
-		if err := json.Unmarshal(flagRule.RolloutRules, &rolloutMap); err == nil {
-			variationID, matched := EvaluateRolloutSplit(flagRule.Key, entityKey, rolloutMap, sVal)
-			if matched {
-				res := models.EvaluationResult{
-					Value:  variationID,
 					Reason: "PERCENTAGE_ROLLOUT",
 				}
-				executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+				ExecuteAfterHooks(hookCtx, hooks.EvaluationDetails{
 					FlagKey: flagRule.Key,
 					Value:   res.Value,
 					Reason:  res.Reason,
@@ -281,11 +265,12 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 		}
 	}
 
+	// 3. Fallback to Default Variation
 	res := models.EvaluationResult{
 		Value:  flagRule.DefaultVariation,
 		Reason: "DEFAULT",
 	}
-	executeAfterHooks(hookCtx, hooks.EvaluationDetails{
+	ExecuteAfterHooks(hookCtx, hooks.EvaluationDetails{
 		FlagKey: flagRule.Key,
 		Value:   res.Value,
 		Reason:  res.Reason,

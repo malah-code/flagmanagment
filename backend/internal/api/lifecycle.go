@@ -54,7 +54,7 @@ func (h *LifecycleHandler) TransitionLifecycle(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	targetState := models.LifecycleActive
+	var targetState models.LifecycleState
 	switch req.Action {
 	case "ARCHIVE":
 		targetState = models.LifecycleArchived

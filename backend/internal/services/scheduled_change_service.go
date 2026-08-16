@@ -33,15 +33,16 @@ func (s *ScheduledChangeService) Create(ctx context.Context, sc *models.Schedule
 		return errors.New("scheduled_for must be in the future")
 	}
 
-	if sc.TargetType == models.TargetTypeFlag {
+	switch sc.TargetType {
+	case models.TargetTypeFlag:
 		if sc.Action != models.ActionEnable && sc.Action != models.ActionDisable {
 			return fmt.Errorf("action %s invalid for FLAG target type (must be ENABLE or DISABLE)", sc.Action)
 		}
-	} else if sc.TargetType == models.TargetTypeChangeRequest {
+	case models.TargetTypeChangeRequest:
 		if sc.Action != models.ActionApply {
 			return fmt.Errorf("action %s invalid for CHANGE_REQUEST target type (must be APPLY)", sc.Action)
 		}
-	} else {
+	default:
 		return fmt.Errorf("invalid target_type: %s", sc.TargetType)
 	}
 

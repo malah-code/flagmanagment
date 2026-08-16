@@ -123,7 +123,8 @@ func (h *ScheduledChangeHandler) Create(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Validate target_id entity existence
-	if req.TargetType == "FLAG" {
+	switch req.TargetType {
+	case "FLAG":
 		if _, err := h.store.FlagRepo().GetByID(r.Context(), targetID); err != nil {
 			if err == repository.ErrNotFound {
 				RespondWithError(w, http.StatusNotFound, "Target feature flag not found")
@@ -132,7 +133,7 @@ func (h *ScheduledChangeHandler) Create(w http.ResponseWriter, r *http.Request) 
 			RespondWithError(w, http.StatusInternalServerError, "Failed to verify feature flag existence")
 			return
 		}
-	} else if req.TargetType == "CHANGE_REQUEST" {
+	case "CHANGE_REQUEST":
 		if _, err := h.store.ChangeRequestRepo().GetByID(r.Context(), targetID); err != nil {
 			if err == repository.ErrNotFound {
 				RespondWithError(w, http.StatusNotFound, "Target change request not found")
