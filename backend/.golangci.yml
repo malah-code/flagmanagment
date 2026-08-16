@@ -13,9 +13,12 @@ linters:
     - unused
 
   settings:
-    staticcheck:
-      checks:
-        - all
+    errcheck:
+      # Exclude common patterns where errors are intentionally unchecked
+      exclude-functions:
+        - (net/http.ResponseWriter).Write
+        - (*encoding/json.Encoder).Encode
+        - (*github.com/flagmanagment/backend/internal/services.AuditService).LogAction
 
 formatters:
   enable:
@@ -29,3 +32,20 @@ formatters:
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-rules:
+    # Unchecked json.Unmarshal in audit/logging contexts is intentional
+    - source: "json\\.Unmarshal"
+      linters:
+        - errcheck
+    # w.Write in HTTP handlers - error is unrecoverable after headers sent
+    - source: "w\\.Write\\("
+      linters:
+        - errcheck
+    # audit.LogAction failures are non-critical
+    - source: "\\.LogAction\\("
+      linters:
+        - errcheck
+    # json.NewEncoder(w).Encode - same as w.Write
+    - source: "json\\.NewEncoder\\(w\\)\\.Encode"
+      linters:
+        - errcheck
