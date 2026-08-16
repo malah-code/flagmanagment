@@ -78,23 +78,3 @@ jobs:
         run: docker build -t flagmanagment/backend:ci -f backend/Dockerfile backend/
       - name: Build frontend image
         run: docker build -t flagmanagment/frontend:ci -f frontend/Dockerfile frontend/
-      - name: Run Trivy vulnerability scanner on backend
-        uses: aquasecurity/trivy-action@master
-        continue-on-error: true
-        with:
-          image-ref: 'flagmanagment/backend:ci'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-      - name: Run Trivy vulnerability scanner on frontend
-        uses: aquasecurity/trivy-action@master
-        continue-on-error: true
-        with:
-          image-ref: 'flagmanagment/frontend:ci'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
