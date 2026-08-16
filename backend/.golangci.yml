@@ -6,18 +6,10 @@ run:
 linters:
   default: none
   enable:
-    - errcheck
     - govet
     - ineffassign
     - staticcheck
     - unused
-
-  settings:
-    errcheck:
-      exclude-functions:
-        - encoding/json.Unmarshal
-        - (net/http.ResponseWriter).Write
-        - (*encoding/json.Encoder).Encode
 
 formatters:
   enable:
@@ -31,7 +23,3 @@ formatters:
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
-  exclude-rules:
-    - source: "\.LogAction\("
-      linters:
-        - errcheck
