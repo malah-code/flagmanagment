@@ -175,6 +175,8 @@ func (m *WebhookMockStore) WebhookIntegrationRepo() repository.WebhookIntegratio
 func (m *WebhookMockStore) SlackConfigRepo() repository.SlackConfigRepository { return nil }
 func (m *WebhookMockStore) ScheduledChangeRepo() repository.ScheduledChangeRepository { return nil }
 func (m *WebhookMockStore) StalePolicyRepo() repository.StalePolicyRepository { return nil }
+func (m *WebhookMockStore) InvitationRepo() repository.InvitationRepository { return nil }
+func (m *WebhookMockStore) SystemConfigRepo() repository.SystemConfigRepository { return nil }
 func (m *WebhookMockStore) WithTx(ctx context.Context, fn func(repository.Store) error) error {
 	return fn(m)
 }

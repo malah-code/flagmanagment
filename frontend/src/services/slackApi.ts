@@ -12,7 +12,11 @@ export const slackApi = {
     return await apiClient.get<SlackWebhookConfig>(`/environments/${envId}/slack`);
   },
 
-  saveSlackConfig: async (envId: string, webhook_url: string, enabled: boolean): Promise<SlackWebhookConfig> => {
+  saveSlackConfig: async (
+    envId: string,
+    webhook_url: string,
+    enabled: boolean,
+  ): Promise<SlackWebhookConfig> => {
     return await apiClient.post<SlackWebhookConfig>(`/environments/${envId}/slack`, {
       webhook_url,
       enabled,

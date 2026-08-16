@@ -23,7 +23,11 @@ export const fetchHealth = async (): Promise<HealthResponse> => {
   return response.json();
 };
 
-export const transitionLifecycle = async (envId: string, flagId: string, action: 'ARCHIVE' | 'DEPRECATE' | 'RESTORE' | 'MARK_STALE') => {
+export const transitionLifecycle = async (
+  envId: string,
+  flagId: string,
+  action: 'ARCHIVE' | 'DEPRECATE' | 'RESTORE' | 'MARK_STALE',
+) => {
   const response = await fetch(`${API_BASE}/v1/environments/${envId}/flags/${flagId}/lifecycle`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

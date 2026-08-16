@@ -15,10 +15,6 @@ export const SlackConfigForm: React.FC<SlackConfigFormProps> = ({ environmentId 
   const [saving, setSaving] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchConfig();
-  }, [environmentId]);
-
   const fetchConfig = async () => {
     setLoading(true);
     try {
@@ -31,12 +27,20 @@ export const SlackConfigForm: React.FC<SlackConfigFormProps> = ({ environmentId 
     }
   };
 
+  useEffect(() => {
+    fetchConfig();
+  }, [environmentId]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setMessage(null);
     try {
-      const updated = await slackApi.saveSlackConfig(environmentId, config.webhook_url, config.enabled);
+      const updated = await slackApi.saveSlackConfig(
+        environmentId,
+        config.webhook_url,
+        config.enabled,
+      );
       setConfig(updated);
       setMessage('Slack notification settings saved successfully!');
     } catch (err: any) {
@@ -83,7 +87,9 @@ export const SlackConfigForm: React.FC<SlackConfigFormProps> = ({ environmentId 
         </div>
 
         {message && (
-          <div className={`text-xs p-2 rounded ${message.includes('Failed') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+          <div
+            className={`text-xs p-2 rounded ${message.includes('Failed') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}
+          >
             {message}
           </div>
         )}

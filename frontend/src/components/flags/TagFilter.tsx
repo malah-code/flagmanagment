@@ -7,11 +7,7 @@ interface TagFilterProps {
   onChange: (tag: string) => void;
 }
 
-export const TagFilter: React.FC<TagFilterProps> = ({
-  allTags,
-  selectedTag,
-  onChange,
-}) => {
+export const TagFilter: React.FC<TagFilterProps> = ({ allTags, selectedTag, onChange }) => {
   if (allTags.length === 0) return null;
 
   return (

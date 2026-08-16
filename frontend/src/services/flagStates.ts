@@ -28,19 +28,37 @@ function mapUIFlagStateToApi(data: UpdateFlagStatePayload): any {
 
 export const flagStateService = {
   async getByEnvironment(projectId: string, environmentId: string): Promise<FlagState[]> {
-    const res = await apiClient.get<{ data: any[] }>(`/projects/${projectId}/environments/${environmentId}/flag-states`);
+    const res = await apiClient.get<{ data: any[] }>(
+      `/projects/${projectId}/environments/${environmentId}/flag-states`,
+    );
     return (res.data || []).map(mapApiFlagStateToUI);
   },
 
-  async update(projectId: string, environmentId: string, flagId: string, data: UpdateFlagStatePayload): Promise<FlagState> {
+  async update(
+    projectId: string,
+    environmentId: string,
+    flagId: string,
+    data: UpdateFlagStatePayload,
+  ): Promise<FlagState> {
     const apiData = mapUIFlagStateToApi(data);
-    const res = await apiClient.put<any>(`/projects/${projectId}/environments/${environmentId}/flags/${flagId}/state`, apiData);
+    const res = await apiClient.put<any>(
+      `/projects/${projectId}/environments/${environmentId}/flags/${flagId}/state`,
+      apiData,
+    );
     return mapApiFlagStateToUI(res);
   },
 
-  async createOrUpdateByEnvAndFlag(projectId: string, environmentId: string, flagId: string, data: UpdateFlagStatePayload): Promise<FlagState> {
+  async createOrUpdateByEnvAndFlag(
+    projectId: string,
+    environmentId: string,
+    flagId: string,
+    data: UpdateFlagStatePayload,
+  ): Promise<FlagState> {
     const apiData = mapUIFlagStateToApi(data);
-    const res = await apiClient.put<any>(`/projects/${projectId}/environments/${environmentId}/flags/${flagId}/state`, apiData);
+    const res = await apiClient.put<any>(
+      `/projects/${projectId}/environments/${environmentId}/flags/${flagId}/state`,
+      apiData,
+    );
     return mapApiFlagStateToUI(res);
   },
 };

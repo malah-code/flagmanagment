@@ -34,7 +34,11 @@ export const ServerSideKeysPanel = ({ projectId, envId }: ServerSideKeysPanelPro
   }, [fetchKeys]);
 
   const handleDelete = async (keyId: string, name: string) => {
-    if (!confirm(`Are you sure you want to revoke server key "${name}"? Backend SDKs using this key will lose access.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to revoke server key "${name}"? Backend SDKs using this key will lose access.`,
+      )
+    ) {
       return;
     }
 
@@ -54,9 +58,7 @@ export const ServerSideKeysPanel = ({ projectId, envId }: ServerSideKeysPanelPro
     }));
   };
 
-  const filteredKeys = keys.filter((k) =>
-    k.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredKeys = keys.filter((k) => k.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
@@ -69,7 +71,8 @@ export const ServerSideKeysPanel = ({ projectId, envId }: ServerSideKeysPanelPro
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            Privileged SDK keys for backend local evaluation (Go, Node.js, Python, Java). Kept secret.
+            Privileged SDK keys for backend local evaluation (Go, Node.js, Python, Java). Kept
+            secret.
           </p>
         </div>
 
@@ -124,20 +127,24 @@ export const ServerSideKeysPanel = ({ projectId, envId }: ServerSideKeysPanelPro
                 const isRevealed = !!visibleKeyIds[keyItem.id];
                 return (
                   <tr key={keyItem.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-semibold text-slate-900">
-                      {keyItem.name}
-                    </td>
+                    <td className="py-3 px-4 font-semibold text-slate-900">{keyItem.name}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-slate-600 bg-slate-100 px-2 py-1 rounded border border-slate-200 text-[11px]">
-                          {isRevealed ? `env_server_key_${keyItem.id.slice(0, 8)}...` : '••••••••••••••••••••••••'}
+                          {isRevealed
+                            ? `env_server_key_${keyItem.id.slice(0, 8)}...`
+                            : '••••••••••••••••••••••••'}
                         </span>
                         <button
                           onClick={() => toggleVisibility(keyItem.id)}
                           className="text-slate-400 hover:text-slate-600 p-1 rounded transition-colors"
                           title={isRevealed ? 'Mask key' : 'Show key hint'}
                         >
-                          {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          {isRevealed ? (
+                            <EyeOff className="w-3.5 h-3.5" />
+                          ) : (
+                            <Eye className="w-3.5 h-3.5" />
+                          )}
                         </button>
                       </div>
                     </td>

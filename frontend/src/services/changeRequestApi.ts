@@ -21,7 +21,9 @@ function mapChangeRequest(apiData: any): ChangeRequest {
 export const changeRequestApi = {
   listByEnvironment: async (envId: string, status?: string): Promise<ChangeRequest[]> => {
     const params = status ? `?status=${status}` : '';
-    const response = await apiClient.get<{ data: any[] }>(`/environments/${envId}/change-requests${params}`);
+    const response = await apiClient.get<{ data: any[] }>(
+      `/environments/${envId}/change-requests${params}`,
+    );
     return (response.data || []).map(mapChangeRequest);
   },
 

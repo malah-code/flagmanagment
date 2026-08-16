@@ -50,17 +50,21 @@ export const SdkSettingsPanel = ({ projectId, environment }: SdkSettingsPanelPro
   };
 
   const currentSettings = environment.sdkSettings || {};
-  const isDirty = 
+  const isDirty =
     pollingInterval !== (currentSettings.pollingInterval ?? 30) ||
     enableStreaming !== (currentSettings.enableStreaming ?? true) ||
     enableAnalytics !== (currentSettings.enableAnalytics ?? false);
 
   return (
-    <form onSubmit={handleUpdate} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
+    <form
+      onSubmit={handleUpdate}
+      className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden max-w-3xl"
+    >
       <div className="p-6 border-b border-slate-100">
         <h3 className="text-base font-semibold text-slate-900">SDK Configurations</h3>
         <p className="text-sm text-slate-500 mt-1">
-          Control how client and server SDKs connect, fetch updates, and report analytics for this environment.
+          Control how client and server SDKs connect, fetch updates, and report analytics for this
+          environment.
         </p>
       </div>
 
@@ -72,7 +76,8 @@ export const SdkSettingsPanel = ({ projectId, environment }: SdkSettingsPanelPro
             <h4 className="text-sm font-semibold text-slate-900">Event Polling Interval</h4>
           </div>
           <p className="text-xs text-slate-500">
-            How often older SDKs should poll the server for feature flag updates (when streaming is disabled or unavailable).
+            How often older SDKs should poll the server for feature flag updates (when streaming is
+            disabled or unavailable).
           </p>
           <select
             value={pollingInterval}
@@ -109,13 +114,17 @@ export const SdkSettingsPanel = ({ projectId, environment }: SdkSettingsPanelPro
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-slate-900 cursor-pointer" onClick={() => setEnableStreaming(!enableStreaming)}>
+              <label
+                className="text-sm font-medium text-slate-900 cursor-pointer"
+                onClick={() => setEnableStreaming(!enableStreaming)}
+              >
                 Real-time Updates (SSE / Streaming)
               </label>
               <Activity className="w-4 h-4 text-emerald-600" />
             </div>
             <p className="text-sm text-slate-500 mt-1">
-              Enable Server-Sent Events to push instantaneous feature flag updates to connected clients. Disabling this forces all clients to fall back to standard HTTP polling.
+              Enable Server-Sent Events to push instantaneous feature flag updates to connected
+              clients. Disabling this forces all clients to fall back to standard HTTP polling.
             </p>
           </div>
         </div>
@@ -142,13 +151,17 @@ export const SdkSettingsPanel = ({ projectId, environment }: SdkSettingsPanelPro
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-slate-900 cursor-pointer" onClick={() => setEnableAnalytics(!enableAnalytics)}>
+              <label
+                className="text-sm font-medium text-slate-900 cursor-pointer"
+                onClick={() => setEnableAnalytics(!enableAnalytics)}
+              >
                 SDK Analytics Collection
               </label>
               <BarChart3 className="w-4 h-4 text-indigo-500" />
             </div>
             <p className="text-sm text-slate-500 mt-1">
-              Allow SDKs to periodically report diagnostic evaluation data back to the server. Disabling this reduces server load but prevents usage metrics from being captured.
+              Allow SDKs to periodically report diagnostic evaluation data back to the server.
+              Disabling this reduces server load but prevents usage metrics from being captured.
             </p>
           </div>
         </div>

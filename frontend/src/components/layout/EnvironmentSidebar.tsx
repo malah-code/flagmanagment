@@ -1,6 +1,16 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Server, Flag, Settings, Folder, Activity, Plus, Shield, GitPullRequest } from 'lucide-react';
+import {
+  ArrowLeft,
+  Server,
+  Flag,
+  Settings,
+  Folder,
+  Activity,
+  Plus,
+  Shield,
+  GitPullRequest,
+} from 'lucide-react';
 import type { Environment } from '../../types';
 
 interface EnvironmentSidebarProps {
@@ -95,7 +105,9 @@ export const EnvironmentSidebar: React.FC<EnvironmentSidebarProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-2.5 truncate">
-                      <Server className={`w-4 h-4 shrink-0 ${isEnvActive ? 'text-white' : 'text-indigo-400'}`} />
+                      <Server
+                        className={`w-4 h-4 shrink-0 ${isEnvActive ? 'text-white' : 'text-indigo-400'}`}
+                      />
                       <span className="truncate">{env.name}</span>
                     </div>
                     <span
@@ -103,8 +115,8 @@ export const EnvironmentSidebar: React.FC<EnvironmentSidebarProps> = ({
                         env.name.toLowerCase().includes('prod')
                           ? 'bg-rose-400'
                           : env.name.toLowerCase().includes('stage')
-                          ? 'bg-amber-400'
-                          : 'bg-emerald-400'
+                            ? 'bg-amber-400'
+                            : 'bg-emerald-400'
                       }`}
                     />
                   </Link>

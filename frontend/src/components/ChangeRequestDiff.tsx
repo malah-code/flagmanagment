@@ -15,9 +15,9 @@ export const ChangeRequestDiff: React.FC<ChangeRequestDiffProps> = ({
 
   return (
     <div className="my-4 border rounded shadow-sm overflow-hidden text-sm font-mono">
-      <ReactDiffViewer 
-        oldValue={oldCode} 
-        newValue={newCode} 
+      <ReactDiffViewer
+        oldValue={oldCode}
+        newValue={newCode}
         splitView={true}
         useDarkTheme={false}
         leftTitle="Current Configuration"

@@ -1,12 +1,27 @@
 import { useState } from 'react';
-import { useEnvironments, useDeleteEnvironment, useCloneEnvironment } from '../../hooks/useEnvironments';
+import {
+  useEnvironments,
+  useDeleteEnvironment,
+  useCloneEnvironment,
+} from '../../hooks/useEnvironments';
 import { CreateEnvironmentDialog } from './CreateEnvironmentDialog';
 import { SDKIntegrationModal } from './SDKIntegrationModal';
 import { EnvironmentSettingsTabs } from './EnvironmentSettingsTabs';
 import { ServerSideKeysPanel } from './ServerSideKeysPanel';
 import { GeneralSettingsPanel } from './GeneralSettingsPanel';
 import { SdkSettingsPanel } from './SdkSettingsPanel';
-import { Plus, Server, Trash2, Loader2, Copy, Check, Code2, ShieldCheck, Key, ArrowLeft } from 'lucide-react';
+import {
+  Plus,
+  Server,
+  Trash2,
+  Loader2,
+  Copy,
+  Check,
+  Code2,
+  ShieldCheck,
+  Key,
+  ArrowLeft,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Environment } from '../../types';
 
@@ -20,11 +35,18 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
   const cloneMutation = useCloneEnvironment(projectId);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
-  const [selectedEnvForGuide, setSelectedEnvForGuide] = useState<{ name: string; key: string } | null>(null);
+  const [selectedEnvForGuide, setSelectedEnvForGuide] = useState<{
+    name: string;
+    key: string;
+  } | null>(null);
   const [activeSettingsEnv, setActiveSettingsEnv] = useState<Environment | null>(null);
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete environment "${name}"? Active flag configurations for this environment will be removed.`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete environment "${name}"? Active flag configurations for this environment will be removed.`,
+      )
+    ) {
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -61,8 +83,12 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">{activeSettingsEnv.name} Settings</h2>
-              <p className="text-xs text-slate-500">Manage client-side & server-side SDK credentials and configurations.</p>
+              <h2 className="text-xl font-bold text-slate-900">
+                {activeSettingsEnv.name} Settings
+              </h2>
+              <p className="text-xs text-slate-500">
+                Manage client-side & server-side SDK credentials and configurations.
+              </p>
             </div>
           </div>
         </div>
@@ -74,17 +100,14 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
             <ServerSideKeysPanel projectId={projectId} envId={activeSettingsEnv.id} />
           }
           generalSettingsContent={
-            <GeneralSettingsPanel 
-              projectId={projectId} 
-              environment={activeSettingsEnv} 
-              onEnvironmentDeleted={() => setActiveSettingsEnv(null)} 
+            <GeneralSettingsPanel
+              projectId={projectId}
+              environment={activeSettingsEnv}
+              onEnvironmentDeleted={() => setActiveSettingsEnv(null)}
             />
           }
           sdkSettingsContent={
-            <SdkSettingsPanel 
-              projectId={projectId} 
-              environment={activeSettingsEnv} 
-            />
+            <SdkSettingsPanel projectId={projectId} environment={activeSettingsEnv} />
           }
         />
       </div>
@@ -96,7 +119,9 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Environments</h2>
-          <p className="text-sm text-slate-500">Configure target deployment environments for feature flags.</p>
+          <p className="text-sm text-slate-500">
+            Configure target deployment environments for feature flags.
+          </p>
         </div>
         <button
           onClick={() => setIsCreateOpen(true)}
@@ -122,7 +147,9 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
           </div>
           <div className="space-y-1">
             <h3 className="text-sm font-medium text-slate-900">No environments</h3>
-            <p className="text-sm text-slate-500">Get started by creating your first environment.</p>
+            <p className="text-sm text-slate-500">
+              Get started by creating your first environment.
+            </p>
           </div>
           <div className="pt-2">
             <button
@@ -137,7 +164,8 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {environments.map((env) => {
-            const displayKey = env.apiKey || `env_${env.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_token`;
+            const displayKey =
+              env.apiKey || `env_${env.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_token`;
             return (
               <div
                 key={env.id}
@@ -149,7 +177,9 @@ export const EnvironmentsList = ({ projectId }: EnvironmentsListProps) => {
                       <Server className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 text-base leading-tight">{env.name}</h4>
+                      <h4 className="font-bold text-slate-900 text-base leading-tight">
+                        {env.name}
+                      </h4>
                       <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <ShieldCheck className="w-3 h-3" /> Public Client SDK Key
                       </span>

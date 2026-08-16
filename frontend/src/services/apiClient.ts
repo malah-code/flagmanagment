@@ -19,7 +19,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
     } catch {
       // Ignored if not JSON
     }
-    
+
     // If unauthorized, could clear token or redirect to login here
     if (response.status === 401) {
       localStorage.removeItem('auth_token');
@@ -95,4 +95,3 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 };
-

@@ -43,12 +43,24 @@ export const flagService = {
     return apiClient.delete<void>(`/flags/${id}`);
   },
 
-  async update(projectId: string, flagId: string, payload: UpdateFlagPayload): Promise<FeatureFlag> {
-    const res = await apiClient.put<{ data: FeatureFlag }>(`/projects/${projectId}/flags/${flagId}`, payload);
+  async update(
+    projectId: string,
+    flagId: string,
+    payload: UpdateFlagPayload,
+  ): Promise<FeatureFlag> {
+    const res = await apiClient.put<{ data: FeatureFlag }>(
+      `/projects/${projectId}/flags/${flagId}`,
+      payload,
+    );
     return res.data;
   },
 
-  async promote(projectId: string, flagId: string, sourceEnvId: string, targetEnvId: string): Promise<any> {
+  async promote(
+    projectId: string,
+    flagId: string,
+    sourceEnvId: string,
+    targetEnvId: string,
+  ): Promise<any> {
     return apiClient.post<any>(`/projects/${projectId}/flags/${flagId}/promote`, {
       source_env_id: sourceEnvId,
       target_env_id: targetEnvId,

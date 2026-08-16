@@ -3,7 +3,16 @@ import { useParams, Link } from 'react-router-dom';
 import { useFlags, useUpdateFlag } from '../hooks/useFlags';
 import { useEnvironments } from '../hooks/useEnvironments';
 import { useFlagStates, useUpdateFlagState, useInitFlagState } from '../hooks/useFlagStates';
-import { ArrowLeft, Sliders, Settings, LayoutTemplate, Save, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  Sliders,
+  Settings,
+  LayoutTemplate,
+  Save,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 type TabType = 'targeting' | 'variations' | 'settings';
@@ -12,19 +21,22 @@ export const FlagDetail = () => {
   const { projectId = '', flagId = '' } = useParams<{ projectId: string; flagId: string }>();
   const { data: flags = [], isLoading: isLoadingFlags } = useFlags(projectId);
   const { data: environments = [] } = useEnvironments(projectId);
-  
+
   const [activeTab, setActiveTab] = useState<TabType>('targeting');
   const [selectedEnvId, setSelectedEnvId] = useState<string>('');
 
-  const flag = flags.find(f => f.id === flagId);
+  const flag = flags.find((f) => f.id === flagId);
   const currentEnvId = selectedEnvId || (environments[0]?.id ?? '');
-  
-  const { data: flagStates = [], isLoading: isLoadingStates } = useFlagStates(projectId, currentEnvId);
+
+  const { data: flagStates = [], isLoading: isLoadingStates } = useFlagStates(
+    projectId,
+    currentEnvId,
+  );
   const updateMutation = useUpdateFlagState(projectId, currentEnvId);
   const initMutation = useInitFlagState(projectId, currentEnvId);
   const updateFlagMutation = useUpdateFlag(projectId);
 
-  const flagState = flagStates.find(s => s.flagId === flagId);
+  const flagState = flagStates.find((s) => s.flagId === flagId);
 
   const [settingsName, setSettingsName] = useState('');
   const [settingsDescription, setSettingsDescription] = useState('');
@@ -41,15 +53,18 @@ export const FlagDetail = () => {
   const handleUpdateSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!flag) return;
-    
+
     try {
       await updateFlagMutation.mutateAsync({
         flagId: flag.id,
         payload: {
           name: settingsName.trim(),
           description: settingsDescription.trim(),
-          tags: settingsTags.split(',').map(t => t.trim()).filter(Boolean),
-        }
+          tags: settingsTags
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean),
+        },
       });
       toast.success('Flag settings updated');
     } catch (err) {
@@ -68,7 +83,10 @@ export const FlagDetail = () => {
   if (!flag) {
     return (
       <div className="space-y-4">
-        <Link to={`/projects/${projectId}`} className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline">
+        <Link
+          to={`/projects/${projectId}`}
+          className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline"
+        >
           <ArrowLeft className="w-4 h-4" /> Back to Project
         </Link>
         <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200">
@@ -83,7 +101,7 @@ export const FlagDetail = () => {
     try {
       await updateMutation.mutateAsync({
         flagId: flagState.flagId,
-        payload: { 
+        payload: {
           isEnabled: !flagState.isEnabled,
           targetingRules: flagState.targetingRules || { rules: [] },
           remoteConfig: flagState.remoteConfig || {},
@@ -111,7 +129,9 @@ export const FlagDetail = () => {
         <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 font-mono">{flag.key}</h1>
-            <p className="text-sm text-slate-500 mt-1">{flag.description || 'No description provided.'}</p>
+            <p className="text-sm text-slate-500 mt-1">
+              {flag.description || 'No description provided.'}
+            </p>
           </div>
           <div className="flex items-center gap-2 bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200">
             Type: {flag.type}
@@ -191,12 +211,19 @@ export const FlagDetail = () => {
               </div>
             ) : !flagState ? (
               <div className="bg-amber-50 text-amber-700 p-4 rounded-xl border border-amber-200 text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <span>This flag has not been initialized in the selected environment. Initialize it to start configuring targeting rules and serving variations.</span>
+                <span>
+                  This flag has not been initialized in the selected environment. Initialize it to
+                  start configuring targeting rules and serving variations.
+                </span>
                 <button
                   onClick={() => {
                     initMutation.mutate({
-                      flagId, 
-                      payload: { isEnabled: false, targetingRules: { rules: [] }, remoteConfig: {} }
+                      flagId,
+                      payload: {
+                        isEnabled: false,
+                        targetingRules: { rules: [] },
+                        remoteConfig: {},
+                      },
                     });
                   }}
                   disabled={initMutation.isPending}
@@ -211,7 +238,10 @@ export const FlagDetail = () => {
                 <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                   <div>
                     <h3 className="text-base font-semibold text-slate-900">Environment Status</h3>
-                    <p className="text-sm text-slate-500">Enable or disable this flag in {environments.find(e => e.id === currentEnvId)?.name}.</p>
+                    <p className="text-sm text-slate-500">
+                      Enable or disable this flag in{' '}
+                      {environments.find((e) => e.id === currentEnvId)?.name}.
+                    </p>
                   </div>
                   <button
                     onClick={handleToggle}
@@ -239,7 +269,8 @@ export const FlagDetail = () => {
                   <h3 className="text-sm font-semibold text-slate-900 mb-4">Targeting Rules</h3>
                   <div className="bg-slate-50 rounded-lg border border-slate-200 p-8 text-center">
                     <p className="text-sm text-slate-500 mb-4">
-                      Targeting rules allow you to serve different variations to specific segments of users.
+                      Targeting rules allow you to serve different variations to specific segments
+                      of users.
                     </p>
                     <button className="inline-flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition-colors">
                       <Sliders className="w-4 h-4" /> Manage Rules in Flags List
@@ -257,7 +288,10 @@ export const FlagDetail = () => {
             {flag.variations && flag.variations.length > 0 ? (
               <div className="space-y-4">
                 {flag.variations.map((v) => (
-                  <div key={v.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <div
+                    key={v.id}
+                    className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200"
+                  >
                     <div>
                       <div className="font-semibold text-slate-900 text-sm">{v.name}</div>
                       <div className="text-sm text-slate-500 font-mono mt-1">{String(v.value)}</div>
@@ -267,14 +301,19 @@ export const FlagDetail = () => {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-sm text-slate-500">This flag is a simple boolean flag and does not have additional variations.</p>
+                <p className="text-sm text-slate-500">
+                  This flag is a simple boolean flag and does not have additional variations.
+                </p>
               </div>
             )}
           </div>
         )}
 
         {activeTab === 'settings' && (
-          <form onSubmit={handleUpdateSettings} className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 max-w-2xl">
+          <form
+            onSubmit={handleUpdateSettings}
+            className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 max-w-2xl"
+          >
             <h3 className="text-base font-semibold text-slate-900 mb-6">Flag Settings</h3>
             <div className="space-y-4">
               <div>
@@ -285,9 +324,11 @@ export const FlagDetail = () => {
                   value={flag.key}
                   className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 text-slate-500 font-mono"
                 />
-                <p className="text-xs text-slate-500 mt-1">The key cannot be changed after creation.</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  The key cannot be changed after creation.
+                </p>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
                 <input
@@ -310,7 +351,9 @@ export const FlagDetail = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tags (comma separated)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Tags (comma separated)
+                </label>
                 <input
                   type="text"
                   value={settingsTags}
@@ -325,7 +368,11 @@ export const FlagDetail = () => {
                   disabled={updateFlagMutation.isPending}
                   className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition-colors"
                 >
-                  {updateFlagMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {updateFlagMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
                   Save Settings
                 </button>
               </div>

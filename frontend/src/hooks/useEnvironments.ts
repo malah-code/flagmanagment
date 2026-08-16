@@ -30,7 +30,8 @@ export function useUpdateEnvironment(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: import('../services/environments').UpdateEnvironmentPayload) => environmentService.update(payload),
+    mutationFn: (payload: import('../services/environments').UpdateEnvironmentPayload) =>
+      environmentService.update(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ENVIRONMENT_KEYS.byProject(projectId) });
     },
@@ -52,7 +53,7 @@ export function useCloneEnvironment(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ envId, name }: { envId: string; name: string }) => 
+    mutationFn: ({ envId, name }: { envId: string; name: string }) =>
       environmentService.clone(projectId, envId, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ENVIRONMENT_KEYS.byProject(projectId) });

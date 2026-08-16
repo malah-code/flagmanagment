@@ -14,7 +14,7 @@ export const ChangeRequestsPage: React.FC<ChangeRequestsPageProps> = ({
   environmentId: initialEnvId,
 }) => {
   const [selectedEnvId, setSelectedEnvId] = useState<string>(
-    initialEnvId || environments[0]?.id || ''
+    initialEnvId || environments[0]?.id || '',
   );
   const [requests, setRequests] = useState<ChangeRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -197,20 +197,21 @@ export const ChangeRequestsPage: React.FC<ChangeRequestsPageProps> = ({
                 </div>
                 <span
                   className={`inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full border ${getStatusBadge(
-                    req.status
+                    req.status,
                   )}`}
                 >
                   {req.status}
                 </span>
               </div>
 
-              {req.description && (
-                <p className="text-sm text-slate-600">{req.description}</p>
-              )}
+              {req.description && <p className="text-sm text-slate-600">{req.description}</p>}
 
               {/* Visual Diff */}
               <div className="pt-2 border-t border-slate-100">
-                <ChangeRequestDiff proposedChanges={req.proposedChanges} currentState={req.currentState} />
+                <ChangeRequestDiff
+                  proposedChanges={req.proposedChanges}
+                  currentState={req.currentState}
+                />
               </div>
 
               {/* Action Buttons for Pending */}

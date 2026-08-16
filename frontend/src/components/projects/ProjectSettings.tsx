@@ -2,7 +2,17 @@ import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject, useUpdateProject, useDeleteProject } from '../../hooks/useProjects';
-import { Save, Trash2, AlertTriangle, Copy, Check, Folder, Calendar, Clock, Loader2 } from 'lucide-react';
+import {
+  Save,
+  Trash2,
+  AlertTriangle,
+  Copy,
+  Check,
+  Folder,
+  Calendar,
+  Clock,
+  Loader2,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface ProjectSettingsProps {
@@ -69,9 +79,7 @@ export const ProjectSettings = ({ projectId }: ProjectSettingsProps) => {
   };
 
   const handleDelete = async () => {
-    const confirmation = prompt(
-      `To confirm deletion, type the project name "${project.name}":`
-    );
+    const confirmation = prompt(`To confirm deletion, type the project name "${project.name}":`);
 
     if (confirmation !== project.name) {
       if (confirmation !== null) {
@@ -91,8 +99,7 @@ export const ProjectSettings = ({ projectId }: ProjectSettingsProps) => {
   };
 
   const isDirty =
-    name.trim() !== (project.name || '') ||
-    description.trim() !== (project.description || '');
+    name.trim() !== (project.name || '') || description.trim() !== (project.description || '');
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -140,9 +147,7 @@ export const ProjectSettings = ({ projectId }: ProjectSettingsProps) => {
 
           {/* Project ID */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-700">
-              Project ID
-            </label>
+            <label className="block text-sm font-medium text-slate-700">Project ID</label>
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -230,7 +235,8 @@ export const ProjectSettings = ({ projectId }: ProjectSettingsProps) => {
           <div className="space-y-1 max-w-lg">
             <h4 className="text-sm font-semibold text-slate-900">Delete Project</h4>
             <p className="text-sm text-slate-500">
-              Permanently delete this project and all its environments, feature flags, targeting rules, server keys, and history. This action cannot be undone.
+              Permanently delete this project and all its environments, feature flags, targeting
+              rules, server keys, and history. This action cannot be undone.
             </p>
           </div>
           <button

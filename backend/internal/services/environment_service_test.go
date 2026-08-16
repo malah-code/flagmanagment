@@ -33,6 +33,8 @@ func (m *EnvMockStore) RoleRepo() repository.RoleRepository                     
 func (m *EnvMockStore) UserRepo() repository.UserRepository                     { return nil }
 func (m *EnvMockStore) ServiceAccountRepo() repository.ServiceAccountRepository { return nil }
 func (m *EnvMockStore) WebhookIntegrationRepo() repository.WebhookIntegrationRepository { return nil }
+func (m *EnvMockStore) InvitationRepo() repository.InvitationRepository { return nil }
+func (m *EnvMockStore) SystemConfigRepo() repository.SystemConfigRepository { return nil }
 func (m *EnvMockStore) WithTx(ctx context.Context, fn func(repository.Store) error) error {
 	return fn(m)
 }

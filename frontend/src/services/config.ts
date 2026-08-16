@@ -16,5 +16,5 @@ export const configService = {
   },
   async testSMTP(email: string): Promise<void> {
     return apiClient.post('/config/smtp/test', { email });
-  }
+  },
 };

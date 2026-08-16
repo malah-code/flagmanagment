@@ -60,7 +60,9 @@ export const StalePolicySettings: React.FC<StalePolicySettingsProps> = ({ projec
         </div>
         <div>
           <h3 className="text-base font-semibold text-slate-900">Stale Flag Detection Policy</h3>
-          <p className="text-xs text-slate-500">Define after how many inactive days feature flags are marked as Stale.</p>
+          <p className="text-xs text-slate-500">
+            Define after how many inactive days feature flags are marked as Stale.
+          </p>
         </div>
       </div>
 
@@ -77,7 +79,10 @@ export const StalePolicySettings: React.FC<StalePolicySettingsProps> = ({ projec
             onChange={(e) => setStaleDays(parseInt(e.target.value, 10) || 30)}
             className="w-full text-sm px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
           />
-          <p className="text-xs text-slate-400 mt-1">Default is 30 days. Flags at 100% rollout or inactive for longer than this will be marked STALE.</p>
+          <p className="text-xs text-slate-400 mt-1">
+            Default is 30 days. Flags at 100% rollout or inactive for longer than this will be
+            marked STALE.
+          </p>
         </div>
 
         {message && (
@@ -91,7 +96,11 @@ export const StalePolicySettings: React.FC<StalePolicySettingsProps> = ({ projec
           disabled={saving}
           className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
         >
-          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+          {saving ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Save className="w-3.5 h-3.5" />
+          )}
           <span>Save Threshold</span>
         </button>
       </form>

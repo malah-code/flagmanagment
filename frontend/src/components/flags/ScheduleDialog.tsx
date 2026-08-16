@@ -128,7 +128,9 @@ export const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
           {hasPending && !isModifying ? (
             <div className="space-y-4">
               <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
-                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">Current Schedule:</p>
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                  Current Schedule:
+                </p>
                 <p className="text-sm text-amber-800 dark:text-amber-300 mt-1">
                   Action: <strong>{existingSchedule.action}</strong>
                 </p>

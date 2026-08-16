@@ -8,7 +8,11 @@ interface CreateEnvironmentDialogProps {
   onClose: () => void;
 }
 
-export const CreateEnvironmentDialog = ({ projectId, isOpen, onClose }: CreateEnvironmentDialogProps) => {
+export const CreateEnvironmentDialog = ({
+  projectId,
+  isOpen,
+  onClose,
+}: CreateEnvironmentDialogProps) => {
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [createdKey, setCreatedKey] = useState<string | null>(null);
@@ -76,7 +80,8 @@ export const CreateEnvironmentDialog = ({ projectId, isOpen, onClose }: CreateEn
               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <strong className="font-semibold block mb-0.5">Save your API key now!</strong>
-                This key will <strong>NEVER</strong> be displayed again. If lost, you will need to generate a new environment key.
+                This key will <strong>NEVER</strong> be displayed again. If lost, you will need to
+                generate a new environment key.
               </div>
             </div>
 
@@ -97,7 +102,11 @@ export const CreateEnvironmentDialog = ({ projectId, isOpen, onClose }: CreateEn
                   className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-lg transition-colors flex items-center justify-center shrink-0"
                   title="Copy API Key"
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                  {copied ? (
+                    <Check className="w-4 h-4 text-emerald-300" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>

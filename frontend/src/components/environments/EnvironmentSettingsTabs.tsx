@@ -75,7 +75,8 @@ export const EnvironmentSettingsTabs = ({
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           {generalSettingsContent || (
             <div className="text-sm text-slate-500">
-              General settings for environment <strong className="text-slate-800">{envName}</strong>.
+              General settings for environment <strong className="text-slate-800">{envName}</strong>
+              .
             </div>
           )}
         </div>
@@ -85,7 +86,8 @@ export const EnvironmentSettingsTabs = ({
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           {sdkSettingsContent || (
             <div className="text-sm text-slate-500">
-              SDK configurations and stream settings for environment <strong className="text-slate-800">{envName}</strong>.
+              SDK configurations and stream settings for environment{' '}
+              <strong className="text-slate-800">{envName}</strong>.
             </div>
           )}
         </div>

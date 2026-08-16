@@ -4,7 +4,8 @@ import type { UpdateFlagStatePayload } from '../services/flagStates';
 
 export const FLAG_STATE_KEYS = {
   all: ['flagStates'] as const,
-  byEnvironment: (environmentId: string) => [...FLAG_STATE_KEYS.all, 'environment', environmentId] as const,
+  byEnvironment: (environmentId: string) =>
+    [...FLAG_STATE_KEYS.all, 'environment', environmentId] as const,
 };
 
 export function useFlagStates(projectId: string, environmentId: string) {

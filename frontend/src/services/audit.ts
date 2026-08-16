@@ -20,9 +20,15 @@ export interface AuditLogsResponse {
 }
 
 export const auditService = {
-  async getByProject(projectId: string, pageSize: number = 50, pageToken?: string): Promise<AuditLogsResponse> {
+  async getByProject(
+    projectId: string,
+    pageSize: number = 50,
+    pageToken?: string,
+  ): Promise<AuditLogsResponse> {
     const params = new URLSearchParams({ page_size: pageSize.toString() });
     if (pageToken) params.append('page_token', pageToken);
-    return apiClient.get<AuditLogsResponse>(`/projects/${projectId}/audit-logs?${params.toString()}`);
-  }
+    return apiClient.get<AuditLogsResponse>(
+      `/projects/${projectId}/audit-logs?${params.toString()}`,
+    );
+  },
 };

@@ -12,7 +12,7 @@ export const SystemSettings: React.FC = () => {
     host: '',
     port: 1025,
     username: '',
-    password: ''
+    password: '',
   });
   const [testEmail, setTestEmail] = useState('');
 
@@ -22,7 +22,7 @@ export const SystemSettings: React.FC = () => {
         host: smtpData.host || '',
         port: smtpData.port || 1025,
         username: smtpData.username || '',
-        password: '' // Keep empty
+        password: '', // Keep empty
       });
     }
   }, [smtpData]);
@@ -31,7 +31,8 @@ export const SystemSettings: React.FC = () => {
     e.preventDefault();
     updateSMTPMutation.mutate(smtpForm, {
       onSuccess: () => toast.success('SMTP configuration saved!'),
-      onError: (err: any) => toast.error(err?.response?.data || 'Failed to save SMTP configuration')
+      onError: (err: any) =>
+        toast.error(err?.response?.data || 'Failed to save SMTP configuration'),
     });
   };
 
@@ -45,7 +46,7 @@ export const SystemSettings: React.FC = () => {
         toast.success('Test email sent successfully!');
         setTestEmail('');
       },
-      onError: (err: any) => toast.error(err?.response?.data || 'Failed to send test email')
+      onError: (err: any) => toast.error(err?.response?.data || 'Failed to send test email'),
     });
   };
 
@@ -54,7 +55,9 @@ export const SystemSettings: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">System Settings</h1>
-          <p className="text-sm text-slate-500 mt-1">Configure global platform settings and integrations</p>
+          <p className="text-sm text-slate-500 mt-1">
+            Configure global platform settings and integrations
+          </p>
         </div>
       </div>
 
@@ -78,7 +81,7 @@ export const SystemSettings: React.FC = () => {
                     type="text"
                     required
                     value={smtpForm.host}
-                    onChange={e => setSmtpForm({...smtpForm, host: e.target.value})}
+                    onChange={(e) => setSmtpForm({ ...smtpForm, host: e.target.value })}
                     placeholder="smtp.example.com"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
@@ -89,7 +92,7 @@ export const SystemSettings: React.FC = () => {
                     type="number"
                     required
                     value={smtpForm.port}
-                    onChange={e => setSmtpForm({...smtpForm, port: parseInt(e.target.value)})}
+                    onChange={(e) => setSmtpForm({ ...smtpForm, port: parseInt(e.target.value) })}
                     placeholder="587"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
@@ -101,7 +104,7 @@ export const SystemSettings: React.FC = () => {
                   <input
                     type="text"
                     value={smtpForm.username}
-                    onChange={e => setSmtpForm({...smtpForm, username: e.target.value})}
+                    onChange={(e) => setSmtpForm({ ...smtpForm, username: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
@@ -110,8 +113,8 @@ export const SystemSettings: React.FC = () => {
                   <input
                     type="password"
                     value={smtpForm.password}
-                    onChange={e => setSmtpForm({...smtpForm, password: e.target.value})}
-                    placeholder={smtpData?.username ? "••••••••" : ""}
+                    onChange={(e) => setSmtpForm({ ...smtpForm, password: e.target.value })}
+                    placeholder={smtpData?.username ? '••••••••' : ''}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                   {smtpData?.username && (
@@ -135,12 +138,14 @@ export const SystemSettings: React.FC = () => {
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-6 space-y-4">
               <h3 className="text-md font-medium text-slate-900">Test Connection</h3>
-              <p className="text-sm text-slate-500">Send a test email to verify your SMTP configuration.</p>
+              <p className="text-sm text-slate-500">
+                Send a test email to verify your SMTP configuration.
+              </p>
               <div className="flex gap-2">
                 <input
                   type="email"
                   value={testEmail}
-                  onChange={e => setTestEmail(e.target.value)}
+                  onChange={(e) => setTestEmail(e.target.value)}
                   placeholder="test@example.com"
                   className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />

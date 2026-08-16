@@ -37,7 +37,9 @@ export const Switch: React.FC<SwitchProps> = ({
   };
 
   return (
-    <label className={`inline-flex items-center gap-2 ${disabled || loading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+    <label
+      className={`inline-flex items-center gap-2 ${disabled || loading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+    >
       <button
         type="button"
         role="switch"
@@ -46,9 +48,7 @@ export const Switch: React.FC<SwitchProps> = ({
         onClick={() => !disabled && !loading && onChange(!checked)}
         className={`relative inline-flex flex-shrink-0 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
           sizeClasses[size].split(' ')[0]
-        } ${sizeClasses[size].split(' ')[1]} ${
-          checked ? 'bg-emerald-500' : 'bg-slate-300'
-        }`}
+        } ${sizeClasses[size].split(' ')[1]} ${checked ? 'bg-emerald-500' : 'bg-slate-300'}`}
       >
         <span className="sr-only">{label || 'Toggle switch'}</span>
         <span

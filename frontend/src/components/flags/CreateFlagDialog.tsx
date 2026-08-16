@@ -33,13 +33,19 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
   const handleAddVariation = () => {
     const nextIdx = variations.length + 1;
     const nextId = `var_${String.fromCharCode(96 + nextIdx)}`;
-    const initialValue = type === 'JSON' ? '{\n  \n}' : `Option ${String.fromCharCode(64 + nextIdx)}`;
-    setVariations([...variations, { id: nextId, name: `Variation ${String.fromCharCode(64 + nextIdx)}`, value: initialValue }]);
+    const initialValue =
+      type === 'JSON' ? '{\n  \n}' : `Option ${String.fromCharCode(64 + nextIdx)}`;
+    setVariations([
+      ...variations,
+      { id: nextId, name: `Variation ${String.fromCharCode(64 + nextIdx)}`, value: initialValue },
+    ]);
   };
 
   const handleRemoveVariation = (index: number) => {
     if (variations.length <= 2) {
-      setError(`${type === 'JSON' ? 'JSON' : 'Multivariate'} flags must have at least 2 variations.`);
+      setError(
+        `${type === 'JSON' ? 'JSON' : 'Multivariate'} flags must have at least 2 variations.`,
+      );
       return;
     }
     setVariations(variations.filter((_, i) => i !== index));
@@ -63,15 +69,16 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
       return;
     }
 
-    let parsedVariations = (type === 'MULTIVARIATE' || type === 'JSON') ? variations : undefined;
+    let parsedVariations = type === 'MULTIVARIATE' || type === 'JSON' ? variations : undefined;
 
     if (type === 'JSON') {
       try {
-        parsedVariations = variations.map(v => {
-          if (typeof v.value !== 'string') throw new Error(`Variation ${v.name} is not a valid JSON string.`);
+        parsedVariations = variations.map((v) => {
+          if (typeof v.value !== 'string')
+            throw new Error(`Variation ${v.name} is not a valid JSON string.`);
           return {
             ...v,
-            value: JSON.parse(v.value)
+            value: JSON.parse(v.value),
           };
         });
       } catch (err) {
@@ -90,7 +97,10 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
         type,
         enabledByDefault,
         variations: parsedVariations,
-        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        tags: tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
         parentFlagId: parentFlagId || undefined,
       });
       setKey('');
@@ -144,13 +154,17 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
               placeholder="e.g. new-checkout-v2"
               className="w-full px-3.5 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 placeholder:text-slate-400 text-sm font-mono transition-all"
             />
-            <p className="text-xs text-slate-400 mt-1">Unique key used by SDKs to evaluate this flag.</p>
+            <p className="text-xs text-slate-400 mt-1">
+              Unique key used by SDKs to evaluate this flag.
+            </p>
           </div>
 
           <div className="flex items-center justify-between p-3 border border-slate-200 rounded-lg bg-slate-50">
             <div>
               <label className="block text-sm font-medium text-slate-700">Enabled by default</label>
-              <p className="text-xs text-slate-500">This will initialize the flag as ON across all environments.</p>
+              <p className="text-xs text-slate-500">
+                This will initialize the flag as ON across all environments.
+              </p>
             </div>
             <button
               type="button"
@@ -221,7 +235,9 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
               placeholder={type === 'BOOLEAN' ? 'e.g. true' : 'e.g. "dark-mode" or 42'}
               className="w-full px-3.5 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 placeholder:text-slate-400 text-sm transition-all"
             />
-            <p className="text-xs text-slate-400 mt-1">Default value or variation payload served when enabled.</p>
+            <p className="text-xs text-slate-400 mt-1">
+              Default value or variation payload served when enabled.
+            </p>
           </div>
 
           {(type === 'MULTIVARIATE' || type === 'JSON') && (
@@ -238,8 +254,13 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
               </div>
 
               {variations.map((v, i) => (
-                <div key={v.id || i} className={`flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 ${type === 'JSON' ? 'flex-col' : 'items-center'}`}>
-                  <div className={`flex w-full gap-2 ${type === 'JSON' ? 'items-center justify-between mb-2' : ''}`}>
+                <div
+                  key={v.id || i}
+                  className={`flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 ${type === 'JSON' ? 'flex-col' : 'items-center'}`}
+                >
+                  <div
+                    className={`flex w-full gap-2 ${type === 'JSON' ? 'items-center justify-between mb-2' : ''}`}
+                  >
                     <input
                       type="text"
                       value={v.name}
@@ -300,7 +321,9 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Depends On (Optional)</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Depends On (Optional)
+            </label>
             <select
               value={parentFlagId}
               onChange={(e) => setParentFlagId(e.target.value)}
@@ -313,7 +336,9 @@ export const CreateFlagDialog = ({ projectId, isOpen, onClose }: CreateFlagDialo
                 </option>
               ))}
             </select>
-            <p className="text-xs text-slate-400 mt-1">If set, this flag will only evaluate if the parent flag evaluates to ON.</p>
+            <p className="text-xs text-slate-400 mt-1">
+              If set, this flag will only evaluate if the parent flag evaluates to ON.
+            </p>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2">

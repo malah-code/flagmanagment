@@ -95,7 +95,8 @@ export const RolloutRuleBuilder: React.FC<RolloutRuleBuilderProps> = ({
               Percentage Rollout (A/B/n Split)
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Configure traffic distribution for <span className="font-mono text-slate-700">{flagKey}</span>
+              Configure traffic distribution for{' '}
+              <span className="font-mono text-slate-700">{flagKey}</span>
             </p>
           </div>
           <button
@@ -115,7 +116,10 @@ export const RolloutRuleBuilder: React.FC<RolloutRuleBuilderProps> = ({
 
           <div className="space-y-4">
             {variations.map((v) => (
-              <div key={v.id} className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
+              <div
+                key={v.id}
+                className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2"
+              >
                 <div className="flex justify-between items-center text-sm">
                   <span className="font-semibold text-slate-900">{v.name}</span>
                   <div className="flex items-center gap-1">
@@ -125,7 +129,9 @@ export const RolloutRuleBuilder: React.FC<RolloutRuleBuilderProps> = ({
                       max="100"
                       step="0.01"
                       value={rollouts[v.id] ?? 0}
-                      onChange={(e) => handlePercentageChange(v.id, parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        handlePercentageChange(v.id, parseFloat(e.target.value) || 0)
+                      }
                       className="w-20 px-2 py-1 border border-slate-300 rounded text-right text-sm font-mono font-bold focus:ring-1 focus:ring-indigo-500 outline-none"
                     />
                     <span className="text-slate-500 font-bold">%</span>
@@ -146,7 +152,9 @@ export const RolloutRuleBuilder: React.FC<RolloutRuleBuilderProps> = ({
 
           <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg text-sm border border-indigo-100">
             <span className="font-medium text-indigo-900">Total Traffic Allocation:</span>
-            <span className={`font-bold font-mono text-base ${totalPercentage === 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+            <span
+              className={`font-bold font-mono text-base ${totalPercentage === 100 ? 'text-emerald-600' : 'text-amber-600'}`}
+            >
               {totalPercentage}%
             </span>
           </div>

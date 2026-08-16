@@ -28,7 +28,7 @@ export function useUpdateUserAccess() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateAccessPayload }) => 
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateAccessPayload }) =>
       userService.updateAccess(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: USER_KEYS.all });

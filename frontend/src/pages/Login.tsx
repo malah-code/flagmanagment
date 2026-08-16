@@ -63,7 +63,9 @@ export const Login: React.FC = () => {
             {error && (
               <div className="mt-3 p-3 bg-red-950/60 border border-red-800/80 rounded-lg flex items-center gap-2 text-xs font-medium text-red-300">
                 <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                <span>{error === 'API Error' ? 'Invalid email or password. Please try again.' : error}</span>
+                <span>
+                  {error === 'API Error' ? 'Invalid email or password. Please try again.' : error}
+                </span>
               </div>
             )}
           </div>

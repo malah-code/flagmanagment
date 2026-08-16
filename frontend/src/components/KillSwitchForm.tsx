@@ -12,10 +12,6 @@ export const KillSwitchForm: React.FC<Props> = ({ envId, flagId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchRules();
-  }, [envId, flagId]);
-
   const fetchRules = async () => {
     try {
       const data = await killSwitchApi.list(envId, flagId);
@@ -24,6 +20,10 @@ export const KillSwitchForm: React.FC<Props> = ({ envId, flagId }) => {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    fetchRules();
+  }, [envId, flagId]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

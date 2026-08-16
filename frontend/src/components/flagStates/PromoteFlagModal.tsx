@@ -29,11 +29,12 @@ export const PromoteFlagModal: React.FC<PromoteFlagModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      environmentService.getByProject(projectId)
+      environmentService
+        .getByProject(projectId)
         .then((envs) => {
-          setEnvironments(envs.filter(env => env.id !== sourceEnvId));
+          setEnvironments(envs.filter((env) => env.id !== sourceEnvId));
           if (envs.length > 0) {
-            const defaultTarget = envs.find(env => env.id !== sourceEnvId);
+            const defaultTarget = envs.find((env) => env.id !== sourceEnvId);
             if (defaultTarget) setTargetEnvId(defaultTarget.id);
           }
         })
@@ -72,7 +73,12 @@ export const PromoteFlagModal: React.FC<PromoteFlagModalProps> = ({
           >
             <span className="sr-only">Close</span>
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -107,7 +113,9 @@ export const PromoteFlagModal: React.FC<PromoteFlagModalProps> = ({
               className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               required
             >
-              <option value="" disabled>Select an environment</option>
+              <option value="" disabled>
+                Select an environment
+              </option>
               {environments.map((env) => (
                 <option key={env.id} value={env.id}>
                   {env.name} {env.isProtected ? '(Protected)' : ''}
@@ -115,11 +123,11 @@ export const PromoteFlagModal: React.FC<PromoteFlagModalProps> = ({
               ))}
             </select>
           </div>
-          
+
           <div className="mt-2 mb-4 text-sm text-gray-500">
-            {environments.find(e => e.id === targetEnvId)?.isProtected 
-              ? "This environment is protected. A Change Request will be generated for approval."
-              : "This will instantly update the flag configuration in the target environment."}
+            {environments.find((e) => e.id === targetEnvId)?.isProtected
+              ? 'This environment is protected. A Change Request will be generated for approval.'
+              : 'This will instantly update the flag configuration in the target environment.'}
           </div>
 
           <div className="flex justify-end gap-3 mt-6">

@@ -81,13 +81,17 @@ export const AuditLogs: React.FC<AuditLogsProps> = ({ projectId: propProjectId }
         ) : error ? (
           <div className="p-8 text-center text-rose-600 bg-rose-50/50">
             <p className="font-semibold text-sm">Failed to load audit logs.</p>
-            <p className="text-xs mt-1 text-rose-500">{(error as any)?.message || 'Please try again.'}</p>
+            <p className="text-xs mt-1 text-rose-500">
+              {(error as any)?.message || 'Please try again.'}
+            </p>
           </div>
         ) : filteredLogs.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <Activity className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <p className="font-medium text-slate-700">No audit logs found</p>
-            <p className="text-xs text-slate-400 mt-1">Actions performed on flags and environments will appear here.</p>
+            <p className="text-xs text-slate-400 mt-1">
+              Actions performed on flags and environments will appear here.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -109,7 +113,9 @@ export const AuditLogs: React.FC<AuditLogsProps> = ({ projectId: propProjectId }
                     className="hover:bg-slate-50/75 transition-colors cursor-pointer"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full border ${getActionBadgeClass(log.action)}`}>
+                      <span
+                        className={`inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full border ${getActionBadgeClass(log.action)}`}
+                      >
                         {log.action}
                       </span>
                     </td>
@@ -163,37 +169,59 @@ export const AuditLogs: React.FC<AuditLogsProps> = ({ projectId: propProjectId }
                   <p className="font-semibold text-slate-900">{selectedLog.action}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 uppercase">Resource Type</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase">
+                    Resource Type
+                  </label>
                   <p className="text-slate-800">{selectedLog.target_type}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 uppercase">Target ID</label>
-                  <p className="font-mono text-xs text-indigo-600 break-all">{selectedLog.target_id}</p>
+                  <label className="text-xs font-semibold text-slate-400 uppercase">
+                    Target ID
+                  </label>
+                  <p className="font-mono text-xs text-indigo-600 break-all">
+                    {selectedLog.target_id}
+                  </p>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-400 uppercase">Actor ID</label>
-                  <p className="font-mono text-xs text-slate-800 break-all">{selectedLog.actor_id || 'System'}</p>
+                  <p className="font-mono text-xs text-slate-800 break-all">
+                    {selectedLog.actor_id || 'System'}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 uppercase">Timestamp</label>
-                  <p className="text-slate-800">{new Date(selectedLog.created_at).toLocaleString()}</p>
+                  <label className="text-xs font-semibold text-slate-400 uppercase">
+                    Timestamp
+                  </label>
+                  <p className="text-slate-800">
+                    {new Date(selectedLog.created_at).toLocaleString()}
+                  </p>
                 </div>
               </div>
 
               {(selectedLog.previous_state || selectedLog.new_state) && (
                 <div className="pt-2 border-t border-slate-100 space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase">State Payloads</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase">
+                    State Payloads
+                  </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
                     {selectedLog.previous_state && (
                       <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 overflow-x-auto">
-                        <span className="text-xs font-bold text-slate-500 block mb-1">Previous State</span>
-                        <pre className="text-slate-700">{JSON.stringify(selectedLog.previous_state, null, 2)}</pre>
+                        <span className="text-xs font-bold text-slate-500 block mb-1">
+                          Previous State
+                        </span>
+                        <pre className="text-slate-700">
+                          {JSON.stringify(selectedLog.previous_state, null, 2)}
+                        </pre>
                       </div>
                     )}
                     {selectedLog.new_state && (
                       <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 overflow-x-auto">
-                        <span className="text-xs font-bold text-slate-500 block mb-1">New State</span>
-                        <pre className="text-slate-700">{JSON.stringify(selectedLog.new_state, null, 2)}</pre>
+                        <span className="text-xs font-bold text-slate-500 block mb-1">
+                          New State
+                        </span>
+                        <pre className="text-slate-700">
+                          {JSON.stringify(selectedLog.new_state, null, 2)}
+                        </pre>
                       </div>
                     )}
                   </div>

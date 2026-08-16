@@ -27,7 +27,10 @@ export const ProjectDetail = () => {
   if (!project) {
     return (
       <div className="space-y-4">
-        <Link to="/projects" className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline">
+        <Link
+          to="/projects"
+          className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline"
+        >
           <ArrowLeft className="w-4 h-4" /> Back to Projects
         </Link>
         <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200">
@@ -49,42 +52,34 @@ export const ProjectDetail = () => {
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">
         <Routes>
-          <Route 
-            index 
+          <Route
+            index
             element={
-              environments.length > 0 
-                ? <Navigate to={`/projects/${projectId}/env/${environments[0].id}`} replace />
-                : <Navigate to={`/projects/${projectId}/flags`} replace />
-            } 
+              environments.length > 0 ? (
+                <Navigate to={`/projects/${projectId}/env/${environments[0].id}`} replace />
+              ) : (
+                <Navigate to={`/projects/${projectId}/flags`} replace />
+              )
+            }
           />
-          <Route 
-            path="flags" 
+          <Route
+            path="flags"
             element={
-              <FlagsList 
-                projectId={projectId} 
-                onNavigateToTargeting={() => navigate(`/projects/${projectId}/env/${environments[0]?.id || ''}`)}
+              <FlagsList
+                projectId={projectId}
+                onNavigateToTargeting={() =>
+                  navigate(`/projects/${projectId}/env/${environments[0]?.id || ''}`)
+                }
               />
-            } 
+            }
           />
-          <Route 
-            path="env/:envId" 
-            element={<EnvSpecificView projectId={projectId} />} 
-          />
-          <Route 
-            path="settings" 
-            element={<EnvironmentsList projectId={projectId} />} 
-          />
-          <Route 
-            path="project-settings" 
-            element={<ProjectSettings projectId={projectId} />} 
-          />
-          <Route 
-            path="audit-logs" 
-            element={<AuditLogs projectId={projectId} />} 
-          />
-          <Route 
-            path="change-requests" 
-            element={<ChangeRequestsPage environments={environments} />} 
+          <Route path="env/:envId" element={<EnvSpecificView projectId={projectId} />} />
+          <Route path="settings" element={<EnvironmentsList projectId={projectId} />} />
+          <Route path="project-settings" element={<ProjectSettings projectId={projectId} />} />
+          <Route path="audit-logs" element={<AuditLogs projectId={projectId} />} />
+          <Route
+            path="change-requests"
+            element={<ChangeRequestsPage environments={environments} />}
           />
         </Routes>
       </div>

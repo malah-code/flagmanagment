@@ -32,7 +32,8 @@ export const ClientSideKeyCard = ({ envName, apiKey }: ClientSideKeyCardProps) =
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            Used by client-side applications (React, Mobile, Browser) for flag evaluations. Safe for public exposure.
+            Used by client-side applications (React, Mobile, Browser) for flag evaluations. Safe for
+            public exposure.
           </p>
         </div>
 

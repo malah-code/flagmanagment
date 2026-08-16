@@ -29,7 +29,7 @@ describe('ProjectsList', () => {
         <BrowserRouter>
           <ProjectsList />
         </BrowserRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     expect(screen.getByText('Test Project 1')).toBeInTheDocument();

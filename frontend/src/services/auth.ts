@@ -37,5 +37,5 @@ export const authService = {
   ssoLogin(provider: 'oidc' | 'saml') {
     // Redirects browser to the backend SSO endpoint
     window.location.href = `/api/v1/auth/sso/login?provider=${provider}`;
-  }
+  },
 };

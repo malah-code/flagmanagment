@@ -18,7 +18,7 @@ export const GeneralSettingsPanel = ({
 }: GeneralSettingsPanelProps) => {
   const [name, setName] = useState(environment.name);
   const [isProtected, setIsProtected] = useState(environment.isProtected || false);
-  
+
   const updateMutation = useUpdateEnvironment(projectId);
   const deleteMutation = useDeleteEnvironment(projectId);
 
@@ -51,8 +51,12 @@ export const GeneralSettingsPanel = ({
       toast.error('Cannot delete a protected environment. Disable protection first.');
       return;
     }
-    
-    if (confirm(`Are you absolutely sure you want to delete "${environment.name}"? This action cannot be undone.`)) {
+
+    if (
+      confirm(
+        `Are you absolutely sure you want to delete "${environment.name}"? This action cannot be undone.`,
+      )
+    ) {
       try {
         await deleteMutation.mutateAsync(environment.id);
         toast.success(`Environment "${environment.name}" deleted`);
@@ -66,18 +70,22 @@ export const GeneralSettingsPanel = ({
     }
   };
 
-  const isDirty = name.trim() !== environment.name || isProtected !== (environment.isProtected || false);
+  const isDirty =
+    name.trim() !== environment.name || isProtected !== (environment.isProtected || false);
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <form onSubmit={handleUpdate} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <form
+        onSubmit={handleUpdate}
+        className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+      >
         <div className="p-6 border-b border-slate-100">
           <h3 className="text-base font-semibold text-slate-900">Environment Details</h3>
           <p className="text-sm text-slate-500 mt-1">
             Update basic information and protection status for this environment.
           </p>
         </div>
-        
+
         <div className="p-6 space-y-6">
           <div className="space-y-2">
             <label htmlFor="envName" className="block text-sm font-medium text-slate-700">
@@ -115,7 +123,10 @@ export const GeneralSettingsPanel = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-slate-900 cursor-pointer" onClick={() => setIsProtected(!isProtected)}>
+                <label
+                  className="text-sm font-medium text-slate-900 cursor-pointer"
+                  onClick={() => setIsProtected(!isProtected)}
+                >
                   Protected Environment
                 </label>
                 {isProtected ? (
@@ -125,7 +136,8 @@ export const GeneralSettingsPanel = ({
                 )}
               </div>
               <p className="text-sm text-slate-500 mt-1">
-                When enabled, this environment cannot be deleted. Recommended for critical environments like Production.
+                When enabled, this environment cannot be deleted. Recommended for critical
+                environments like Production.
               </p>
             </div>
           </div>
@@ -155,7 +167,8 @@ export const GeneralSettingsPanel = ({
           <div className="space-y-1 max-w-lg">
             <h4 className="text-sm font-semibold text-slate-900">Delete Environment</h4>
             <p className="text-sm text-slate-500">
-              Permanently delete this environment and all its active flag states, rules, and server keys. This action cannot be undone.
+              Permanently delete this environment and all its active flag states, rules, and server
+              keys. This action cannot be undone.
             </p>
           </div>
           <button

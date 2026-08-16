@@ -85,7 +85,8 @@ export const CreateServerKeyDialog = ({
               <div>
                 <strong className="font-semibold">Save this secret key!</strong>
                 <p className="mt-0.5 text-amber-700">
-                  This key will only be displayed once. Store it securely in your server configuration or environment variables.
+                  This key will only be displayed once. Store it securely in your server
+                  configuration or environment variables.
                 </p>
               </div>
             </div>
@@ -143,7 +144,8 @@ export const CreateServerKeyDialog = ({
                 autoFocus
               />
               <p className="text-xs text-slate-500">
-                A descriptive name to identify which microservice or backend environment uses this token.
+                A descriptive name to identify which microservice or backend environment uses this
+                token.
               </p>
             </div>
 

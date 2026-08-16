@@ -163,6 +163,8 @@ func (m *PromoMockStore) SlackConfigRepo() repository.SlackConfigRepository { re
 func (m *PromoMockStore) ScheduledChangeRepo() repository.ScheduledChangeRepository { return nil }
 func (m *PromoMockStore) StalePolicyRepo() repository.StalePolicyRepository { return nil }
 func (m *PromoMockStore) KillSwitchRepo() repository.KillSwitchRepository { return nil }
+func (m *PromoMockStore) InvitationRepo() repository.InvitationRepository { return nil }
+func (m *PromoMockStore) SystemConfigRepo() repository.SystemConfigRepository { return nil }
 
 func (m *PromoMockStore) WithTx(ctx context.Context, fn func(repository.Store) error) error {
 	return fn(m)

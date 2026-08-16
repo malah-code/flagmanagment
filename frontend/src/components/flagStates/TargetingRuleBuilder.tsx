@@ -61,8 +61,8 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
               ...r,
               conditions: [...r.conditions, { attribute: '', operator: 'EQUALS', value: '' }],
             }
-          : r
-      )
+          : r,
+      ),
     );
   };
 
@@ -74,8 +74,8 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
               ...r,
               conditions: r.conditions.filter((_, i) => i !== condIndex),
             }
-          : r
-      )
+          : r,
+      ),
     );
   };
 
@@ -83,26 +83,24 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
     ruleId: string,
     condIndex: number,
     field: keyof TargetingCondition,
-    value: string
+    value: string,
   ) => {
     setRules(
       rules.map((r) =>
         r.id === ruleId
           ? {
               ...r,
-              conditions: r.conditions.map((c, i) => (i === condIndex ? { ...c, [field]: value } : c)),
+              conditions: r.conditions.map((c, i) =>
+                i === condIndex ? { ...c, [field]: value } : c,
+              ),
             }
-          : r
-      )
+          : r,
+      ),
     );
   };
 
   const handleVariationChange = (ruleId: string, value: boolean) => {
-    setRules(
-      rules.map((r) =>
-        r.id === ruleId ? { ...r, variation: value } : r
-      )
-    );
+    setRules(rules.map((r) => (r.id === ruleId ? { ...r, variation: value } : r)));
   };
 
   const handleSave = async () => {
@@ -125,7 +123,8 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
               Targeting Rules
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Configure contextual targeting for <span className="font-mono text-slate-700">{flagKey}</span>
+              Configure contextual targeting for{' '}
+              <span className="font-mono text-slate-700">{flagKey}</span>
             </p>
           </div>
           <button
@@ -153,7 +152,10 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
             </div>
           ) : (
             rules.map((rule, index) => (
-              <div key={rule.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+              <div
+                key={rule.id}
+                className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden"
+              >
                 <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
                   <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
                     <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold">
@@ -168,7 +170,7 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
                     Delete Rule
                   </button>
                 </div>
-                
+
                 <div className="p-4 space-y-3">
                   {rule.conditions.map((cond, condIndex) => (
                     <div key={condIndex} className="flex items-center gap-3">
@@ -176,12 +178,21 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
                         type="text"
                         placeholder="Attribute (e.g. email)"
                         value={cond.attribute}
-                        onChange={(e) => handleConditionChange(rule.id, condIndex, 'attribute', e.target.value)}
+                        onChange={(e) =>
+                          handleConditionChange(rule.id, condIndex, 'attribute', e.target.value)
+                        }
                         className="flex-1 rounded-lg border-slate-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none"
                       />
                       <select
                         value={cond.operator}
-                        onChange={(e) => handleConditionChange(rule.id, condIndex, 'operator', e.target.value as any)}
+                        onChange={(e) =>
+                          handleConditionChange(
+                            rule.id,
+                            condIndex,
+                            'operator',
+                            e.target.value as any,
+                          )
+                        }
                         className="rounded-lg border-slate-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none bg-white"
                       >
                         <option value="EQUALS">Equals</option>
@@ -192,7 +203,9 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
                         type="text"
                         placeholder="Value"
                         value={cond.value}
-                        onChange={(e) => handleConditionChange(rule.id, condIndex, 'value', e.target.value)}
+                        onChange={(e) =>
+                          handleConditionChange(rule.id, condIndex, 'value', e.target.value)
+                        }
                         className="flex-1 rounded-lg border-slate-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none"
                       />
                       <button
@@ -219,7 +232,9 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
                     <button
                       onClick={() => handleVariationChange(rule.id, true)}
                       className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                        rule.variation ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'
+                        rule.variation
+                          ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                          : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       TRUE
@@ -227,7 +242,9 @@ export const TargetingRuleBuilder: React.FC<TargetingRuleBuilderProps> = ({
                     <button
                       onClick={() => handleVariationChange(rule.id, false)}
                       className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                        !rule.variation ? 'bg-red-100 text-red-700 ring-1 ring-red-500' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'
+                        !rule.variation
+                          ? 'bg-red-100 text-red-700 ring-1 ring-red-500'
+                          : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       FALSE

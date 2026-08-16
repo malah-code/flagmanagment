@@ -6,7 +6,18 @@ import { StaleBadge } from './StaleBadge';
 import { FlagActions } from './FlagActions';
 import type { LifecycleState } from '../../types';
 import { Link } from 'react-router-dom';
-import { Plus, Flag, Trash2, Loader2, Search, Tag, Filter, Link2, Sliders, Edit3 } from 'lucide-react';
+import {
+  Plus,
+  Flag,
+  Trash2,
+  Loader2,
+  Search,
+  Tag,
+  Filter,
+  Link2,
+  Sliders,
+  Edit3,
+} from 'lucide-react';
 import { Switch } from '../ui/Switch';
 import { TagFilter } from './TagFilter';
 import toast from 'react-hot-toast';
@@ -25,7 +36,7 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
   const [searchTerm, setSearchTerm] = useState('');
   const [lifecycleFilter, setLifecycleFilter] = useState<LifecycleState | 'ALL'>('ALL');
   const [tagFilter, setTagFilter] = useState('');
-  
+
   const { data: flagStates = [] } = useFlagStates(projectId, environmentId || '');
   const updateMutation = useUpdateFlagState(projectId, environmentId || '');
   const [togglingStateId, setTogglingStateId] = useState<string | null>(null);
@@ -33,12 +44,12 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
   const handleToggle = async (flagId: string, currentEnabled: boolean) => {
     const state = flagStates.find((s) => s.flagId === flagId);
     if (!state) return;
-    
+
     setTogglingStateId(flagId);
     try {
       await updateMutation.mutateAsync({
         flagId,
-        payload: { 
+        payload: {
           isEnabled: !currentEnabled,
           targetingRules: state.targetingRules || { rules: [] },
           remoteConfig: state.remoteConfig || {},
@@ -65,7 +76,7 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
     return matchesSearch && matchesLifecycle && matchesTag;
   });
 
-  const allTags = Array.from(new Set(flags.flatMap(f => f.tags || []))).sort();
+  const allTags = Array.from(new Set(flags.flatMap((f) => f.tags || []))).sort();
 
   const handleDelete = async (id: string, key: string) => {
     if (confirm(`Are you sure you want to delete feature flag "${key}"?`)) {
@@ -116,11 +127,7 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
           </select>
         </div>
 
-        <TagFilter
-          allTags={allTags}
-          selectedTag={tagFilter}
-          onChange={setTagFilter}
-        />
+        <TagFilter allTags={allTags} selectedTag={tagFilter} onChange={setTagFilter} />
       </div>
 
       {isLoading ? (
@@ -141,7 +148,9 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
               {searchTerm || lifecycleFilter !== 'ALL' ? 'No results found' : 'No feature flags'}
             </h3>
             <p className="text-sm text-slate-500">
-              {searchTerm || lifecycleFilter !== 'ALL' ? 'Try adjusting your search or filters.' : 'Get started by creating your first feature flag.'}
+              {searchTerm || lifecycleFilter !== 'ALL'
+                ? 'Try adjusting your search or filters.'
+                : 'Get started by creating your first feature flag.'}
             </p>
           </div>
           {!searchTerm && lifecycleFilter === 'ALL' && (
@@ -173,18 +182,27 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
                 <tr key={flag.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-6 py-4 font-mono font-medium text-slate-900 flex items-center gap-2">
                     <Flag className="w-4 h-4 text-indigo-600 shrink-0" />
-                    <Link to={`/projects/${projectId}/flags/${flag.id}`} className="text-indigo-600 hover:text-indigo-800 hover:underline">
+                    <Link
+                      to={`/projects/${projectId}/flags/${flag.id}`}
+                      className="text-indigo-600 hover:text-indigo-800 hover:underline"
+                    >
                       {flag.key}
                     </Link>
                     {flag.parentFlagId && (
-                      <span title="Depends on a parent flag" className="text-amber-500 flex items-center">
+                      <span
+                        title="Depends on a parent flag"
+                        className="text-amber-500 flex items-center"
+                      >
                         <Link2 className="w-3.5 h-3.5" />
                       </span>
                     )}
                     {flag.tags && flag.tags.length > 0 && (
                       <div className="flex gap-1 flex-wrap ml-2">
-                        {flag.tags.map(t => (
-                          <span key={t} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                        {flag.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200"
+                          >
                             {t}
                           </span>
                         ))}
@@ -204,9 +222,9 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
                     {flag.description || '—'}
                   </td>
                   <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                    {environmentId && (
+                    {environmentId &&
                       (() => {
-                        const state = flagStates.find(s => s.flagId === flag.id);
+                        const state = flagStates.find((s) => s.flagId === flag.id);
                         if (!state) return null;
                         const isEnabled = state.isEnabled;
                         return (
@@ -218,8 +236,7 @@ export const FlagsList = ({ projectId, environmentId, onNavigateToTargeting }: F
                             />
                           </div>
                         );
-                      })()
-                    )}
+                      })()}
                     {onNavigateToTargeting && (
                       <button
                         onClick={onNavigateToTargeting}

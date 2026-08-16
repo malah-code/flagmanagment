@@ -10,7 +10,10 @@ export const scheduledChangesApi = {
     return await apiClient.post<ScheduledChange>(`/environments/${envId}/scheduled-changes`, data);
   },
 
-  list: async (envId: string, status?: string): Promise<{ data: ScheduledChange[]; nextPageToken?: string }> => {
+  list: async (
+    envId: string,
+    status?: string,
+  ): Promise<{ data: ScheduledChange[]; nextPageToken?: string }> => {
     const url = status
       ? `/environments/${envId}/scheduled-changes?status=${encodeURIComponent(status)}`
       : `/environments/${envId}/scheduled-changes`;

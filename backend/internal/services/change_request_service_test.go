@@ -34,6 +34,8 @@ func (m *MockStore) KillSwitchRepo() repository.KillSwitchRepository { return ni
 func (m *MockStore) SlackConfigRepo() repository.SlackConfigRepository { return nil }
 func (m *MockStore) ScheduledChangeRepo() repository.ScheduledChangeRepository { return nil }
 func (m *MockStore) StalePolicyRepo() repository.StalePolicyRepository { return nil }
+func (m *MockStore) InvitationRepo() repository.InvitationRepository { return nil }
+func (m *MockStore) SystemConfigRepo() repository.SystemConfigRepository { return nil }
 
 func (m *MockStore) WithTx(ctx context.Context, fn func(repository.Store) error) error {
 	return fn(m)

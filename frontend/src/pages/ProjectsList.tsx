@@ -11,13 +11,18 @@ export const ProjectsList = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredProjects = projects.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProjects = projects.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.description?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete project "${name}"? All associated environments and flags will be lost.`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete project "${name}"? All associated environments and flags will be lost.`,
+      )
+    ) {
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -66,7 +71,9 @@ export const ProjectsList = () => {
           </div>
           <h3 className="text-base font-semibold text-slate-900">No projects found</h3>
           <p className="text-sm text-slate-500 max-w-sm mx-auto">
-            {searchTerm ? 'No projects match your search query.' : 'Get started by creating your first project.'}
+            {searchTerm
+              ? 'No projects match your search query.'
+              : 'Get started by creating your first project.'}
           </p>
           {!searchTerm && (
             <button
@@ -87,7 +94,7 @@ export const ProjectsList = () => {
             >
               <div>
                 <div className="flex items-start justify-between gap-3">
-                  <Link 
+                  <Link
                     to={`/projects/${project.id}`}
                     className="flex items-center gap-2.5 font-semibold text-slate-900 text-lg group-hover:text-indigo-600 hover:underline transition-colors cursor-pointer"
                   >

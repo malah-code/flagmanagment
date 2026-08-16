@@ -43,7 +43,7 @@ export const environmentService = {
 
   async listServerKeys(projectId: string, envId: string) {
     const res = await apiClient.get<{ data: import('../types').ServerKey[] }>(
-      `/projects/${projectId}/environments/${envId}/server-keys`
+      `/projects/${projectId}/environments/${envId}/server-keys`,
     );
     return res.data || [];
   },
@@ -51,13 +51,13 @@ export const environmentService = {
   async createServerKey(projectId: string, envId: string, name: string) {
     return apiClient.post<import('../types').CreateServerKeyResponse>(
       `/projects/${projectId}/environments/${envId}/server-keys`,
-      { name }
+      { name },
     );
   },
 
   async deleteServerKey(projectId: string, envId: string, keyId: string): Promise<void> {
     return apiClient.delete<void>(
-      `/projects/${projectId}/environments/${envId}/server-keys/${keyId}`
+      `/projects/${projectId}/environments/${envId}/server-keys/${keyId}`,
     );
   },
 };
