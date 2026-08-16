@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	regexCache     sync.Map
-	hooksMu        sync.RWMutex
+	regexCache      sync.Map
+	hooksMu         sync.RWMutex
 	registeredHooks []hooks.Hook
 )
 
@@ -100,11 +100,11 @@ func HashPII(ctx *models.EvaluationContext, salt string) *models.EvaluationConte
 }
 
 // EvaluateRolloutSplit evaluates percentage rollout using MurmurHash3 and an environment salt
-func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRules map[string]interface{}, salt string) (string, bool) {
-	if rolloutRules == nil || entityKey == "" {
+func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON models.JSONB, salt string) (string, bool) {
+	if rolloutRulesJSON == nil || entityKey == "" {
 		return "", false
 	}
-	rulesInterface, ok := rolloutRules["rules"]
+	rulesInterface, ok := rolloutRulesJSON["rules"]
 	if !ok {
 		return "", false
 	}
@@ -136,7 +136,9 @@ func murmurHash3_32(key []byte, seed uint32) uint32 {
 	c1 := uint32(0xcc9e2d51)
 	c2 := uint32(0x1b873593)
 
-	nblocks := len(key) / 4
+	length := len(key)
+	nblocks := length / 4
+
 	for i := 0; i < nblocks; i++ {
 		k1 := uint32(key[i*4]) |
 			uint32(key[i*4+1])<<8 |
@@ -154,7 +156,7 @@ func murmurHash3_32(key []byte, seed uint32) uint32 {
 
 	tail := key[nblocks*4:]
 	var k1 uint32
-	switch len(tail) & 3 {
+	switch len(tail) {
 	case 3:
 		k1 ^= uint32(tail[2]) << 16
 		fallthrough
@@ -169,7 +171,7 @@ func murmurHash3_32(key []byte, seed uint32) uint32 {
 		h1 ^= k1
 	}
 
-	h1 ^= uint32(len(key))
+	h1 ^= uint32(length)
 	h1 ^= h1 >> 16
 	h1 *= 0x85ebca6b
 	h1 ^= h1 >> 13
@@ -224,35 +226,48 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 		}
 	}
 	
-	// 1. Contextual Targeting Rules Evaluation (Top priority)
+	entityKey := ""
+	if ctx != nil {
+		entityKey = ctx.EntityKey
+	}
+
 	if flagRule.TargetingRules != nil {
-		var rulesMap map[string]interface{}
-		if err := json.Unmarshal(flagRule.TargetingRules, &rulesMap); err == nil {
-			if rules, ok := rulesMap["rules"]; ok {
-				rulesBytes, _ := json.Marshal(rules)
-				if variation, matched := EvaluateTargetingRules(rulesBytes, ctx); matched {
-					res := models.EvaluationResult{
-						Value:  variation,
-						Reason: "TARGETING_MATCH",
-					}
-					ExecuteAfterHooks(hookCtx, hooks.EvaluationDetails{
-						FlagKey: flagRule.Key,
-						Value:   res.Value,
-						Reason:  res.Reason,
-					})
-					return res
+		// Convert context for the rules engine
+		evalCtx := make(EvaluationContext)
+		if ctx != nil {
+			for k, v := range ctx.Attributes {
+				if strVal, ok := v.(string); ok {
+					evalCtx[k] = strVal
 				}
+			}
+		}
+
+		// Convert JSONRawMessage to JSONB map structure for our internal evaluator
+		var rulesMap models.JSONB
+		if err := json.Unmarshal(flagRule.TargetingRules, &rulesMap); err == nil {
+			variation, matched := EvaluateContextualRules(rulesMap, evalCtx)
+			if matched {
+				res := models.EvaluationResult{
+					Value:  variation,
+					Reason: "TARGETING_MATCH",
+				}
+				ExecuteAfterHooks(hookCtx, hooks.EvaluationDetails{
+					FlagKey: flagRule.Key,
+					Value:   res.Value,
+					Reason:  res.Reason,
+				})
+				return res
 			}
 		}
 	}
 
-	// 2. Percentage Rollout Evaluation (Second priority)
-	if flagRule.RolloutRules != nil && ctx != nil {
-		var rolloutMap map[string]interface{}
+	if flagRule.RolloutRules != nil && entityKey != "" {
+		var rolloutMap models.JSONB
 		if err := json.Unmarshal(flagRule.RolloutRules, &rolloutMap); err == nil {
-			if variation, matched := EvaluateRolloutSplit(flagRule.Key, ctx.EntityKey, rolloutMap, sVal); matched {
+			variationID, matched := EvaluateRolloutSplit(flagRule.Key, entityKey, rolloutMap, sVal)
+			if matched {
 				res := models.EvaluationResult{
-					Value:  variation,
+					Value:  variationID,
 					Reason: "PERCENTAGE_ROLLOUT",
 				}
 				ExecuteAfterHooks(hookCtx, hooks.EvaluationDetails{
@@ -265,7 +280,6 @@ func EvaluateFlag(flagRule *models.FlagRule, ctx *models.EvaluationContext, rule
 		}
 	}
 
-	// 3. Fallback to Default Variation
 	res := models.EvaluationResult{
 		Value:  flagRule.DefaultVariation,
 		Reason: "DEFAULT",
