@@ -1,0 +1,40 @@
+Business Source License 1.1
+
+Parameters:
+
+Licensor:
+FlagManagment Authors
+
+Licensed Work:
+The FlagManagment software and documentation.
+
+Additional Use Grant:
+You may use the Licensed Work for internal development, testing, and production operations within your organization at no charge, provided you do not make the Licensed Work available to third parties as a hosted or managed service (e.g., competing Software-as-a-Service).
+
+Change Date:
+2030-01-01
+
+Change License:
+Apache License, Version 2.0
+
+----------------------------------------------------------------------
+
+Notice:
+The Business Source License 1.1 (the "License") is not an Open Source Initiative (OSI) approved license. 
+
+TERMS AND CONDITIONS
+
+1. Grant of License.
+Licensor grants you a non-exclusive, worldwide, royalty-free copyright license to copy, modify, create derivative works of, and distribute the Licensed Work, subject to the terms and conditions of this License and the Additional Use Grant.
+
+2. Change to Open Source License.
+Effective on the Change Date, or the date specified in the Change Date parameter, the Licensor grants you a license to the Licensed Work under the terms of the Change License.
+
+3. Restrictions.
+You may not make the functionality of the Licensed Work available to third parties as a commercial hosted service, managed service, or Software-as-a-Service (SaaS) that competes with Licensor's products or services.
+
+4. Disclaimer of Warranties.
+THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+5. Limitation of Liability.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

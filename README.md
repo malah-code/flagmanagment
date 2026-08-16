@@ -5,7 +5,7 @@
 [![React Version](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react)](https://reactjs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=flat&logo=postgresql)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7+-DC382D?style=flat&logo=redis)](https://redis.io/)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-BSL_1.1_(Fair--Source)-blue.svg)](LICENSE)
 
 **FlagManagment** is an enterprise-grade, cloud-native feature flag and remote configuration platform. It provides deterministic evaluations, multi-environment isolation, contextual targeting, emergency kill switches, four-eyes governance change requests, and tamper-evident audit logging with zero vendor lock-in.
 
@@ -121,4 +121,4 @@ docker compose logs -f postgres
 ---
 
 ## 📄 License
-Distributed under the Apache 2.0 License. See `LICENSE` for more information.
+Distributed under the **Business Source License 1.1 (BSL 1.1)** / Fair-Source model. Free for internal self-hosted production and development use with zero artificial feature caps, while preventing third parties from reselling the codebase as a competing public SaaS. See [`LICENSE`](LICENSE) for complete terms.
