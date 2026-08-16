@@ -10,7 +10,6 @@ import (
 
 	"github.com/flagmanagment/backend/internal/models"
 	"github.com/flagmanagment/backend/internal/sdk/hooks"
-	"github.com/spaolacci/murmur3"
 )
 
 var (
@@ -123,7 +122,7 @@ func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON mod
 	}
 
 	// MurmurHash3 32-bit calculation with environment salt
-	hash := murmur3.Sum32([]byte(flagKey + ":" + entityKey + ":" + salt))
+	hash := murmurHash3_32([]byte(flagKey+":"+entityKey+":"+salt), 0)
 	bucket := int(hash % 10000) // 0 - 9999
 
 	cumulative := 0
@@ -134,6 +133,53 @@ func EvaluateRolloutSplit(flagKey string, entityKey string, rolloutRulesJSON mod
 		}
 	}
 	return "", false
+}
+
+func murmurHash3_32(key []byte, seed uint32) uint32 {
+	var h1 uint32 = seed
+	c1 := uint32(0xcc9e2d51)
+	c2 := uint32(0x1b873593)
+
+	length := len(key)
+	nblocks := length / 4
+
+	for i := 0; i < nblocks; i++ {
+		k1 := uint32(key[i*4]) | uint32(key[i*4+1])<<8 | uint32(key[i*4+2])<<16 | uint32(key[i*4+3])<<24
+
+		k1 *= c1
+		k1 = (k1 << 15) | (k1 >> 17)
+		k1 *= c2
+
+		h1 ^= k1
+		h1 = (h1 << 13) | (h1 >> 19)
+		h1 = h1*5 + 0xe6546b64
+	}
+
+	tail := key[nblocks*4:]
+	var k1 uint32
+	switch len(tail) {
+	case 3:
+		k1 ^= uint32(tail[2]) << 16
+		fallthrough
+	case 2:
+		k1 ^= uint32(tail[1]) << 8
+		fallthrough
+	case 1:
+		k1 ^= uint32(tail[0])
+		k1 *= c1
+		k1 = (k1 << 15) | (k1 >> 17)
+		k1 *= c2
+		h1 ^= k1
+	}
+
+	h1 ^= uint32(length)
+	h1 ^= h1 >> 16
+	h1 *= 0x85ebca6b
+	h1 ^= h1 >> 13
+	h1 *= 0xc2b2ae35
+	h1 ^= h1 >> 16
+
+	return h1
 }
 
 // EvaluateFlag orchestrates the evaluation of a single flag against the context
