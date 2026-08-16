@@ -14,6 +14,7 @@ export const UsersManagement: React.FC = () => {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('Read-Only Auditor');
+  const [inviteProjects, setInviteProjects] = useState<string[]>([]);
 
   const allUsers = (usersData?.users || []).map((u: any) => ({
     id: u.id,
@@ -49,7 +50,7 @@ export const UsersManagement: React.FC = () => {
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const projects = inviteRole === 'Global Administrator' ? [] : []; // Would need an array of UUIDs if they can select projects on invite, but MVP invite is fixed to Global Admin or Read-Only (no project selected initially)
+    const projects = inviteRole === 'Global Administrator' ? [] : inviteProjects;
 
     inviteUserMutation.mutate(
       { email: inviteEmail, role: inviteRole, project_ids: projects },
@@ -59,6 +60,7 @@ export const UsersManagement: React.FC = () => {
           setIsInviteModalOpen(false);
           setInviteEmail('');
           setInviteRole('Read-Only Auditor');
+          setInviteProjects([]);
         },
         onError: (error: any) => {
           toast.error(error?.response?.data || 'Failed to send invitation');
@@ -168,6 +170,7 @@ export const UsersManagement: React.FC = () => {
         </div>
       </div>
 
+      {/* Invite User Modal */}
       {isInviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
@@ -190,7 +193,13 @@ export const UsersManagement: React.FC = () => {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Role Assignment</label>
                 <select 
                   value={inviteRole}
-                  onChange={e => setInviteRole(e.target.value)}
+                  onChange={e => {
+                    const newRole = e.target.value;
+                    setInviteRole(newRole);
+                    if (newRole === 'Global Administrator') {
+                      setInviteProjects([]);
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                 >
                   <option value="Read-Only Auditor">Read-Only Auditor</option>
@@ -198,6 +207,33 @@ export const UsersManagement: React.FC = () => {
                   <option value="Global Administrator">Global Administrator</option>
                 </select>
               </div>
+
+              {inviteRole !== 'Global Administrator' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Assigned Projects</label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
+                    {projectsData.map((p: any) => (
+                      <label key={p.id} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded text-indigo-600 focus:ring-indigo-500"
+                          checked={inviteProjects.includes(p.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setInviteProjects([...inviteProjects, p.id]);
+                            } else {
+                              setInviteProjects(inviteProjects.filter(id => id !== p.id));
+                            }
+                          }}
+                        />
+                        {p.name}
+                      </label>
+                    ))}
+                    {projectsData.length === 0 && <span className="text-xs text-slate-500">No projects found.</span>}
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3 pt-4 border-t border-slate-100 mt-6">
                 <button
                   type="button"
@@ -219,6 +255,7 @@ export const UsersManagement: React.FC = () => {
         </div>
       )}
 
+      {/* Edit User Modal */}
       {editingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
