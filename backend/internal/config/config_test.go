@@ -5,9 +5,19 @@ import (
 	"testing"
 )
 
+func unsetFMEnv(t *testing.T) {
+	keys := []string{
+		"FM_BACKEND_PORT", "FM_DB_HOST", "FM_DB_PORT", "FM_DB_USER",
+		"FM_DB_PASSWORD", "FM_DB_NAME", "FM_REDIS_HOST", "FM_REDIS_PORT",
+		"FM_ENV", "FM_LOG_FORMAT",
+	}
+	for _, k := range keys {
+		t.Setenv(k, "")
+	}
+}
+
 func TestLoad_Defaults(t *testing.T) {
-	// Clear any existing env vars for the test
-	os.Clearenv()
+	unsetFMEnv(t)
 
 	cfg := Load()
 
@@ -44,7 +54,7 @@ func TestLoad_Defaults(t *testing.T) {
 }
 
 func TestLoad_Overrides(t *testing.T) {
-	os.Clearenv()
+	unsetFMEnv(t)
 	t.Setenv("FM_BACKEND_PORT", "9090")
 	t.Setenv("FM_DB_NAME", "testdb")
 
