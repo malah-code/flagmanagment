@@ -3,6 +3,7 @@ package services_test
 import (
 	"context"
 	"io"
+	"sync"
 	"testing"
 	"time"
 
@@ -15,10 +16,13 @@ import (
 
 type mockFlagStateRepo struct {
 	repository.FlagStateRepository
+	mu     sync.RWMutex
 	states map[string]*models.EnvironmentFlagState
 }
 
 func (m *mockFlagStateRepo) GetByEnvAndFlag(ctx context.Context, envID, flagID uuid.UUID) (*models.EnvironmentFlagState, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	key := envID.String() + ":" + flagID.String()
 	st, ok := m.states[key]
 	if !ok {
@@ -28,6 +32,8 @@ func (m *mockFlagStateRepo) GetByEnvAndFlag(ctx context.Context, envID, flagID u
 }
 
 func (m *mockFlagStateRepo) Update(ctx context.Context, state *models.EnvironmentFlagState) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	key := state.EnvironmentID.String() + ":" + state.FeatureFlagID.String()
 	m.states[key] = state
 	return nil
@@ -131,7 +137,11 @@ func TestScheduler_ExecutesDueSchedules(t *testing.T) {
 	cancel()
 
 	// Verify flag state turned ON
-	if !flagStateRepo.states[key].Enabled {
+	flagStateRepo.mu.RLock()
+	stateEnabled := flagStateRepo.states[key].Enabled
+	flagStateRepo.mu.RUnlock()
+
+	if !stateEnabled {
 		t.Fatalf("expected flag state to be enabled (ON), got false")
 	}
 
