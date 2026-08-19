@@ -2,9 +2,6 @@ package hooks
 
 import (
 	"bytes"
-	"io"
-	"log"
-	"os"
 	"strings"
 	"testing"
 
@@ -12,13 +9,9 @@ import (
 )
 
 func TestAnalyticsHook_After(t *testing.T) {
-	// Capture stdout
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+	var buf bytes.Buffer
+	hook := NewAnalyticsHook("TEST", &buf)
 
-	hook := NewAnalyticsHook("TEST")
-	
 	ctx := HookContext{
 		FlagKey:  "my-flag",
 		FlagType: "boolean",
@@ -29,7 +22,7 @@ func TestAnalyticsHook_After(t *testing.T) {
 			},
 		},
 	}
-	
+
 	details := EvaluationDetails{
 		FlagKey: "my-flag",
 		Value:   "true",
@@ -38,12 +31,6 @@ func TestAnalyticsHook_After(t *testing.T) {
 
 	hook.After(ctx, details)
 
-	// Restore stdout
-	w.Close()
-	os.Stdout = oldStdout
-	
-	var buf bytes.Buffer
-	io.Copy(&buf, r)
 	output := buf.String()
 
 	if !strings.Contains(output, "[TEST] ANALYTICS_EVENT:") {
@@ -58,13 +45,9 @@ func TestAnalyticsHook_After(t *testing.T) {
 }
 
 func TestAnalyticsHook_Error(t *testing.T) {
-	// Capture log output
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer log.SetOutput(os.Stderr)
+	hook := NewAnalyticsHook("TEST", &buf)
 
-	hook := NewAnalyticsHook("TEST")
-	
 	ctx := HookContext{
 		FlagKey: "error-flag",
 	}
