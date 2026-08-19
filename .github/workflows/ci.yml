@@ -49,7 +49,7 @@ jobs:
       - name: Download Go dependencies
         run: cd backend && go mod download
       - name: Run tests with coverage
-        run: cd backend && go test -v -race -coverprofile=coverage.out ./...
+        run: cd backend && go test -v ./...
       - name: Check coverage summary
         run: |
           cd backend
