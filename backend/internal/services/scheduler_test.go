@@ -133,14 +133,22 @@ func TestScheduler_ExecutesDueSchedules(t *testing.T) {
 	// Start scheduler in goroutine and give it time to process
 	go scheduler.Start(ctx)
 
-	time.Sleep(100 * time.Millisecond)
+	// Wait up to 2s for schedule to be executed
+	deadline := time.Now().Add(2 * time.Second)
+	var stateEnabled bool
+	for time.Now().Before(deadline) {
+		flagStateRepo.mu.RLock()
+		if st, ok := flagStateRepo.states[key]; ok && st.Enabled {
+			stateEnabled = true
+			flagStateRepo.mu.RUnlock()
+			break
+		}
+		flagStateRepo.mu.RUnlock()
+		time.Sleep(10 * time.Millisecond)
+	}
 	cancel()
 
 	// Verify flag state turned ON
-	flagStateRepo.mu.RLock()
-	stateEnabled := flagStateRepo.states[key].Enabled
-	flagStateRepo.mu.RUnlock()
-
 	if !stateEnabled {
 		t.Fatalf("expected flag state to be enabled (ON), got false")
 	}
