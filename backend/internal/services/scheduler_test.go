@@ -105,14 +105,17 @@ func TestScheduler_ExecutesDueSchedules(t *testing.T) {
 	key := envID.String() + ":" + flagID.String()
 
 	// Initial flag state is OFF
+	flagStateRepo.mu.Lock()
 	flagStateRepo.states[key] = &models.EnvironmentFlagState{
 		ID:            uuid.New(),
 		EnvironmentID: envID,
 		FeatureFlagID: flagID,
 		Enabled:       false,
 	}
+	flagStateRepo.mu.Unlock()
 
 	scID := uuid.New()
+	scRepo.mu.Lock()
 	scRepo.schedules[scID] = &models.ScheduledChange{
 		ID:            scID,
 		ProjectID:     uuid.New(),
@@ -123,6 +126,7 @@ func TestScheduler_ExecutesDueSchedules(t *testing.T) {
 		ScheduledFor:  time.Now().UTC().Add(-1 * time.Minute), // Due in the past
 		Status:        models.ScheduleStatusPending,
 	}
+	scRepo.mu.Unlock()
 
 	logger := zerolog.New(io.Discard)
 	scheduler := services.NewScheduler(store, nil, nil, nil, logger)
