@@ -4,18 +4,18 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/flagmanagment/backend/internal/services"
+	"github.com/flagmanagment/backend/internal/crypto"
 )
 
 type store struct {
 	db     *sql.DB
-	crypto services.CryptoService
+	crypto crypto.CryptoService
 }
 
 func NewStore(db *sql.DB) Store {
 	return &store{
 		db:     db,
-		crypto: services.NewCryptoService(),
+		crypto: crypto.NewCryptoService(),
 	}
 }
 

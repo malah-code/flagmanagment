@@ -10,8 +10,8 @@ const INTEGRATION_TYPES = [
     icon: <Activity className="w-8 h-8 text-orange-500" />,
     fields: [
       { id: 'url', label: 'PostHog Host', placeholder: 'https://app.posthog.com' },
-      { id: 'secret_key', label: 'Project API Key', placeholder: 'phc_...' }
-    ]
+      { id: 'secret_key', label: 'Project API Key', placeholder: 'phc_...' },
+    ],
   },
   {
     id: 'datadog',
@@ -19,9 +19,13 @@ const INTEGRATION_TYPES = [
     description: 'Track feature flag toggles and operational metrics in Datadog.',
     icon: <Globe className="w-8 h-8 text-purple-500" />,
     fields: [
-      { id: 'url', label: 'Datadog Site (Intake URL)', placeholder: 'https://http-intake.logs.datadoghq.com' },
-      { id: 'secret_key', label: 'API Key', placeholder: 'dd_...' }
-    ]
+      {
+        id: 'url',
+        label: 'Datadog Site (Intake URL)',
+        placeholder: 'https://http-intake.logs.datadoghq.com',
+      },
+      { id: 'secret_key', label: 'API Key', placeholder: 'dd_...' },
+    ],
   },
   {
     id: 'custom',
@@ -30,19 +34,19 @@ const INTEGRATION_TYPES = [
     icon: <Settings className="w-8 h-8 text-slate-500" />,
     fields: [
       { id: 'url', label: 'Webhook URL', placeholder: 'https://api.example.com/webhooks' },
-      { id: 'secret_key', label: 'Secret (Optional HMAC)', placeholder: 'Optional signing secret' }
-    ]
-  }
+      { id: 'secret_key', label: 'Secret (Optional HMAC)', placeholder: 'Optional signing secret' },
+    ],
+  },
 ];
 
 export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
   const { data: integrations = [], isLoading } = useWebhooks(projectId);
   const createWebhook = useCreateWebhook(projectId);
-  
+
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', url: '', secret_key: '' });
 
-  const activeIntegrationDef = INTEGRATION_TYPES.find(t => t.id === selectedType);
+  const activeIntegrationDef = INTEGRATION_TYPES.find((t) => t.id === selectedType);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +59,7 @@ export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
         url: formData.url,
         secret_key: formData.secret_key || undefined,
         events: ['flag.updated', 'flag.created'], // default events
-        is_active: true
+        is_active: true,
       });
       setSelectedType(null);
       setFormData({ name: '', url: '', secret_key: '' });
@@ -72,18 +76,21 @@ export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
     <div className="max-w-6xl mx-auto p-8 space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Integrations</h1>
-        <p className="text-slate-500 mt-2">Connect FlagManagment to your existing observability and product analytics tools.</p>
+        <p className="text-slate-500 mt-2">
+          Connect FlagManagment to your existing observability and product analytics tools.
+        </p>
       </div>
 
       {/* Catalog */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {INTEGRATION_TYPES.map(type => (
-          <div key={type.id} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+        {INTEGRATION_TYPES.map((type) => (
+          <div
+            key={type.id}
+            className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+          >
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                {type.icon}
-              </div>
-              <button 
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">{type.icon}</div>
+              <button
                 onClick={() => setSelectedType(type.id)}
                 className="flex items-center gap-1.5 text-sm font-semibold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
               >
@@ -106,10 +113,15 @@ export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
           </div>
         ) : (
           <div className="space-y-4">
-            {integrations.map(inv => {
-              const def = INTEGRATION_TYPES.find(t => t.id === inv.integration_type) || INTEGRATION_TYPES[2];
+            {integrations.map((inv) => {
+              const def =
+                INTEGRATION_TYPES.find((t) => t.id === inv.integration_type) ||
+                INTEGRATION_TYPES[2];
               return (
-                <div key={inv.id} className="bg-white border border-slate-200 rounded-xl p-5 flex items-center justify-between shadow-sm">
+                <div
+                  key={inv.id}
+                  className="bg-white border border-slate-200 rounded-xl p-5 flex items-center justify-between shadow-sm"
+                >
                   <div className="flex items-center gap-4">
                     <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
                       {def.icon}
@@ -117,7 +129,9 @@ export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
                     <div>
                       <h4 className="font-bold text-slate-900 flex items-center gap-2">
                         {inv.name}
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${inv.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${inv.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}
+                        >
                           {inv.is_active ? 'Active' : 'Disabled'}
                         </span>
                       </h4>
@@ -148,22 +162,29 @@ export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
                 {activeIntegrationDef.icon}
                 <h2 className="font-bold text-slate-900">Configure {activeIntegrationDef.name}</h2>
               </div>
-              <button onClick={() => setSelectedType(null)} className="text-slate-400 hover:text-slate-600">×</button>
+              <button
+                onClick={() => setSelectedType(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                ×
+              </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Connection Name</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                  Connection Name
+                </label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder={`My ${activeIntegrationDef.name} Integration`}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
               </div>
 
-              {activeIntegrationDef.fields.map(field => (
+              {activeIntegrationDef.fields.map((field) => (
                 <div key={field.id}>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
                     {field.id === 'secret_key' && <Key className="w-3.5 h-3.5 text-slate-400" />}
@@ -173,7 +194,7 @@ export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
                     type={field.id === 'secret_key' ? 'password' : 'text'}
                     required={field.id === 'url'}
                     value={formData[field.id as keyof typeof formData] || ''}
-                    onChange={e => setFormData({ ...formData, [field.id]: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
                     placeholder={field.placeholder}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
@@ -182,7 +203,10 @@ export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
 
               <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200/50 flex gap-3 text-sm">
                 <AlertCircle className="w-5 h-5 shrink-0 text-amber-500" />
-                <p>Events will be synced securely. Make sure your API keys have the necessary permissions in {activeIntegrationDef.name}.</p>
+                <p>
+                  Events will be synced securely. Make sure your API keys have the necessary
+                  permissions in {activeIntegrationDef.name}.
+                </p>
               </div>
 
               <div className="flex items-center gap-3 pt-4 border-t border-slate-100">

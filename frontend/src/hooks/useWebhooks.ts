@@ -25,7 +25,7 @@ export const useWebhooks = (projectId: string) => {
 
 export const useCreateWebhook = (projectId: string) => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: {
       name: string;

@@ -5,16 +5,16 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/flagmanagment/backend/internal/crypto"
 	"github.com/flagmanagment/backend/internal/models"
-	"github.com/flagmanagment/backend/internal/services"
 )
 
 type userRepository struct {
 	db     *sql.DB
-	crypto services.CryptoService
+	crypto crypto.CryptoService
 }
 
-func NewUserRepository(db *sql.DB, crypto services.CryptoService) UserRepository {
+func NewUserRepository(db *sql.DB, crypto crypto.CryptoService) UserRepository {
 	return &userRepository{db: db, crypto: crypto}
 }
 

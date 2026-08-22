@@ -101,8 +101,7 @@ export const SystemSettings: React.FC = () => {
     e.preventDefault();
     updateSSOMutation.mutate(ssoForm, {
       onSuccess: () => toast.success('SSO configuration saved!'),
-      onError: (err: any) =>
-        toast.error(err?.response?.data || 'Failed to save SSO configuration'),
+      onError: (err: any) => toast.error(err?.response?.data || 'Failed to save SSO configuration'),
     });
   };
 
@@ -125,7 +124,8 @@ export const SystemSettings: React.FC = () => {
             Enterprise SSO
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Configure Single Sign-On using OpenID Connect (OIDC) or SAML 2.0 identity providers (Okta, Azure AD, Google Workspace).
+            Configure Single Sign-On using OpenID Connect (OIDC) or SAML 2.0 identity providers
+            (Okta, Azure AD, Google Workspace).
           </p>
         </div>
         <div className="md:col-span-2 space-y-6">
@@ -135,7 +135,9 @@ export const SystemSettings: React.FC = () => {
               <div className="px-6 py-4 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <KeyRound className="w-4 h-4 text-indigo-500" />
-                  <span className="font-semibold text-slate-800 text-sm">OpenID Connect (OIDC)</span>
+                  <span className="font-semibold text-slate-800 text-sm">
+                    OpenID Connect (OIDC)
+                  </span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -158,7 +160,9 @@ export const SystemSettings: React.FC = () => {
 
               <div className="p-6 space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Issuer URL (Discovery Endpoint)</label>
+                  <label className="text-sm font-medium text-slate-700">
+                    Issuer URL (Discovery Endpoint)
+                  </label>
                   <input
                     type="url"
                     value={ssoForm.oidc.issuer_url}
@@ -236,7 +240,9 @@ export const SystemSettings: React.FC = () => {
               <div className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">IdP Single Sign-On URL</label>
+                    <label className="text-sm font-medium text-slate-700">
+                      IdP Single Sign-On URL
+                    </label>
                     <input
                       type="url"
                       value={ssoForm.saml.idp_sso_url}
@@ -251,7 +257,9 @@ export const SystemSettings: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">IdP Entity ID / Issuer</label>
+                    <label className="text-sm font-medium text-slate-700">
+                      IdP Entity ID / Issuer
+                    </label>
                     <input
                       type="text"
                       value={ssoForm.saml.idp_entity_id}
@@ -267,7 +275,9 @@ export const SystemSettings: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">IdP X.509 Certificate (Optional)</label>
+                  <label className="text-sm font-medium text-slate-700">
+                    IdP X.509 Certificate (Optional)
+                  </label>
                   <textarea
                     rows={2}
                     value={ssoForm.saml.idp_cert}
@@ -283,8 +293,18 @@ export const SystemSettings: React.FC = () => {
                 </div>
                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
                   <p className="font-semibold text-slate-700">Service Provider (SP) Metadata:</p>
-                  <p>ACS URL: <span className="font-mono text-indigo-600">{window.location.origin}/api/v1/auth/saml/acs</span></p>
-                  <p>Entity ID: <span className="font-mono text-indigo-600">{window.location.origin}/api/v1/auth/saml/metadata</span></p>
+                  <p>
+                    ACS URL:{' '}
+                    <span className="font-mono text-indigo-600">
+                      {window.location.origin}/api/v1/auth/saml/acs
+                    </span>
+                  </p>
+                  <p>
+                    Entity ID:{' '}
+                    <span className="font-mono text-indigo-600">
+                      {window.location.origin}/api/v1/auth/saml/metadata
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>

@@ -2,7 +2,15 @@ import toast from 'react-hot-toast';
 import { useFlagStates, useUpdateFlagState, useInitFlagState } from '../../hooks/useFlagStates';
 import { useFlags } from '../../hooks/useFlags';
 import { useEnvironments } from '../../hooks/useEnvironments';
-import { Loader2, CheckCircle2, XCircle, ArrowUpRight, Target, Clock, Settings } from 'lucide-react';
+import {
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  ArrowUpRight,
+  Target,
+  Clock,
+  Settings,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Switch } from '../ui/Switch';
 import { useState, useEffect, useCallback } from 'react';

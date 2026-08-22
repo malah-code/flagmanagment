@@ -89,7 +89,7 @@ export const RemoteConfigBuilder: React.FC<RemoteConfigBuilderProps> = ({
           else updated.value = '';
         }
         return updated;
-      })
+      }),
     );
   };
 
@@ -131,7 +131,8 @@ export const RemoteConfigBuilder: React.FC<RemoteConfigBuilderProps> = ({
               Remote Config Payload
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Attach dynamic payload configuration to <span className="font-mono text-slate-700">{flagKey}</span>
+              Attach dynamic payload configuration to{' '}
+              <span className="font-mono text-slate-700">{flagKey}</span>
             </p>
           </div>
           <button
@@ -147,7 +148,9 @@ export const RemoteConfigBuilder: React.FC<RemoteConfigBuilderProps> = ({
             <button
               onClick={() => handleModeSwitch('VISUAL')}
               className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
-                mode === 'VISUAL' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                mode === 'VISUAL'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <FileText className="w-4 h-4" /> Visual Editor
@@ -155,7 +158,9 @@ export const RemoteConfigBuilder: React.FC<RemoteConfigBuilderProps> = ({
             <button
               onClick={() => handleModeSwitch('JSON')}
               className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
-                mode === 'JSON' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                mode === 'JSON'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Code className="w-4 h-4" /> Raw JSON
@@ -180,12 +185,17 @@ export const RemoteConfigBuilder: React.FC<RemoteConfigBuilderProps> = ({
               ) : (
                 <div className="space-y-3">
                   <div className="grid grid-cols-[2fr,1fr,2fr,auto] gap-3 px-1">
-                    <label className="text-xs font-semibold text-slate-500 uppercase">Key Name</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase">
+                      Key Name
+                    </label>
                     <label className="text-xs font-semibold text-slate-500 uppercase">Type</label>
                     <label className="text-xs font-semibold text-slate-500 uppercase">Value</label>
                   </div>
                   {fields.map((field) => (
-                    <div key={field.id} className="grid grid-cols-[2fr,1fr,2fr,auto] gap-3 items-center">
+                    <div
+                      key={field.id}
+                      className="grid grid-cols-[2fr,1fr,2fr,auto] gap-3 items-center"
+                    >
                       <input
                         type="text"
                         placeholder="e.g. primaryColor"
@@ -202,11 +212,13 @@ export const RemoteConfigBuilder: React.FC<RemoteConfigBuilderProps> = ({
                         <option value="NUMBER">Number</option>
                         <option value="BOOLEAN">Boolean</option>
                       </select>
-                      
+
                       {field.type === 'BOOLEAN' ? (
                         <select
                           value={field.value.toString()}
-                          onChange={(e) => handleFieldChange(field.id, 'value', e.target.value === 'true')}
+                          onChange={(e) =>
+                            handleFieldChange(field.id, 'value', e.target.value === 'true')
+                          }
                           className="rounded-lg border-slate-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none bg-white"
                         >
                           <option value="true">True</option>
@@ -217,7 +229,9 @@ export const RemoteConfigBuilder: React.FC<RemoteConfigBuilderProps> = ({
                           type="number"
                           placeholder="0"
                           value={field.value}
-                          onChange={(e) => handleFieldChange(field.id, 'value', Number(e.target.value))}
+                          onChange={(e) =>
+                            handleFieldChange(field.id, 'value', Number(e.target.value))
+                          }
                           className="rounded-lg border-slate-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none"
                         />
                       ) : (
@@ -238,7 +252,7 @@ export const RemoteConfigBuilder: React.FC<RemoteConfigBuilderProps> = ({
                       </button>
                     </div>
                   ))}
-                  
+
                   <button
                     onClick={handleAddField}
                     className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 mt-2"
@@ -292,7 +306,7 @@ function parseConfigToFields(config: Record<string, unknown>): VisualField[] {
     const val = config[key];
     let type: 'STRING' | 'NUMBER' | 'BOOLEAN' = 'STRING';
     let safeVal = val;
-    
+
     if (typeof val === 'boolean') {
       type = 'BOOLEAN';
     } else if (typeof val === 'number') {
@@ -301,7 +315,7 @@ function parseConfigToFields(config: Record<string, unknown>): VisualField[] {
       type = 'STRING';
       safeVal = JSON.stringify(val);
     }
-    
+
     return {
       id: `f-${Date.now()}-${i}`,
       key,

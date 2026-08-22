@@ -5,16 +5,16 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/flagmanagment/backend/internal/crypto"
 	"github.com/flagmanagment/backend/internal/models"
-	"github.com/flagmanagment/backend/internal/services"
 )
 
 type invitationRepository struct {
 	db     *sql.DB
-	crypto services.CryptoService
+	crypto crypto.CryptoService
 }
 
-func NewInvitationRepository(db *sql.DB, crypto services.CryptoService) InvitationRepository {
+func NewInvitationRepository(db *sql.DB, crypto crypto.CryptoService) InvitationRepository {
 	return &invitationRepository{db: db, crypto: crypto}
 }
 
