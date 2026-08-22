@@ -175,6 +175,17 @@ export const EnvironmentSidebar: React.FC<EnvironmentSidebarProps> = ({
             <GitPullRequest className="w-4 h-4 text-indigo-400" />
             <span>Change Requests</span>
           </Link>
+          <Link
+            to={`/projects/${projectId}/integrations`}
+            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              location.pathname === `/projects/${projectId}/integrations`
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+            }`}
+          >
+            <Activity className="w-4 h-4 text-indigo-400" />
+            <span>Integrations</span>
+          </Link>
         </div>
       </nav>
     </div>

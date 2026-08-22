@@ -74,3 +74,18 @@ type ApproveChangeRequestRequest struct {
 type RejectChangeRequestRequest struct {
 	Reason string `json:"reason"`
 }
+
+// SDK Metrics Request
+type SDKEvaluationMetric struct {
+	FlagKey   string `json:"flagKey"`
+	Timestamp string `json:"timestamp"`
+}
+
+type SDKMetricsRequest struct {
+	Evaluations []SDKEvaluationMetric `json:"evaluations"`
+}
+
+// Client SDK Request
+type EvaluateClientRequest struct {
+	Context map[string]interface{} `json:"context"`
+}

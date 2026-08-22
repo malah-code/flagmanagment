@@ -9,6 +9,7 @@ import (
 type Invitation struct {
 	ID         uuid.UUID  `json:"id" db:"id"`
 	Email      string     `json:"email" db:"email"`
+	EmailHash  string     `json:"-" db:"email_hash"`
 	TokenHash  string     `json:"-" db:"token_hash"`
 	Role       string     `json:"role" db:"role"`
 	ProjectIDs JSONB      `json:"project_ids" db:"project_ids"`

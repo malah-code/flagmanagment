@@ -15,6 +15,7 @@ import (
 	"github.com/flagmanagment/backend/internal/sdk"
 	"github.com/flagmanagment/backend/internal/services"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type SDKHandler struct {
@@ -30,6 +31,8 @@ func (h *SDKHandler) RegisterRoutes(r chi.Router) {
 	// Protected by AuthMiddleware (mounted in main router)
 	r.Get("/evaluate/flags", h.EvaluateFlags)
 	r.Post("/sdk/evaluate", h.EvaluateSingleFlag)
+	r.Post("/sdk/metrics", h.IngestMetrics)
+	r.Post("/client/evaluate", h.EvaluateClientFlags)
 }
 
 func (h *SDKHandler) EvaluateFlags(w http.ResponseWriter, r *http.Request) {
@@ -252,4 +255,187 @@ func (h *SDKHandler) EvaluateSingleFlag(w http.ResponseWriter, r *http.Request) 
 		"value":  result.Value,
 		"reason": result.Reason,
 	})
+}
+
+func (h *SDKHandler) IngestMetrics(w http.ResponseWriter, r *http.Request) {
+	env := GetEnvironmentFromContext(r.Context())
+	if env == nil {
+		RespondWithError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	var req dto.SDKMetricsRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	// For efficiency, list all project flags and all environment states to map them
+	flags, _, err := h.store.FlagRepo().ListByProject(r.Context(), env.ProjectID, 10000, 0)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Failed to load project flags")
+		return
+	}
+
+	states, err := h.store.FlagStateRepo().ListByEnvironment(r.Context(), env.ID)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Failed to load environment flag states")
+		return
+	}
+
+	// Map FlagID -> StateID
+	stateMap := make(map[string]string)
+	for _, s := range states {
+		stateMap[s.FeatureFlagID.String()] = s.ID.String()
+	}
+
+	// Map FlagKey -> FlagID
+	flagMap := make(map[string]string)
+	for _, f := range flags {
+		flagMap[f.Key] = f.ID.String()
+	}
+
+	if h.metricService != nil {
+		for _, eval := range req.Evaluations {
+			flagIDStr, ok := flagMap[eval.FlagKey]
+			if !ok {
+				continue
+			}
+			stateIDStr, ok := stateMap[flagIDStr]
+			if !ok {
+				continue
+			}
+			
+			// Try parsing timestamp, fallback to time.Now
+			ts, err := time.Parse(time.RFC3339, eval.Timestamp)
+			if err != nil {
+				ts = time.Now()
+			}
+			
+			// Parse stateID string to uuid.UUID
+			stateUUID, err := uuid.Parse(stateIDStr)
+			if err != nil {
+				continue
+			}
+
+			h.metricService.RecordEvaluation(stateUUID, ts)
+		}
+	}
+
+	RespondWithJSON(w, http.StatusOK, map[string]interface{}{"status": "ok"})
+}
+
+func (h *SDKHandler) EvaluateClientFlags(w http.ResponseWriter, r *http.Request) {
+	env := GetEnvironmentFromContext(r.Context())
+	if env == nil {
+		RespondWithError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	var req dto.EvaluateClientRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	var evalCtx models.EvaluationContext
+	if identity, ok := req.Context["identity"].(string); ok {
+		evalCtx.Identity = identity
+	} else if targetingKey, ok := req.Context["targetingKey"].(string); ok {
+		evalCtx.Identity = targetingKey
+	}
+	evalCtx.Attributes = req.Context
+
+	flags, _, err := h.store.FlagRepo().ListByProject(r.Context(), env.ProjectID, 10000, 0)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Failed to load project flags")
+		return
+	}
+
+	states, err := h.store.FlagStateRepo().ListByEnvironment(r.Context(), env.ID)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Failed to load environment flag states")
+		return
+	}
+
+	// PII Hashing
+	hashedContext := sdk.HashPII(&evalCtx, env.Salt)
+
+	// Build Rules map
+	rulesMap := make(map[string]*models.FlagRule)
+	stateMap := make(map[string]*models.EnvironmentFlagState)
+	for _, s := range states {
+		if s.LifecycleState == models.LifecycleArchived {
+			continue
+		}
+		// find flag
+		var flag *models.FeatureFlag
+		for _, f := range flags {
+			if f.ID == s.FeatureFlagID {
+				flag = f
+				break
+			}
+		}
+		if flag == nil {
+			continue
+		}
+		stateMap[flag.Key] = s
+
+		var tRules, rRules, vars json.RawMessage
+		if s.TargetingRules != nil {
+			b, _ := json.Marshal(s.TargetingRules)
+			tRules = b
+		}
+		if s.RolloutRules != nil {
+			b, _ := json.Marshal(s.RolloutRules)
+			rRules = b
+		}
+		if flag.Variations != nil {
+			b, _ := json.Marshal(flag.Variations)
+			vars = b
+		}
+		defVar := "false"
+		if s.DefaultVariation != "" {
+			defVar = s.DefaultVariation
+		}
+		
+		parentKey := ""
+		if flag.ParentFlagID != nil {
+			for _, pf := range flags {
+				if pf.ID == *flag.ParentFlagID {
+					parentKey = pf.Key
+					break
+				}
+			}
+		}
+		
+		rulesMap[flag.Key] = &models.FlagRule{
+			Key:              flag.Key,
+			Type:             string(flag.Type),
+			Enabled:          s.Enabled,
+			DefaultVariation: defVar,
+			TargetingRules:   tRules,
+			RolloutRules:     rRules,
+			Variations:       vars,
+			ParentFlagKey:    parentKey,
+		}
+	}
+
+	results := make(map[string]map[string]interface{})
+	for key, rule := range rulesMap {
+		res := sdk.EvaluateFlag(rule, hashedContext, rulesMap, env.Salt)
+		results[key] = map[string]interface{}{
+			"value":  res.Value,
+			"reason": res.Reason,
+		}
+		
+		// Record metric for client evaluations
+		if h.metricService != nil {
+			if st, ok := stateMap[key]; ok {
+				h.metricService.RecordEvaluation(st.ID, time.Now())
+			}
+		}
+	}
+
+	RespondWithJSON(w, http.StatusOK, results)
 }

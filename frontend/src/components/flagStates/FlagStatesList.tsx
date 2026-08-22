@@ -2,7 +2,7 @@ import toast from 'react-hot-toast';
 import { useFlagStates, useUpdateFlagState, useInitFlagState } from '../../hooks/useFlagStates';
 import { useFlags } from '../../hooks/useFlags';
 import { useEnvironments } from '../../hooks/useEnvironments';
-import { Loader2, CheckCircle2, XCircle, ArrowUpRight, Target, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, ArrowUpRight, Target, Clock, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Switch } from '../ui/Switch';
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +10,7 @@ import { KillSwitchForm } from '../KillSwitchForm';
 import { SlackConfigForm } from '../SlackConfigForm';
 import { PromoteFlagModal } from './PromoteFlagModal';
 import { TargetingRuleBuilder } from './TargetingRuleBuilder';
+import { RemoteConfigBuilder } from './RemoteConfigBuilder';
 import type { TargetingRule } from './TargetingRuleBuilder';
 import { ScheduledChangeBadge } from '../flags/ScheduledChangeBadge';
 import { ScheduleDialog } from '../flags/ScheduleDialog';
@@ -43,6 +44,11 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
   const [selectedFlagForSchedule, setSelectedFlagForSchedule] = useState<{
     id: string;
     name: string;
+  } | null>(null);
+  const [editingConfigState, setEditingConfigState] = useState<{
+    flagId: string;
+    key: string;
+    config: Record<string, unknown>;
   } | null>(null);
   const [togglingStateId, setTogglingStateId] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -217,6 +223,18 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
                             <Target className="w-3.5 h-3.5" /> Targeting
                           </button>
                           <button
+                            onClick={() => {
+                              setEditingConfigState({
+                                flagId: flag.id,
+                                key: flag.key,
+                                config: (state.remoteConfig as Record<string, unknown>) || {},
+                              });
+                            }}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1.5 rounded transition-colors"
+                          >
+                            <Settings className="w-3.5 h-3.5" /> Payload
+                          </button>
+                          <button
                             onClick={() =>
                               setSelectedFlagForSchedule({ id: flag.id, name: flag.key })
                             }
@@ -303,6 +321,18 @@ export const FlagStatesList = ({ projectId, environmentId }: FlagStatesListProps
           flagId={editingRulesState.flagId}
           flagKey={editingRulesState.key}
           initialRules={editingRulesState.rules}
+        />
+      )}
+
+      {editingConfigState && (
+        <RemoteConfigBuilder
+          isOpen={true}
+          onClose={() => setEditingConfigState(null)}
+          envId={environmentId}
+          projectId={projectId}
+          flagId={editingConfigState.flagId}
+          flagKey={editingConfigState.key}
+          initialConfig={editingConfigState.config}
         />
       )}
     </div>

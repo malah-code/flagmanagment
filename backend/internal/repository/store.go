@@ -3,14 +3,20 @@ package repository
 import (
 	"context"
 	"database/sql"
+
+	"github.com/flagmanagment/backend/internal/services"
 )
 
 type store struct {
-	db *sql.DB
+	db     *sql.DB
+	crypto services.CryptoService
 }
 
 func NewStore(db *sql.DB) Store {
-	return &store{db: db}
+	return &store{
+		db:     db,
+		crypto: services.NewCryptoService(),
+	}
 }
 
 func (s *store) ProjectRepo() ProjectRepository {
@@ -58,11 +64,11 @@ func (s *store) RoleRepo() RoleRepository {
 }
 
 func (s *store) UserRepo() UserRepository {
-	return NewUserRepository(s.db)
+	return NewUserRepository(s.db, s.crypto)
 }
 
 func (s *store) InvitationRepo() InvitationRepository {
-	return NewInvitationRepository(s.db)
+	return NewInvitationRepository(s.db, s.crypto)
 }
 
 func (s *store) SystemConfigRepo() SystemConfigRepository {

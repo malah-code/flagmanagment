@@ -76,10 +76,12 @@ func (h *WebhookHandler) CreateWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload struct {
-		URL       string          `json:"url"`
-		SecretKey *string         `json:"secret_key,omitempty"`
-		Events    json.RawMessage `json:"events"`
-		IsActive  bool            `json:"is_active"`
+		Name            string          `json:"name"`
+		IntegrationType string          `json:"integration_type"`
+		URL             string          `json:"url"`
+		SecretKey       *string         `json:"secret_key,omitempty"`
+		Events          json.RawMessage `json:"events"`
+		IsActive        bool            `json:"is_active"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
@@ -88,11 +90,13 @@ func (h *WebhookHandler) CreateWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wh := &models.WebhookIntegration{
-		ProjectID: projectID,
-		URL:       payload.URL,
-		SecretKey: payload.SecretKey,
-		Events:    payload.Events,
-		IsActive:  payload.IsActive,
+		ProjectID:       projectID,
+		Name:            payload.Name,
+		IntegrationType: payload.IntegrationType,
+		URL:             payload.URL,
+		SecretKey:       payload.SecretKey,
+		Events:          payload.Events,
+		IsActive:        payload.IsActive,
 	}
 
 	if err := h.webhookService.CreateWebhook(r.Context(), wh); err != nil {

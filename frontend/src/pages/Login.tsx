@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, KeyRound, ShieldCheck } from 'lucide-react';
+import { useSSOProviders } from '../hooks/useConfig';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { data: ssoProviders } = useSSOProviders();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +26,8 @@ export const Login: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const showSSODivider = ssoProviders?.oidc_enabled || ssoProviders?.saml_enabled;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-50">
@@ -79,22 +83,44 @@ export const Login: React.FC = () => {
           </button>
         </form>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-700"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="bg-slate-900 px-2 text-slate-400">Or continue with</span>
-          </div>
-        </div>
+        {showSSODivider && (
+          <>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-slate-900 px-2 text-slate-400">Or continue with</span>
+              </div>
+            </div>
 
-        <button
-          onClick={() => authService.ssoLogin('oidc')}
-          disabled={loading}
-          className="w-full rounded-md bg-slate-800 px-4 py-2 font-medium text-slate-100 border border-slate-700 hover:bg-slate-700 disabled:opacity-50"
-        >
-          Log in with SSO (OIDC)
-        </button>
+            <div className="space-y-3">
+              {ssoProviders?.oidc_enabled && (
+                <button
+                  type="button"
+                  onClick={() => authService.ssoLogin('oidc')}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 rounded-md bg-slate-800 px-4 py-2 font-medium text-slate-100 border border-slate-700 hover:bg-slate-700 disabled:opacity-50 transition-colors"
+                >
+                  <KeyRound className="w-4 h-4 text-indigo-400" />
+                  Log in with SSO (OIDC)
+                </button>
+              )}
+
+              {ssoProviders?.saml_enabled && (
+                <button
+                  type="button"
+                  onClick={() => authService.ssoLogin('saml')}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 rounded-md bg-slate-800 px-4 py-2 font-medium text-slate-100 border border-slate-700 hover:bg-slate-700 disabled:opacity-50 transition-colors"
+                >
+                  <ShieldCheck className="w-4 h-4 text-purple-400" />
+                  Log in with SAML 2.0
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

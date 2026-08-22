@@ -12,13 +12,15 @@ import (
 
 type AuditService struct {
 	store       repository.Store
+	crypto      CryptoService
 	subscribers map[chan *models.AuditLog]bool
 	mu          sync.RWMutex
 }
 
-func NewAuditService(store repository.Store) *AuditService {
+func NewAuditService(store repository.Store, crypto CryptoService) *AuditService {
 	return &AuditService{
 		store:       store,
+		crypto:      crypto,
 		subscribers: make(map[chan *models.AuditLog]bool),
 	}
 }
@@ -28,8 +30,8 @@ func (s *AuditService) LogAction(ctx context.Context, log *models.AuditLog) erro
 		log.CreatedAt = time.Now()
 	}
 
-	log.NewState = ScrubJSONB(log.NewState)
-	log.PreviousState = ScrubJSONB(log.PreviousState)
+	log.NewState = s.ScrubJSONB(log.NewState)
+	log.PreviousState = s.ScrubJSONB(log.PreviousState)
 	
 	// Asynchronously log to prevent blocking hot paths
 	go func(l models.AuditLog) {
@@ -69,30 +71,39 @@ var sensitiveKeys = map[string]bool{
 	"secret_key":    true,
 	"password":      true,
 	"authorization": true,
+	"email":         true,
+	"user_id":       true,
+	"userid":        true,
+	"id":            false, // Often used benignly, so we don't redact plain "id"
 }
 
-// ScrubJSONB recursively redacts sensitive fields in models.JSONB.
-func ScrubJSONB(j models.JSONB) models.JSONB {
+// ScrubJSONB recursively redacts/hashes sensitive fields in models.JSONB.
+func (s *AuditService) ScrubJSONB(j models.JSONB) models.JSONB {
 	if j == nil {
 		return nil
 	}
-	res := scrubValue(j)
+	res := s.scrubValue(j)
 	if m, ok := res.(map[string]interface{}); ok {
 		return models.JSONB(m)
 	}
 	return j
 }
 
-func scrubValue(v interface{}) interface{} {
+func (s *AuditService) scrubValue(v interface{}) interface{} {
 	switch val := v.(type) {
 	case models.JSONB:
 		res := make(map[string]interface{}, len(val))
 		for k, vChild := range val {
 			kLower := strings.ToLower(k)
 			if sensitiveKeys[kLower] {
-				res[k] = "[REDACTED]"
+				// hash the value if it's a string, else redact
+				if strVal, ok := vChild.(string); ok {
+					res[k] = s.crypto.HashToken(strVal)
+				} else {
+					res[k] = "[REDACTED]"
+				}
 			} else {
-				res[k] = scrubValue(vChild)
+				res[k] = s.scrubValue(vChild)
 			}
 		}
 		return res
@@ -101,16 +112,20 @@ func scrubValue(v interface{}) interface{} {
 		for k, vChild := range val {
 			kLower := strings.ToLower(k)
 			if sensitiveKeys[kLower] {
-				res[k] = "[REDACTED]"
+				if strVal, ok := vChild.(string); ok {
+					res[k] = s.crypto.HashToken(strVal)
+				} else {
+					res[k] = "[REDACTED]"
+				}
 			} else {
-				res[k] = scrubValue(vChild)
+				res[k] = s.scrubValue(vChild)
 			}
 		}
 		return res
 	case []interface{}:
 		res := make([]interface{}, len(val))
 		for i, item := range val {
-			res[i] = scrubValue(item)
+			res[i] = s.scrubValue(item)
 		}
 		return res
 	default:

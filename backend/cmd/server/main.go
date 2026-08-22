@@ -70,11 +70,13 @@ func main() {
 	// Initialize Cache Client
 	cacheClient := cache.NewClient(fmt.Sprintf("%s:%s", cfg.RedisHost, cfg.RedisPort), "", 0)
 
+	cryptoService := services.NewCryptoService()
+
 	// Initialize Handlers
-	authHandler := api.NewAuthHandler(store)
+	authHandler := api.NewAuthHandler(store, cryptoService)
 	rbacMiddleware := api.NewRBACMiddleware(store)
 	auditHandler := api.NewAuditHandler(store)
-	auditService := services.NewAuditService(store)
+	auditService := services.NewAuditService(store, cryptoService)
 	crService := services.NewChangeRequestService(store, auditService)
 	promotionService := services.NewPromotionService(store, auditService, crService)
 	scService := services.NewScheduledChangeService(store, auditService)
@@ -102,7 +104,6 @@ func main() {
 	scHandler := api.NewScheduledChangeHandler(store, scService, rbacMiddleware, cacheClient)
 	saHandler := api.NewServiceAccountHandler(store)
 
-	cryptoService := services.NewCryptoService()
 	emailService := services.NewEmailService(store)
 	userService := services.NewUserService(store, cryptoService, emailService)
 	usersHandler := api.NewUsersHandler(userService)
