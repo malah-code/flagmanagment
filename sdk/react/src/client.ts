@@ -2,62 +2,72 @@ type Listener = () => void;
 
 export class FlagClient {
   private apiKey: string;
-  private streamUrl: string;
+  private apiUrl: string;
+  private streamUrl?: string;
   private flags: Record<string, any> = {};
   private listeners: Set<Listener> = new Set();
   private eventSource: EventSource | null = null;
   private isConnecting: boolean = false;
   private context: Record<string, any> = {};
 
-  constructor(apiKey: string, streamUrl: string) {
+  constructor(apiKey: string, apiUrl: string, streamUrl?: string) {
     this.apiKey = apiKey;
+    this.apiUrl = apiUrl;
     this.streamUrl = streamUrl;
   }
 
-  public setContext(context: Record<string, any>) {
+  public async setContext(context: Record<string, any>) {
     this.context = context;
-    // Real-world implementation might re-fetch or re-evaluate based on new context.
+    await this.fetchFlags();
   }
 
   public getContext() {
     return this.context;
   }
 
-  public connect() {
+  private async fetchFlags() {
+    try {
+      const url = `${this.apiUrl}/api/v1/client/evaluate`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({ context: this.context }),
+      });
+
+      if (!res.ok) {
+        console.error(`[FlagManagment] Failed to fetch flags: HTTP ${res.status}`);
+        return;
+      }
+
+      const data = await res.json();
+      this.flags = data || {};
+      this.notifyListeners();
+    } catch (e) {
+      console.error(`[FlagManagment] Error fetching flags:`, e);
+    }
+  }
+
+  public async connect() {
+    await this.fetchFlags();
+
+    if (!this.streamUrl) return;
+
     if (this.eventSource || this.isConnecting) return;
     this.isConnecting = true;
 
-    // Passing authorization in standard EventSource is limited in browsers.
-    // A production solution typically uses a polyfill or fetch-based SSE 
-    // to pass the API Key in the Authorization header.
-    // Assuming standard EventSource for MVP:
+    // Standard EventSource for MVP
     this.eventSource = new EventSource(`${this.streamUrl}?apiKey=${this.apiKey}`);
 
-    this.eventSource.addEventListener("bootstrap", (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.flags) {
-          this.flags = data.flags;
-          this.notifyListeners();
-        }
-      } catch (e) {
-        console.error("Failed to parse bootstrap data:", e);
-      }
+    this.eventSource.addEventListener("bootstrap", () => {
+      this.fetchFlags();
     });
 
-    this.eventSource.addEventListener("flag_updated", (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.flagKey && data.flag) {
-          this.flags = {
-            ...this.flags,
-            [data.flagKey]: data.flag,
-          };
-          this.notifyListeners();
-        }
-      } catch (e) {
-        console.error("Failed to parse flag update:", e);
-      }
+    this.eventSource.addEventListener("flag_updated", () => {
+      // Whenever a flag is updated on the server, we re-fetch for this context
+      this.fetchFlags();
     });
 
     this.eventSource.onerror = () => {

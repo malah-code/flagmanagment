@@ -1,6 +1,5 @@
 import { Provider, ResolutionDetails, EvaluationContext, JsonValue, StandardResolutionReasons, ErrorCode } from '@openfeature/react-sdk';
 import { FlagClient } from './client';
-import { evaluateFlag } from './evaluator';
 
 export class FlagManagmentWebProvider implements Provider {
   readonly metadata = {
@@ -15,8 +14,8 @@ export class FlagManagmentWebProvider implements Provider {
 
   private evaluateFlag<T>(flagKey: string, defaultValue: T, context: EvaluationContext): ResolutionDetails<T> {
     try {
-      const flag = this.client.getFlag(flagKey);
-      if (!flag) {
+      const flagState = this.client.getFlag(flagKey);
+      if (!flagState) {
         return {
           value: defaultValue,
           reason: StandardResolutionReasons.DEFAULT,
@@ -24,12 +23,9 @@ export class FlagManagmentWebProvider implements Provider {
         };
       }
 
-      const targetingKey = context?.targetingKey ?? this.client.getContext()?.targetingKey;
-      const result = evaluateFlag(flag, targetingKey);
-
-      if (result.value !== undefined && result.value !== null) {
+      if (flagState.value !== undefined && flagState.value !== null) {
         const expectedType = typeof defaultValue;
-        const actualType = typeof result.value;
+        const actualType = typeof flagState.value;
 
         if (expectedType !== 'object' && actualType !== expectedType) {
           return {
@@ -41,9 +37,8 @@ export class FlagManagmentWebProvider implements Provider {
       }
 
       return {
-        value: (result.value as unknown as T) ?? defaultValue,
-        variant: result.variant,
-        reason: result.reason,
+        value: (flagState.value as unknown as T) ?? defaultValue,
+        reason: flagState.reason,
       };
     } catch (e) {
       return {

@@ -15,6 +15,11 @@ import (
 
 // Client manages the SSE connection to the FlagManagment backend and
 // maintains a thread-safe in-memory cache of flag definitions.
+type Options struct {
+	StreamURL   string
+	EndpointURL string
+}
+
 type Client struct {
 	apiKey    string
 	streamURL string
@@ -22,14 +27,23 @@ type Client struct {
 	mu        sync.RWMutex
 	cancel    context.CancelFunc
 	done      chan struct{}
+	metrics   *MetricsSync
 }
 
-func NewClient(apiKey string, streamURL string) *Client {
+func NewClient(apiKey string, opts Options) *Client {
+	streamURL := opts.StreamURL
+	if streamURL == "" {
+		streamURL = "http://localhost:8080/api/v1/sdk/stream"
+	}
+	
+	metrics := NewMetricsSync(apiKey, opts.EndpointURL)
+
 	return &Client{
 		apiKey:    apiKey,
 		streamURL: streamURL,
 		flags:     make(map[string]interface{}),
 		done:      make(chan struct{}),
+		metrics:   metrics,
 	}
 }
 
@@ -38,10 +52,12 @@ func (c *Client) Connect() {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 	go c.stream(ctx)
+	c.metrics.Start(0)
 }
 
 // Shutdown gracefully stops the background streaming goroutine.
 func (c *Client) Shutdown() {
+	c.metrics.Stop()
 	if c.cancel != nil {
 		c.cancel()
 		<-c.done // wait for goroutine to exit

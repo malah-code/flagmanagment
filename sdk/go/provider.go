@@ -13,8 +13,8 @@ type Provider struct {
 }
 
 // NewProvider creates and connects a new FlagManagment provider.
-func NewProvider(apiKey string, streamURL string) *Provider {
-	client := NewClient(apiKey, streamURL)
+func NewProvider(apiKey string, opts Options) *Provider {
+	client := NewClient(apiKey, opts)
 	client.Connect()
 	return &Provider{client: client}
 }
@@ -199,6 +199,11 @@ type evaluationResult struct {
 }
 
 func (p *Provider) evaluate(flagKey string, evalContext openfeature.EvaluationContext) (evaluationResult, error) {
+	// Record telemetry asynchronously
+	if p.client.metrics != nil {
+		p.client.metrics.RecordEvaluation(flagKey)
+	}
+
 	flag, err := p.client.GetFlag(flagKey)
 	if err != nil {
 		return evaluationResult{}, fmt.Errorf("flag not found: %s", flagKey)

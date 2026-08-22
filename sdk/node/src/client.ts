@@ -2,15 +2,18 @@ import { SDKOptions, EvaluationContext, EvaluationResult } from './types';
 import { RuleStore } from './store';
 import { SyncService } from './sync';
 import { evaluateFlag, hashPII } from './evaluator';
+import { MetricsSync } from './metrics';
 
 export class FlagManagmentClient {
   private store: RuleStore;
   private sync: SyncService;
+  private metrics: MetricsSync;
   private stopStream?: () => void;
 
   constructor(options: SDKOptions) {
     this.store = new RuleStore();
     this.sync = new SyncService(options);
+    this.metrics = new MetricsSync(options);
   }
 
   public async init(): Promise<void> {
@@ -26,15 +29,20 @@ export class FlagManagmentClient {
         console.warn('[FlagManagment] Sync stream error:', err.message);
       }
     );
+
+    this.metrics.start();
   }
 
   public close(): void {
     if (this.stopStream) {
       this.stopStream();
     }
+    this.metrics.stop();
   }
 
   public evaluate(flagKey: string, context?: EvaluationContext, defaultValue: any = false): EvaluationResult {
+    this.metrics.recordEvaluation(flagKey);
+    
     const flag = this.store.getFlag(flagKey);
     if (!flag) {
       return {

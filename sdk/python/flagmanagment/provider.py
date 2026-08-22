@@ -26,6 +26,10 @@ class FlagManagmentProvider(AbstractProvider):
         expected_type: Optional[type] = None,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails:
+        
+        if hasattr(self._client, 'metrics') and self._client.metrics:
+            self._client.metrics.record_evaluation(flag_key)
+
         flag = self._client.get_flag(flag_key)
         if flag is None:
             return FlagResolutionDetails(

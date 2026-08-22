@@ -7,18 +7,22 @@ import urllib.request
 logger = logging.getLogger("flagmanagment-sdk")
 
 
+from .metrics import MetricsSync
+
 class Client:
     """SSE streaming client that connects to the FlagManagment backend,
     maintains a thread-safe in-memory cache of flag definitions,
     and supports exponential backoff reconnection."""
 
-    def __init__(self, api_key: str, stream_url: str):
+    def __init__(self, api_key: str, stream_url: str = None, endpoint_url: str = None):
         self.api_key = api_key
-        self.stream_url = stream_url
+        self.stream_url = stream_url or "http://localhost:8080/api/v1/sdk/stream"
+        self.endpoint_url = endpoint_url
         self.flags: dict = {}
         self._lock = threading.RLock()
         self._running = False
         self._thread: threading.Thread | None = None
+        self.metrics = MetricsSync(api_key, self.endpoint_url)
 
     def connect(self):
         """Start background SSE streaming."""
@@ -27,9 +31,11 @@ class Client:
         self._running = True
         self._thread = threading.Thread(target=self._stream, daemon=True, name="flagmanagment-sse")
         self._thread.start()
+        self.metrics.start()
 
     def shutdown(self):
         """Gracefully stop the SSE stream."""
+        self.metrics.stop()
         self._running = False
 
     def _stream(self):

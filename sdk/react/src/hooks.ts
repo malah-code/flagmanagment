@@ -2,8 +2,6 @@ import { useSyncExternalStore, useCallback } from 'react';
 import { useFlagContext } from './FlagProvider';
 import { FlagClient } from './client';
 
-import { evaluateLocally } from './evaluator';
-
 export const useFlag = <T = any>(flagKey: string, defaultValue: T): T => {
   const { client } = useFlagContext();
 
@@ -19,7 +17,9 @@ export const useFlag = <T = any>(flagKey: string, defaultValue: T): T => {
 
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
-  return evaluateLocally(client, flagKey, defaultValue);
+  const flagState = client.getFlag(flagKey);
+  if (!flagState) return defaultValue;
+  return flagState.value ?? defaultValue;
 };
 
 export const useFlags = () => {

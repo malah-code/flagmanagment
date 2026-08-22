@@ -17,13 +17,15 @@ export const useFlagContext = () => {
 
 interface FlagProviderProps {
   apiKey: string;
-  streamUrl: string;
+  apiUrl: string;
+  streamUrl?: string;
   context?: Record<string, any>;
   children: React.ReactNode;
 }
 
 export const FlagProvider: React.FC<FlagProviderProps> = ({ 
-  apiKey, 
+  apiKey,
+  apiUrl,
   streamUrl, 
   context,
   children 
@@ -32,7 +34,7 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
   const clientRef = useRef<FlagClient | null>(null);
 
   if (!clientRef.current) {
-    clientRef.current = new FlagClient(apiKey, streamUrl);
+    clientRef.current = new FlagClient(apiKey, apiUrl, streamUrl);
     if (context) {
       clientRef.current.setContext(context);
     }
