@@ -340,9 +340,9 @@ func (h *SDKHandler) EvaluateClientFlags(w http.ResponseWriter, r *http.Request)
 
 	var evalCtx models.EvaluationContext
 	if identity, ok := req.Context["identity"].(string); ok {
-		evalCtx.Identity = identity
+		evalCtx.EntityKey = identity
 	} else if targetingKey, ok := req.Context["targetingKey"].(string); ok {
-		evalCtx.Identity = targetingKey
+		evalCtx.EntityKey = targetingKey
 	}
 	evalCtx.Attributes = req.Context
 

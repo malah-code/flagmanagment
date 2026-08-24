@@ -37,7 +37,8 @@ func (m *mockAuditRepo) Create(ctx context.Context, log *models.AuditLog) error 
 func TestAuditService_LogAction_SanitizesSensitiveData(t *testing.T) {
 	mockRepo := &mockAuditRepo{}
 	store := &mockStore{auditRepo: mockRepo}
-	auditService := services.NewAuditService(store)
+	cryptoService := services.NewCryptoService()
+	auditService := services.NewAuditService(store, cryptoService)
 
 	rawNewState := models.JSONB{
 		"name":    "Production Env",
@@ -79,22 +80,22 @@ func TestAuditService_LogAction_SanitizesSensitiveData(t *testing.T) {
 
 	createdLog := mockRepo.logs[0]
 
-	// Verify sensitive keys were redacted
-	if createdLog.NewState["api_key"] != "[REDACTED]" {
-		t.Errorf("expected api_key to be redacted to '[REDACTED]', got %v", createdLog.NewState["api_key"])
+	// Verify sensitive keys were hashed (PII protection, Principle VII), not stored in plaintext
+	if createdLog.NewState["api_key"] != cryptoService.HashToken("secret-12345") {
+		t.Errorf("expected api_key to be hashed, got %v", createdLog.NewState["api_key"])
 	}
-	if createdLog.NewState["token"] != "[REDACTED]" {
-		t.Errorf("expected token to be redacted to '[REDACTED]', got %v", createdLog.NewState["token"])
+	if createdLog.NewState["token"] != cryptoService.HashToken("bearer-xyz") {
+		t.Errorf("expected token to be hashed, got %v", createdLog.NewState["token"])
 	}
-	if createdLog.NewState["secret"] != "[REDACTED]" {
-		t.Errorf("expected secret to be redacted to '[REDACTED]', got %v", createdLog.NewState["secret"])
+	if createdLog.NewState["secret"] != cryptoService.HashToken("my-super-secret") {
+		t.Errorf("expected secret to be hashed, got %v", createdLog.NewState["secret"])
 	}
 	if createdLog.NewState["name"] != "Production Env" {
 		t.Errorf("expected name to be 'Production Env', got %v", createdLog.NewState["name"])
 	}
 
-	if createdLog.PreviousState["password"] != "[REDACTED]" {
-		t.Errorf("expected password to be redacted to '[REDACTED]', got %v", createdLog.PreviousState["password"])
+	if createdLog.PreviousState["password"] != cryptoService.HashToken("old-password") {
+		t.Errorf("expected password to be hashed, got %v", createdLog.PreviousState["password"])
 	}
 	if createdLog.PreviousState["normal"] != "value" {
 		t.Errorf("expected normal to be 'value', got %v", createdLog.PreviousState["normal"])
