@@ -159,7 +159,7 @@ func TestCloneEnvironment_Success(t *testing.T) {
 	store.flagStateRepo = flagStateRepo
 	store.auditRepo = auditRepo
 
-	auditService := NewAuditService(store)
+	auditService := NewAuditService(store, NewCryptoService())
 	service := NewEnvironmentService(store, auditService)
 
 	projectID := uuid.New()
@@ -199,7 +199,7 @@ func TestDeleteEnvironment_Protected_ReturnsForbidden(t *testing.T) {
 	envRepo := new(EnvMockRepo)
 	store.envRepo = envRepo
 
-	auditService := NewAuditService(store)
+	auditService := NewAuditService(store, NewCryptoService())
 	service := NewEnvironmentService(store, auditService)
 
 	envID := uuid.New()
@@ -227,7 +227,7 @@ func TestDeleteEnvironment_Success(t *testing.T) {
 	store.envRepo = envRepo
 	store.auditRepo = auditRepo
 
-	auditService := NewAuditService(store)
+	auditService := NewAuditService(store, NewCryptoService())
 	service := NewEnvironmentService(store, auditService)
 
 	envID := uuid.New()
@@ -259,7 +259,7 @@ func TestCreateServerKey_Success(t *testing.T) {
 	store.envRepo = envRepo
 	store.auditRepo = auditRepo
 
-	auditService := NewAuditService(store)
+	auditService := NewAuditService(store, NewCryptoService())
 	service := NewEnvironmentService(store, auditService)
 
 	envID := uuid.New()
@@ -287,7 +287,7 @@ func TestListServerKeys_Success(t *testing.T) {
 	envRepo := new(EnvMockRepo)
 	store.envRepo = envRepo
 
-	auditService := NewAuditService(store)
+	auditService := NewAuditService(store, NewCryptoService())
 	service := NewEnvironmentService(store, auditService)
 
 	envID := uuid.New()
@@ -310,7 +310,7 @@ func TestDeleteServerKey_Success(t *testing.T) {
 	store.envRepo = envRepo
 	store.auditRepo = auditRepo
 
-	auditService := NewAuditService(store)
+	auditService := NewAuditService(store, NewCryptoService())
 	service := NewEnvironmentService(store, auditService)
 
 	keyID := uuid.New()

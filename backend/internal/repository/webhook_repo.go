@@ -3,8 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"time"
-
 
 	"github.com/flagmanagment/backend/internal/models"
 	"github.com/google/uuid"
