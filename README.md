@@ -61,6 +61,8 @@ cd flagmanagment
 docker compose up -d --build
 ```
 
+> 📖 **New to the team?** Read our comprehensive **[Developer Onboarding & Getting Started Guide](docs/GETTING_STARTED.md)** for architecture deep dives, the SpecKit AI development workflow, and testing practices.
+
 ### 2. Access the Application
 - **Frontend Dashboard**: [http://localhost:3000](http://localhost:3000)
 - **Backend API**: [http://localhost:8080](http://localhost:8080)
