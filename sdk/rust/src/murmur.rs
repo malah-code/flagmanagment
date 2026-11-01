@@ -19,3 +19,4 @@ mod tests {
         assert!(b1 < 100);
     }
 }
+

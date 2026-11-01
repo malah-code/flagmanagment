@@ -15,3 +15,4 @@ export function initFlagManagment(options: WebClientOptions): FlagWebClient {
   });
   return client;
 }
+

@@ -155,6 +155,10 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-11-01 (Playwright E2E Hardening & Full Pipeline Stabilization)**:
+  - **OpenFeature E2E Evaluation Trigger**: Updated [`cuj_openfeature.spec.ts`](../e2e/tests/cuj_openfeature.spec.ts) to explicitly trigger "Run OpenFeature Evaluation" prior to asserting `ResolutionDetails` visibility, resolving the conditional render timeout. Added dynamic test project creation fallback when the projects list is empty.
+  - **Core Navigation & Session Guards**: Hardened `openProject` helper in [`core.spec.ts`](../e2e/tests/core.spec.ts) to navigate directly via project title links with fallback card selectors. Enhanced `loginUser` in [`helpers.ts`](../e2e/tests/helpers.ts) to detect active authenticated sessions and avoid redundant login cycles.
+  - **SDK File Normalization**: Cleaned and normalized file endings across all newly added SDKs (`sdk/web/`, `sdk/rust/`, `sdk/flutter/`).
 - **2026-10-31 (Multi-Language SDK Ecosystem Expansion: Web, Rust & Flutter)**:
   - **Vanilla Browser Web SDK (`sdk/web/`)**: Created zero-dependency TypeScript browser client with synchronous evaluation, `localStorage` caching, real-time SSE streaming, and CNCF `OpenFeatureWebProvider`. Automated test suite passing (`node --test`).
   - **Rust SDK (`sdk/rust/`)**: Created thread-safe Rust evaluation crate with `RwLock` in-memory caching and MurmurHash3 bucketing for sub-microsecond local flag evaluations (<1 µs).

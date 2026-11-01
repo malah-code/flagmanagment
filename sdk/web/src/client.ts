@@ -245,3 +245,4 @@ export class FlagWebClient {
     this.errorListeners.forEach((fn) => fn(err));
   }
 }
+

@@ -12,9 +12,15 @@ test.describe.serial('FlagManagment Core User Journeys', () => {
 
   async function openProject(page: Page) {
     await page.goto('/projects');
-    const targetCard = page.locator('div', { has: page.locator(`span:has-text("${projectName}")`) })
-                           .filter({ hasText: 'Manage' }).last();
-    await targetCard.locator('a:has-text("Manage")').click();
+    await page.waitForSelector(`text=${projectName}`, { timeout: 15000 });
+    const projectLink = page.locator(`a:has-text("${projectName}")`).first();
+    if (await projectLink.isVisible()) {
+      await projectLink.click();
+    } else {
+      const targetCard = page.locator('div', { has: page.locator(`span:has-text("${projectName}")`) })
+                             .filter({ hasText: 'Manage' }).last();
+      await targetCard.locator('a:has-text("Manage")').click();
+    }
     await page.waitForURL('**/projects/*');
   }
 

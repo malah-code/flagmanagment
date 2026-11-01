@@ -66,3 +66,4 @@ impl Client {
         lock.get(flag_key).map(|flag| Evaluator::evaluate(flag, targeting_key, None))
     }
 }
+

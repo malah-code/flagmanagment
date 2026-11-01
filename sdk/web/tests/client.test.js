@@ -42,3 +42,4 @@ test('FlagWebClient subscribes to events and emits changes', () => {
 
   unsubscribe();
 });
+

@@ -1,6 +1,13 @@
 import { Page, expect } from '@playwright/test';
 
 export async function loginUser(page: Page) {
+  if (page.url().includes('/projects')) {
+    const heading = page.locator('h1:has-text("Projects")');
+    if (await heading.isVisible()) {
+      return;
+    }
+  }
+
   await page.goto('/login');
   await page.waitForSelector('input[type="email"]', { timeout: 15000 });
   await page.fill('input[type="email"]', 'admin@example.com');
