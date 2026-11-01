@@ -18,7 +18,7 @@
 
 **Purpose**: Database schema initialization for the feature.
 
-- [ ] T001 Create migration for `parent_flag_id` UUID column in `feature_flags` table in `backend/migrations/`
+- [x] T001 Create migration for `parent_flag_id` UUID column in `feature_flags` table in `backend/migrations/`
 
 ---
 
@@ -28,10 +28,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 [P] Update `FeatureFlag` struct to include `ParentFlagID *uuid.UUID` in `backend/internal/models/feature_flag.go`
-- [ ] T003 [P] Add unit test cases for the cycle detection algorithm in `backend/internal/services/cycle_detector_test.go`
-- [ ] T004 Implement `CycleDetectorService` to perform DFS cycle detection in `backend/internal/services/cycle_detector.go`
-- [ ] T005 Update `FlagRepo` to fetch flag dependency chains in `backend/internal/repository/flag_repo.go`
+- [x] T002 [P] Update `FeatureFlag` struct to include `ParentFlagID *uuid.UUID` in `backend/internal/models/feature_flag.go`
+- [x] T003 [P] Add unit test cases for the cycle detection algorithm in `backend/internal/services/cycle_detector_test.go`
+- [x] T004 Implement `CycleDetectorService` to perform DFS cycle detection in `backend/internal/services/cycle_detector.go`
+- [x] T005 Update `FlagRepo` to fetch flag dependency chains in `backend/internal/repository/flag_repo.go`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -45,10 +45,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Update Flag POST/PUT handlers to accept `parent_flag_id` in `backend/internal/api/flags.go`
-- [ ] T007 [US1] Update `FlagService.Create` and `FlagService.Update` to invoke `CycleDetectorService` before saving to DB in `backend/internal/services/flag_service.go`
-- [ ] T008 [P] [US1] Update frontend `Flag` type definitions with `parent_flag_id` in `frontend/src/types/index.ts`
-- [ ] T009 [US1] Add a "Depends On" optional dropdown in `frontend/src/components/flags/CreateFlagDialog.tsx` selecting from other flags
+- [x] T006 [P] [US1] Update Flag POST/PUT handlers to accept `parent_flag_id` in `backend/internal/api/flags.go`
+- [x] T007 [US1] Update `FlagService.Create` and `FlagService.Update` to invoke `CycleDetectorService` before saving to DB in `backend/internal/services/flag_service.go`
+- [x] T008 [P] [US1] Update frontend `Flag` type definitions with `parent_flag_id` in `frontend/src/types/index.ts`
+- [x] T009 [US1] Add a "Depends On" optional dropdown in `frontend/src/components/flags/CreateFlagDialog.tsx` selecting from other flags
 
 **Checkpoint**: At this point, User Story 1 should be fully functional. Dependencies can be saved without cycles.
 
@@ -62,8 +62,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T010 [P] [US2] Update SDK evaluation unit tests to assert short-circuiting logic in `backend/internal/sdk/evaluator_test.go`
-- [ ] T011 [US2] Update `LocalEvaluator` to recursively check `parent_flag_id` state before evaluating targeting rules in `backend/internal/sdk/evaluator.go`
+- [x] T010 [P] [US2] Update SDK evaluation unit tests to assert short-circuiting logic in `backend/internal/sdk/evaluator_test.go`
+- [x] T011 [US2] Update `LocalEvaluator` to recursively check `parent_flag_id` state before evaluating targeting rules in `backend/internal/sdk/evaluator.go`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Dependencies are evaluated correctly at runtime.
 
@@ -77,8 +77,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T012 [P] [US3] Add a visual indicator in the Flag List identifying flags with parents in `frontend/src/components/flags/FlagsList.tsx`
-- [ ] T013 [US3] Display the `parent_flag_id` reference explicitly in the flag configuration page in `frontend/src/components/flags/FlagDetails.tsx`
+- [x] T012 [P] [US3] Add a visual indicator in the Flag List identifying flags with parents in `frontend/src/components/flags/FlagsList.tsx`
+- [x] T013 [US3] Display the `parent_flag_id` reference explicitly in the flag configuration page in `frontend/src/components/flags/FlagDetails.tsx`
 
 **Checkpoint**: All user stories should now be independently functional.
 
@@ -88,7 +88,7 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T014 Run `quickstart.md` validation scenarios manually to verify End-to-End correctness.
+- [x] T014 Run `quickstart.md` validation scenarios manually to verify End-to-End correctness.
 
 ---
 

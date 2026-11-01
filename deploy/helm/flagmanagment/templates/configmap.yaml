@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "flagmanagment.fullname" . }}-config
+  labels:
+    {{- include "flagmanagment.labels" . | nindent 4 }}
+data:
+  PORT: {{ .Values.backend.service.port | quote }}
+  GRPC_PORT: {{ .Values.backend.service.grpcPort | quote }}
+  LOG_LEVEL: {{ .Values.backend.env.logLevel | default "info" | quote }}
+  ENVIRONMENT: {{ .Values.backend.env.environment | default "production" | quote }}
+  CORS_ALLOWED_ORIGINS: {{ .Values.backend.env.corsOrigins | default "*" | quote }}
+  {{- if .Values.postgresql.enabled }}
+  DB_HOST: {{ printf "%s-postgresql" (include "flagmanagment.fullname" .) | quote }}
+  DB_PORT: "5432"
+  DB_NAME: {{ .Values.postgresql.auth.database | quote }}
+  DB_USER: {{ .Values.postgresql.auth.username | quote }}
+  {{- else }}
+  DB_HOST: {{ .Values.externalDatabase.host | quote }}
+  DB_PORT: {{ .Values.externalDatabase.port | default 5432 | quote }}
+  DB_NAME: {{ .Values.externalDatabase.database | quote }}
+  DB_USER: {{ .Values.externalDatabase.user | quote }}
+  {{- end }}
+  {{- if .Values.redis.enabled }}
+  REDIS_HOST: {{ printf "%s-redis" (include "flagmanagment.fullname" .) | quote }}
+  REDIS_PORT: "6379"
+  {{- else }}
+  REDIS_HOST: {{ .Values.externalRedis.host | quote }}
+  REDIS_PORT: {{ .Values.externalRedis.port | default 6379 | quote }}
+  {{- end }}
+

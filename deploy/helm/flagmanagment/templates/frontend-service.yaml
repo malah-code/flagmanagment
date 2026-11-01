@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flagmanagment.fullname" . }}-frontend
+  labels:
+    {{- include "flagmanagment.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  type: {{ .Values.frontend.service.type | default "ClusterIP" }}
+  ports:
+    - port: {{ .Values.frontend.service.port | default 80 }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "flagmanagment.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+

@@ -75,10 +75,10 @@ description: "Task list for implementing Data Model & State Management"
 - [x] T020 [US2] Implement EnvironmentRepository (`Create`, `GetByID`, `GetByAPIKeyHash`, `ListByProject`, `Update`, `Delete`) in `backend/internal/repository/environment_repo.go`
 - [x] T021 [US2] Implement FlagRepository (`Create`, `GetByID`, `GetByKey`, `ListByProject`, `Update`, `Delete`, `UpdateLastEvaluatedAt`) in `backend/internal/repository/flag_repo.go`
 - [x] T022 [US2] Implement FlagStateRepository (`Create`, `GetByID`, `GetByEnvAndFlag`, `ListByEnvironment`, `Update`, `Delete`) in `backend/internal/repository/flag_state_repo.go`
-- [ ] T023 [P] [US2] Write unit tests for ProjectRepository in `backend/internal/repository/project_repo_test.go`
-- [ ] T024 [P] [US2] Write unit tests for EnvironmentRepository in `backend/internal/repository/environment_repo_test.go`
-- [ ] T025 [P] [US2] Write unit tests for FlagRepository in `backend/internal/repository/flag_repo_test.go`
-- [ ] T026 [P] [US2] Write unit tests for FlagStateRepository in `backend/internal/repository/flag_state_repo_test.go`
+- [x] T023 [P] [US2] Write unit tests for ProjectRepository in `backend/internal/repository/project_repo_test.go`
+- [x] T024 [P] [US2] Write unit tests for EnvironmentRepository in `backend/internal/repository/environment_repo_test.go`
+- [x] T025 [P] [US2] Write unit tests for FlagRepository in `backend/internal/repository/flag_repo_test.go`
+- [x] T026 [P] [US2] Write unit tests for FlagStateRepository in `backend/internal/repository/flag_state_repo_test.go`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Projects, Environments, and Flags can be created and queried using Go repositories.
 
@@ -123,8 +123,8 @@ description: "Task list for implementing Data Model & State Management"
 
 **Purpose**: Verification and quality checks across all implemented components.
 
-- [ ] T036 Run all validation scenarios defined in `quickstart.md` to ensure DB schema constraints, migrations, and performance are up to par.
-- [ ] T037 Run `go vet`, `golangci-lint` and `go test -race ./...` on the `backend` project to ensure zero regressions and high coverage.
+- [x] T036 Run all validation scenarios defined in `quickstart.md` to ensure DB schema constraints, migrations, and performance are up to par.
+- [x] T037 Run `go vet`, `golangci-lint` and `go test -race ./...` on the `backend` project to ensure zero regressions and high coverage.
 
 ---
 

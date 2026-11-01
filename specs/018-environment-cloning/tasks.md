@@ -30,10 +30,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T001 [US1] Implement `CloneEnvironmentState` in `backend/internal/repository/environment_repo.go` using a single `pgx` transaction.
-- [ ] T002 [US1] Implement `CloneEnvironment` logic in `backend/internal/services/environment_service.go` (generate token, call repo clone, log audit event).
-- [ ] T003 [US1] Expose `POST /api/v1/projects/{projectId}/environments/{sourceEnvId}/clone` endpoint in `backend/internal/api/environment.go`.
-- [ ] T004 [P] [US1] Add unit tests for `CloneEnvironment` in `backend/internal/services/environment_service_test.go`.
+- [x] T001 [US1] Implement `CloneEnvironmentState` in `backend/internal/repository/environment_repo.go` using a single `pgx` transaction.
+- [x] T002 [US1] Implement `CloneEnvironment` logic in `backend/internal/services/environment_service.go` (generate token, call repo clone, log audit event).
+- [x] T003 [US1] Expose `POST /api/v1/projects/{projectId}/environments/{sourceEnvId}/clone` endpoint in `backend/internal/api/environment.go`.
+- [x] T004 [P] [US1] Add unit tests for `CloneEnvironment` in `backend/internal/services/environment_service_test.go`.
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently.
 
@@ -47,10 +47,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T005 [US2] Implement `DeleteEnvironment` in `backend/internal/repository/environment_repo.go`.
-- [ ] T006 [US2] Implement `DeleteEnvironment` business logic in `backend/internal/services/environment_service.go` (prevent deletion if `IsProtected`).
-- [ ] T007 [US2] Expose `DELETE /api/v1/projects/{projectId}/environments/{envId}` endpoint in `backend/internal/api/environment.go`.
-- [ ] T008 [P] [US2] Add unit tests for `DeleteEnvironment` in `backend/internal/services/environment_service_test.go`.
+- [x] T005 [US2] Implement `DeleteEnvironment` in `backend/internal/repository/environment_repo.go`.
+- [x] T006 [US2] Implement `DeleteEnvironment` business logic in `backend/internal/services/environment_service.go` (prevent deletion if `IsProtected`).
+- [x] T007 [US2] Expose `DELETE /api/v1/projects/{projectId}/environments/{envId}` endpoint in `backend/internal/api/environment.go`.
+- [x] T008 [P] [US2] Add unit tests for `DeleteEnvironment` in `backend/internal/services/environment_service_test.go`.
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently.
 
@@ -60,8 +60,8 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T009 [P] Run `make test-backend` to ensure all tests pass.
-- [ ] T010 [P] Execute curl scenarios from `quickstart.md` against local running server to manually validate.
+- [x] T009 [P] Run `make test-backend` to ensure all tests pass.
+- [x] T010 [P] Execute curl scenarios from `quickstart.md` against local running server to manually validate.
 
 ---
 

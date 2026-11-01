@@ -10,7 +10,7 @@
 
 **Purpose**: Project initialization and basic structure. As this is an existing project, setup is minimal.
 
-- [ ] T001 Initialize database migrations for new entities in `backend/migrations/`
+- [x] T001 Initialize database migrations for new entities in `backend/migrations/`
 
 ---
 
@@ -20,8 +20,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 Implement Go models (`User`, `ProjectAccess`, `Invitation`, `SystemConfig`) in `backend/internal/models/`
-- [ ] T003 Implement DB migrations for the new tables in `backend/migrations/`
+- [x] T002 Implement Go models (`User`, `ProjectAccess`, `Invitation`, `SystemConfig`) in `backend/internal/models/`
+- [x] T003 Implement DB migrations for the new tables in `backend/migrations/`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -35,10 +35,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T004 [P] [US1] Implement `UserService.GetUsers()` in `backend/internal/services/user_service.go`
-- [ ] T005 [US1] Implement `GET /api/v1/users` endpoint in `backend/internal/handlers/user_handler.go`
-- [ ] T006 [P] [US1] Create React `useUsers` hook in `frontend/src/hooks/useUsers.ts` to call the new API
-- [ ] T007 [US1] Integrate `useUsers` hook into `frontend/src/pages/UsersManagement.tsx`, removing the mock listing data.
+- [x] T004 [P] [US1] Implement `UserService.GetUsers()` in `backend/internal/services/user_service.go`
+- [x] T005 [US1] Implement `GET /api/v1/users` endpoint in `backend/internal/handlers/user_handler.go`
+- [x] T006 [P] [US1] Create React `useUsers` hook in `frontend/src/hooks/useUsers.ts` to call the new API
+- [x] T007 [US1] Integrate `useUsers` hook into `frontend/src/pages/UsersManagement.tsx`, removing the mock listing data.
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently.
 
@@ -52,11 +52,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [P] [US2] Implement `CryptoService.GenerateToken()` in `backend/internal/services/crypto_service.go`
-- [ ] T009 [P] [US2] Implement `EmailService.SendInvitation()` in `backend/internal/services/email_service.go`
-- [ ] T010 [US2] Implement `UserService.CreateInvitation()` in `backend/internal/services/user_service.go` (depends on T008)
-- [ ] T011 [US2] Implement `POST /api/v1/users/invite` in `backend/internal/handlers/user_handler.go` (depends on T009, T010)
-- [ ] T012 [US2] Update `frontend/src/pages/UsersManagement.tsx` to call API on invite form submit (replace mock invite).
+- [x] T008 [P] [US2] Implement `CryptoService.GenerateToken()` in `backend/internal/services/crypto_service.go`
+- [x] T009 [P] [US2] Implement `EmailService.SendInvitation()` in `backend/internal/services/email_service.go`
+- [x] T010 [US2] Implement `UserService.CreateInvitation()` in `backend/internal/services/user_service.go` (depends on T008)
+- [x] T011 [US2] Implement `POST /api/v1/users/invite` in `backend/internal/handlers/user_handler.go` (depends on T009, T010)
+- [x] T012 [US2] Update `frontend/src/pages/UsersManagement.tsx` to call API on invite form submit (replace mock invite).
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently.
 
@@ -70,9 +70,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T013 [P] [US3] Implement `UserService.UpdateUserAccess()` in `backend/internal/services/user_service.go`
-- [ ] T014 [US3] Implement `PUT /api/v1/users/:id/access` in `backend/internal/handlers/user_handler.go`
-- [ ] T015 [US3] Update `frontend/src/pages/UsersManagement.tsx` to call API on edit save (replace mock edit).
+- [x] T013 [P] [US3] Implement `UserService.UpdateUserAccess()` in `backend/internal/services/user_service.go`
+- [x] T014 [US3] Implement `PUT /api/v1/users/:id/access` in `backend/internal/handlers/user_handler.go`
+- [x] T015 [US3] Update `frontend/src/pages/UsersManagement.tsx` to call API on edit save (replace mock edit).
 
 **Checkpoint**: All user management capabilities are fully functional.
 
@@ -86,11 +86,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T016 [P] [US4] Implement `CryptoService.EncryptAES()` and `DecryptAES()` in `backend/internal/services/crypto_service.go`
-- [ ] T017 [US4] Implement `GET /api/v1/config/smtp` and `PUT /api/v1/config/smtp` in `backend/internal/handlers/config_handler.go` (depends on T016)
-- [ ] T018 [US4] Implement `POST /api/v1/config/smtp/test` in `backend/internal/handlers/config_handler.go`
-- [ ] T019 [P] [US4] Create React `useConfig` hook in `frontend/src/hooks/useConfig.ts`
-- [ ] T020 [US4] Implement `frontend/src/pages/SystemSettings.tsx` with a form to manage SMTP config.
+- [x] T016 [P] [US4] Implement `CryptoService.EncryptAES()` and `DecryptAES()` in `backend/internal/services/crypto_service.go`
+- [x] T017 [US4] Implement `GET /api/v1/config/smtp` and `PUT /api/v1/config/smtp` in `backend/internal/handlers/config_handler.go` (depends on T016)
+- [x] T018 [US4] Implement `POST /api/v1/config/smtp/test` in `backend/internal/handlers/config_handler.go`
+- [x] T019 [P] [US4] Create React `useConfig` hook in `frontend/src/hooks/useConfig.ts`
+- [x] T020 [US4] Implement `frontend/src/pages/SystemSettings.tsx` with a form to manage SMTP config.
 
 **Checkpoint**: All user stories should now be independently functional.
 
@@ -100,8 +100,8 @@
 
 **Purpose**: Improvements that affect multiple user stories.
 
-- [ ] T021 Code cleanup, removing any unused mock code from the frontend
-- [ ] T022 Run `quickstart.md` validation end-to-end
+- [x] T021 Code cleanup, removing any unused mock code from the frontend
+- [x] T022 Run `quickstart.md` validation end-to-end
 
 ---
 

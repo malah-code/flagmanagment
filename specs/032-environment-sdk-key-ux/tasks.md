@@ -30,8 +30,8 @@
 
 ### Implementation for User Story 1
 
-- [ ] T001 [US1] Update `Environment` interface in `frontend/src/types/index.ts` to ensure `apiKey` / client key is typed.
-- [ ] T002 [US1] Update `frontend/src/components/environments/EnvironmentsList.tsx` to render the Client SDK Key on environment cards with a 1-click copy button and feedback toast.
+- [x] T001 [US1] Update `Environment` interface in `frontend/src/types/index.ts` to ensure `apiKey` / client key is typed.
+- [x] T002 [US1] Update `frontend/src/components/environments/EnvironmentsList.tsx` to render the Client SDK Key on environment cards with a 1-click copy button and feedback toast.
 
 **Checkpoint**: User Story 1 is functional and testable independently.
 
@@ -61,7 +61,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T006 [US3] Add "Client-Side / Public Key" badges and tooltip helpers to `EnvironmentsList.tsx` and `SDKIntegrationModal.tsx`.
+- [x] T006 [US3] Add "Client-Side / Public Key" badges and tooltip helpers to `EnvironmentsList.tsx` and `SDKIntegrationModal.tsx`.
 
 **Checkpoint**: All user stories are complete.
 
@@ -69,8 +69,8 @@
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T007 [P] Run `quickstart.md` validation scenarios.
-- [ ] T008 [P] Verify responsive behavior of `SDKIntegrationModal` on mobile screens.
+- [x] T007 [P] Run `quickstart.md` validation scenarios.
+- [x] T008 [P] Verify responsive behavior of `SDKIntegrationModal` on mobile screens.
 
 ---
 

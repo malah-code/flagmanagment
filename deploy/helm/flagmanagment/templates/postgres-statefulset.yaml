@@ -1,0 +1,68 @@
+{{- if .Values.postgresql.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "flagmanagment.fullname" . }}-postgresql
+  labels:
+    {{- include "flagmanagment.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  serviceName: {{ include "flagmanagment.fullname" . }}-postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "flagmanagment.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgresql
+  template:
+    metadata:
+      labels:
+        {{- include "flagmanagment.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: "{{ .Values.postgresql.image.repository | default "postgres" }}:{{ .Values.postgresql.image.tag | default "16-alpine" }}"
+          imagePullPolicy: {{ .Values.postgresql.image.pullPolicy | default "IfNotPresent" }}
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "flagmanagment.fullname" . }}-secrets
+                  key: DB_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.postgresql.persistence.size | default "10Gi" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flagmanagment.fullname" . }}-postgresql
+  labels:
+    {{- include "flagmanagment.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: postgresql
+      name: postgresql
+  selector:
+    {{- include "flagmanagment.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+{{- end }}
+

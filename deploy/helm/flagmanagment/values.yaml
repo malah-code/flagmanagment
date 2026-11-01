@@ -1,0 +1,124 @@
+# Default values for flagmanagment Helm chart.
+# This is a YAML-formatted file.
+
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Backend API and Evaluation Engine Service
+backend:
+  replicaCount: 2
+  image:
+    repository: flagmanagment/backend
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 8080
+    grpcPort: 9090
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 75
+    targetMemoryUtilizationPercentage: 80
+  env:
+    environment: "production"
+    logLevel: "info"
+    corsOrigins: "*"
+
+# Frontend Dashboard Service
+frontend:
+  replicaCount: 2
+  image:
+    repository: flagmanagment/frontend
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Pre-Install / Pre-Upgrade Database Migrations Hook
+migrations:
+  enabled: true
+  image:
+    repository: flagmanagment/backend
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+# Security Secrets (JWT, AES Encryption, Salting)
+secrets:
+  jwtSecret: ""
+  encryptionKey: ""
+  hashingSalt: ""
+
+# Standalone Embedded PostgreSQL 16 (Disable for Managed Cloud DB)
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  auth:
+    database: flagmanagment
+    username: postgres
+    password: "postgrespassword"
+  persistence:
+    enabled: true
+    size: 10Gi
+
+# External Managed PostgreSQL Database Configuration
+externalDatabase:
+  host: ""
+  port: 5432
+  user: ""
+  password: ""
+  database: ""
+
+# Standalone Embedded Redis 7 (Disable for Managed Redis / ElastiCache)
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7-alpine"
+    pullPolicy: IfNotPresent
+
+# External Managed Redis Configuration
+externalRedis:
+  host: ""
+  port: 6379
+  password: ""
+
+# Ingress Configuration with TLS Termination
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "16m"
+  hosts:
+    - host: flagmanagment.local
+  tls: []
+

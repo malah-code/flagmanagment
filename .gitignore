@@ -52,3 +52,6 @@ out/
 *.tfvars
 .terraform.lock.hcl
 google-chrome-stable_current_amd64.deb
+test-results.json
+results.xml
+auth.json

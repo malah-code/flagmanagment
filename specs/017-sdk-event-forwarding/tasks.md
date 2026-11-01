@@ -10,7 +10,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create `backend/internal/sdk/hooks` directory
+- [x] T001 Create `backend/internal/sdk/hooks` directory
 
 ---
 
@@ -30,9 +30,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T002 [US1] Implement OpenFeature Hook invocation in `backend/internal/sdk/evaluator.go` inside `EvaluateSingleFlag` (execute `After` hooks asynchronously via goroutines).
-- [ ] T003 [US1] Ensure `Error` hooks are invoked in `evaluator.go` if flag evaluation fails.
-- [ ] T004 [P] [US1] Create unit tests in `backend/internal/sdk/evaluator_test.go` to verify hooks are invoked asynchronously and panics are safely recovered.
+- [x] T002 [US1] Implement OpenFeature Hook invocation in `backend/internal/sdk/evaluator.go` inside `EvaluateSingleFlag` (execute `After` hooks asynchronously via goroutines).
+- [x] T003 [US1] Ensure `Error` hooks are invoked in `evaluator.go` if flag evaluation fails.
+- [x] T004 [P] [US1] Create unit tests in `backend/internal/sdk/evaluator_test.go` to verify hooks are invoked asynchronously and panics are safely recovered.
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently.
 
@@ -46,8 +46,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T005 [P] [US2] Implement reference `AnalyticsHook` (conforming to OpenFeature `Hook` interface) in `backend/internal/sdk/hooks/analytics_hook.go`.
-- [ ] T006 [P] [US2] Create unit tests in `backend/internal/sdk/hooks/analytics_hook_test.go` to verify the `After` method executes properly without blocking.
+- [x] T005 [P] [US2] Implement reference `AnalyticsHook` (conforming to OpenFeature `Hook` interface) in `backend/internal/sdk/hooks/analytics_hook.go`.
+- [x] T006 [P] [US2] Create unit tests in `backend/internal/sdk/hooks/analytics_hook_test.go` to verify the `After` method executes properly without blocking.
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently.
 
@@ -57,8 +57,8 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T007 [P] Run `make test-backend` to ensure all tests pass.
-- [ ] T008 [P] Verify `quickstart.md` validation scenario manually (if necessary).
+- [x] T007 [P] Run `make test-backend` to ensure all tests pass.
+- [x] T008 [P] Verify `quickstart.md` validation scenario manually (if necessary).
 
 ---
 

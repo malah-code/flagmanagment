@@ -1,0 +1,19 @@
+apiVersion: v2
+name: flagmanagment
+description: Production-grade Helm chart for FlagManagment - Open-Source Enterprise Feature Flagging & Targeting Platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - feature-flags
+  - targeting
+  - remote-config
+  - openfeature
+  - kubernetes
+icon: https://raw.githubusercontent.com/malah-code/flagmanagment/main/frontend/public/favicon.ico
+home: https://github.com/malah-code/flagmanagment
+sources:
+  - https://github.com/malah-code/flagmanagment
+maintainers:
+  - name: FlagManagment Platform Team
+    email: maintainers@flagmanagment.io

@@ -94,6 +94,26 @@ npm run dev
 
 ---
 
+### Option C: Production Kubernetes & Helm Deployment
+
+FlagManagment provides an official production Helm v3 chart at [`deploy/helm/flagmanagment`](../deploy/helm/flagmanagment):
+
+```bash
+# 1. Lint the Helm chart
+helm lint deploy/helm/flagmanagment
+
+# 2. Deploy to Kubernetes with a single command
+helm install flagmanagment ./deploy/helm/flagmanagment \
+  --create-namespace \
+  --namespace flagmanagment
+
+# 3. Verify pods, services, ingress, and HPA
+kubectl get all -n flagmanagment
+```
+For external database (RDS/Cloud SQL) and managed Redis configurations, see the [Helm Quickstart Guide](../specs/037-k8s-helm-production-deployment/quickstart.md).
+
+---
+
 ## 3. Repository Structure
 
 ```
@@ -208,11 +228,29 @@ golangci-lint run ./...
 cd frontend
 
 # Run Vitest test suites
-npx vitest run
+npm test
+
+# Run with coverage report
+npm run test:coverage
 
 # Run in watch mode during development
 npx vitest
 ```
+
+### 4. Unified Test Suite Runner & Performance Benchmarks
+To execute the comprehensive test suite across all layers with JSON/JUnit reporting:
+```bash
+# Run all test layers sequentially
+./scripts/run-all-tests.sh --all --json
+
+# Run evaluation performance benchmarks (< 1ms assertion)
+./scripts/run-all-tests.sh --perf
+```
+
+### 5. Troubleshooting Test Failures
+- **Go version mismatch**: Backend requires Go `>= 1.25.0` (ensure `go version` reports 1.25+).
+- **Database connection error**: Integration tests in `backend/tests/` automatically mock or connect to `postgres://postgres:postgres@localhost:5432/flagmanagment?sslmode=disable`. Start local Postgres via `docker compose up -d postgres`.
+- **Vitest DOM errors**: Ensure tests modifying UI components are wrapped in React `act()` if performing asynchronous state updates.
 
 ### 4. Frontend Linting & Style Checks
 ```bash

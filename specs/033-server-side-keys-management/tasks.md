@@ -10,7 +10,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create database migration file for `environment_server_keys` table in `backend/migrations/`
+- [x] T001 Create database migration file for `environment_server_keys` table in `backend/migrations/`
 
 ---
 
@@ -18,7 +18,7 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T002 Implement `EnvironmentServerKey` model in `backend/internal/models/environment.go`
+- [x] T002 Implement `EnvironmentServerKey` model in `backend/internal/models/environment.go`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -32,9 +32,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T003 [P] [US1] Create `frontend/src/components/environments/EnvironmentSettingsTabs.tsx` to handle tabbed layout (`General`, `Keys`, `SDK Settings`).
-- [ ] T004 [P] [US1] Create `frontend/src/components/environments/ClientSideKeyCard.tsx` extracting existing client-side key UI.
-- [ ] T005 [US1] Update environment detail views (e.g. `frontend/src/components/environments/EnvironmentsList.tsx`) to integrate the new `EnvironmentSettingsTabs` and `ClientSideKeyCard`.
+- [x] T003 [P] [US1] Create `frontend/src/components/environments/EnvironmentSettingsTabs.tsx` to handle tabbed layout (`General`, `Keys`, `SDK Settings`).
+- [x] T004 [P] [US1] Create `frontend/src/components/environments/ClientSideKeyCard.tsx` extracting existing client-side key UI.
+- [x] T005 [US1] Update environment detail views (e.g. `frontend/src/components/environments/EnvironmentsList.tsx`) to integrate the new `EnvironmentSettingsTabs` and `ClientSideKeyCard`.
 
 **Checkpoint**: User Story 1 should be fully functional with the tabbed UI and Client key visible.
 
@@ -48,16 +48,16 @@
 
 ### Implementation for User Story 2
 
-- [ ] T006 [P] [US2] Define Create/List server key request and response structs in `backend/internal/dto/requests.go` and `backend/internal/dto/responses.go`
-- [ ] T007 [P] [US2] Implement server keys database operations in `backend/internal/repository/environment_repo.go` (or a dedicated repo file)
-- [ ] T008 [US2] Implement business logic (Create, List, Delete) for Server Keys in `backend/internal/services/environment_service.go`
-- [ ] T009 [US2] Add HTTP handlers for Server Keys endpoints in `backend/internal/api/handlers/environment_handler.go`
-- [ ] T010 [US2] Register Server Keys routes in `backend/internal/api/router.go`
-- [ ] T011 [P] [US2] Add ServerKey types in `frontend/src/types/index.ts`
-- [ ] T012 [P] [US2] Add ServerKey API calls (create, list, delete) in `frontend/src/services/apiClient.ts`
-- [ ] T013 [P] [US2] Create `frontend/src/components/environments/CreateServerKeyDialog.tsx`
-- [ ] T014 [US2] Create `frontend/src/components/environments/ServerSideKeysPanel.tsx` listing keys with "Show/Hide", "Copy", and "Revoke" functionality
-- [ ] T015 [US2] Integrate `ServerSideKeysPanel` and `CreateServerKeyDialog` into the "Keys" tab of `EnvironmentSettingsTabs.tsx`
+- [x] T006 [P] [US2] Define Create/List server key request and response structs in `backend/internal/dto/requests.go` and `backend/internal/dto/responses.go`
+- [x] T007 [P] [US2] Implement server keys database operations in `backend/internal/repository/environment_repo.go` (or a dedicated repo file)
+- [x] T008 [US2] Implement business logic (Create, List, Delete) for Server Keys in `backend/internal/services/environment_service.go`
+- [x] T009 [US2] Add HTTP handlers for Server Keys endpoints in `backend/internal/api/handlers/environment_handler.go`
+- [x] T010 [US2] Register Server Keys routes in `backend/internal/api/router.go`
+- [x] T011 [P] [US2] Add ServerKey types in `frontend/src/types/index.ts`
+- [x] T012 [P] [US2] Add ServerKey API calls (create, list, delete) in `frontend/src/services/apiClient.ts`
+- [x] T013 [P] [US2] Create `frontend/src/components/environments/CreateServerKeyDialog.tsx`
+- [x] T014 [US2] Create `frontend/src/components/environments/ServerSideKeysPanel.tsx` listing keys with "Show/Hide", "Copy", and "Revoke" functionality
+- [x] T015 [US2] Integrate `ServerSideKeysPanel` and `CreateServerKeyDialog` into the "Keys" tab of `EnvironmentSettingsTabs.tsx`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Server Keys can be fully managed.
 

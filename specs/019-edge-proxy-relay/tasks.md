@@ -10,12 +10,12 @@
 
 **Purpose**: Create the `proxy/` Go module and directory skeleton so all subsequent tasks have a compile target.
 
-- [ ] T001 Create top-level `proxy/` directory and initialize Go module (`proxy/go.mod`) with module path `github.com/flagmanagment/proxy`
-- [ ] T002 [P] Create directory skeleton: `proxy/cmd/proxy/`, `proxy/internal/config/`, `proxy/internal/upstream/`, `proxy/internal/store/`, `proxy/internal/broadcaster/`, `proxy/internal/server/`, `proxy/internal/health/`
-- [ ] T003 [P] Add Go dependencies to `proxy/go.mod`: `google.golang.org/grpc`, `github.com/go-chi/chi/v5`, `github.com/rs/zerolog`, `github.com/google/uuid`
-- [ ] T004 Copy `backend/pkg/gen/sdk/v1/` generated proto types to `proxy/pkg/gen/sdk/v1/` (or add as a local `replace` directive pointing at the backend module — no duplication of proto source)
-- [ ] T005 [P] Create `proxy/Dockerfile` (multi-stage, multi-arch: `golang:1.21-alpine` build → `gcr.io/distroless/static` runtime, `CGO_ENABLED=0`)
-- [ ] T006 [P] Create `proxy/Dockerfile.dev` (hot-reload with `air`)
+- [x] T001 Create top-level `proxy/` directory and initialize Go module (`proxy/go.mod`) with module path `github.com/flagmanagment/proxy`
+- [x] T002 [P] Create directory skeleton: `proxy/cmd/proxy/`, `proxy/internal/config/`, `proxy/internal/upstream/`, `proxy/internal/store/`, `proxy/internal/broadcaster/`, `proxy/internal/server/`, `proxy/internal/health/`
+- [x] T003 [P] Add Go dependencies to `proxy/go.mod`: `google.golang.org/grpc`, `github.com/go-chi/chi/v5`, `github.com/rs/zerolog`, `github.com/google/uuid`
+- [x] T004 Copy `backend/pkg/gen/sdk/v1/` generated proto types to `proxy/pkg/gen/sdk/v1/` (or add as a local `replace` directive pointing at the backend module — no duplication of proto source)
+- [x] T005 [P] Create `proxy/Dockerfile` (multi-stage, multi-arch: `golang:1.21-alpine` build → `gcr.io/distroless/static` runtime, `CGO_ENABLED=0`)
+- [x] T006 [P] Create `proxy/Dockerfile.dev` (hot-reload with `air`)
 
 **Checkpoint**: `cd proxy && go build ./...` succeeds (compiles empty stubs).
 
@@ -25,11 +25,11 @@
 
 **Purpose**: Core config and in-memory store that every user story depends on. Must complete before Phase 3.
 
-- [ ] T007 Implement `proxy/internal/config/config.go` — `ProxyConfig` struct and `Load()` function reading all env vars (`FM_PROXY_BACKEND_ADDR`, `FM_PROXY_ENV_TOKEN`, `FM_PROXY_GRPC_PORT`, `FM_PROXY_HEALTH_PORT`, `FM_PROXY_UPSTREAM_TLS`, `FM_PROXY_TLS_CERT`, `FM_PROXY_TLS_KEY`, `FM_PROXY_LOG_FORMAT`) with defaults
-- [ ] T008 Implement `proxy/internal/store/ruleset.go` — thread-safe `RulesetStore` with `Get()`, `Set()`, `Version()` methods using `sync.RWMutex` protecting `*pb.RulesetSnapshot` and `version string`
-- [ ] T009 Implement `proxy/internal/broadcaster/broadcaster.go` — `Broadcaster` with `Register(client)`, `Deregister(clientID)`, `Broadcast(delta)` (non-blocking, per-client buffered channels of size 10), `Count() int`
-- [ ] T010 Write unit tests for `RulesetStore` in `proxy/internal/store/ruleset_test.go` — concurrent Get/Set, version updates
-- [ ] T011 Write unit tests for `Broadcaster` in `proxy/internal/broadcaster/broadcaster_test.go` — fan-out to N clients, slow consumer drop, deregister during broadcast
+- [x] T007 Implement `proxy/internal/config/config.go` — `ProxyConfig` struct and `Load()` function reading all env vars (`FM_PROXY_BACKEND_ADDR`, `FM_PROXY_ENV_TOKEN`, `FM_PROXY_GRPC_PORT`, `FM_PROXY_HEALTH_PORT`, `FM_PROXY_UPSTREAM_TLS`, `FM_PROXY_TLS_CERT`, `FM_PROXY_TLS_KEY`, `FM_PROXY_LOG_FORMAT`) with defaults
+- [x] T008 Implement `proxy/internal/store/ruleset.go` — thread-safe `RulesetStore` with `Get()`, `Set()`, `Version()` methods using `sync.RWMutex` protecting `*pb.RulesetSnapshot` and `version string`
+- [x] T009 Implement `proxy/internal/broadcaster/broadcaster.go` — `Broadcaster` with `Register(client)`, `Deregister(clientID)`, `Broadcast(delta)` (non-blocking, per-client buffered channels of size 10), `Count() int`
+- [x] T010 Write unit tests for `RulesetStore` in `proxy/internal/store/ruleset_test.go` — concurrent Get/Set, version updates
+- [x] T011 Write unit tests for `Broadcaster` in `proxy/internal/broadcaster/broadcaster_test.go` — fan-out to N clients, slow consumer drop, deregister during broadcast
 
 **Checkpoint**: `go test -race ./internal/store/... ./internal/broadcaster/...` passes with no race conditions.
 
@@ -43,12 +43,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Implement `proxy/internal/upstream/client.go` — `UpstreamClient` struct that wraps `pb.SDKServiceClient`; `Connect(ctx, cfg)` creates a gRPC client connection (with optional TLS from config); `Bootstrap(ctx) (*pb.RulesetSnapshot, error)` calls `FetchSnapshot`; `StreamDeltas(ctx) (<-chan *pb.RulesetDelta, error)` calls `StreamRulesets` and returns a channel
-- [ ] T013 [US1] Implement reconnection loop in `proxy/internal/upstream/client.go` — `Run(ctx, store, broadcaster)` goroutine that: bootstraps snapshot → populates `RulesetStore` → streams deltas → on disconnect applies exponential backoff (1s start, 2x factor, 60s max, ±25% jitter) → reconnects
-- [ ] T014 [US1] Implement `proxy/internal/server/service.go` — `ProxyServer` implementing `pb.SDKServiceServer`; `FetchSnapshot`: validates token matches `FM_PROXY_ENV_TOKEN`, returns `RulesetStore.Get()`; `StreamRulesets`: validates token, registers client with `Broadcaster`, reads delta channel and streams to client, deregisters on disconnect or context cancel
-- [ ] T015 [US1] Implement `proxy/cmd/proxy/main.go` — load config, init zerolog logger, create `RulesetStore`, `Broadcaster`, `UpstreamClient`; start upstream `Run()` goroutine; start downstream gRPC server on `FM_PROXY_GRPC_PORT`; graceful shutdown on SIGTERM/SIGINT
-- [ ] T016 [US1] Implement `proxy/internal/upstream/state.go` — `UpstreamState` struct with `connected bool`, `connectedSince *time.Time`, `lastDeltaAt *time.Time`, `mu sync.RWMutex`; `SetConnected(bool)`, `RecordDelta()`, `Snapshot() UpstreamStateSnapshot` methods (used by health handler)
-- [ ] T017 [US1] Write integration test `proxy/internal/upstream/client_test.go` — spin up a mock `SDKServiceServer` in-process, verify `Bootstrap()` populates store, verify `StreamDeltas()` delivers a delta when mock server sends one
+- [x] T012 [US1] Implement `proxy/internal/upstream/client.go` — `UpstreamClient` struct that wraps `pb.SDKServiceClient`; `Connect(ctx, cfg)` creates a gRPC client connection (with optional TLS from config); `Bootstrap(ctx) (*pb.RulesetSnapshot, error)` calls `FetchSnapshot`; `StreamDeltas(ctx) (<-chan *pb.RulesetDelta, error)` calls `StreamRulesets` and returns a channel
+- [x] T013 [US1] Implement reconnection loop in `proxy/internal/upstream/client.go` — `Run(ctx, store, broadcaster)` goroutine that: bootstraps snapshot → populates `RulesetStore` → streams deltas → on disconnect applies exponential backoff (1s start, 2x factor, 60s max, ±25% jitter) → reconnects
+- [x] T014 [US1] Implement `proxy/internal/server/service.go` — `ProxyServer` implementing `pb.SDKServiceServer`; `FetchSnapshot`: validates token matches `FM_PROXY_ENV_TOKEN`, returns `RulesetStore.Get()`; `StreamRulesets`: validates token, registers client with `Broadcaster`, reads delta channel and streams to client, deregisters on disconnect or context cancel
+- [x] T015 [US1] Implement `proxy/cmd/proxy/main.go` — load config, init zerolog logger, create `RulesetStore`, `Broadcaster`, `UpstreamClient`; start upstream `Run()` goroutine; start downstream gRPC server on `FM_PROXY_GRPC_PORT`; graceful shutdown on SIGTERM/SIGINT
+- [x] T016 [US1] Implement `proxy/internal/upstream/state.go` — `UpstreamState` struct with `connected bool`, `connectedSince *time.Time`, `lastDeltaAt *time.Time`, `mu sync.RWMutex`; `SetConnected(bool)`, `RecordDelta()`, `Snapshot() UpstreamStateSnapshot` methods (used by health handler)
+- [x] T017 [US1] Write integration test `proxy/internal/upstream/client_test.go` — spin up a mock `SDKServiceServer` in-process, verify `Bootstrap()` populates store, verify `StreamDeltas()` delivers a delta when mock server sends one
 
 **Checkpoint**: Run Quickstart Scenario 1 and Scenario 2. `grpcurl FetchSnapshot` returns correct flags. Health reports `healthy`.
 
@@ -62,9 +62,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Implement `proxy/internal/health/handler.go` — `HealthHandler` accepting `*UpstreamState` and `*Broadcaster`; `ServeHTTP`: builds `HealthResponse` from state snapshot and client count; returns HTTP 200 for `healthy`/`degraded`, HTTP 503 for `starting_up`
-- [ ] T019 [US2] Wire health HTTP server into `proxy/cmd/proxy/main.go` — start Chi router on `FM_PROXY_HEALTH_PORT` with `GET /healthz` route served by `HealthHandler`; graceful shutdown on SIGTERM
-- [ ] T020 [P] [US2] Write unit test `proxy/internal/health/handler_test.go` — mock `UpstreamState` and `Broadcaster`; assert HTTP 200 + correct JSON for healthy, HTTP 200 + `degraded` status when upstream disconnected, HTTP 503 for `starting_up`
+- [x] T018 [US2] Implement `proxy/internal/health/handler.go` — `HealthHandler` accepting `*UpstreamState` and `*Broadcaster`; `ServeHTTP`: builds `HealthResponse` from state snapshot and client count; returns HTTP 200 for `healthy`/`degraded`, HTTP 503 for `starting_up`
+- [x] T019 [US2] Wire health HTTP server into `proxy/cmd/proxy/main.go` — start Chi router on `FM_PROXY_HEALTH_PORT` with `GET /healthz` route served by `HealthHandler`; graceful shutdown on SIGTERM
+- [x] T020 [P] [US2] Write unit test `proxy/internal/health/handler_test.go` — mock `UpstreamState` and `Broadcaster`; assert HTTP 200 + correct JSON for healthy, HTTP 200 + `degraded` status when upstream disconnected, HTTP 503 for `starting_up`
 
 **Checkpoint**: Run Quickstart Scenario 4 (upstream outage). Health endpoint correctly reports `degraded` when backend is stopped.
 
@@ -78,9 +78,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Add concurrent connection tracking to `Broadcaster` — ensure `Register` and `Deregister` are safe under high concurrency (`go test -race -count=100`); add `Count()` method used by health handler
-- [ ] T022 [US3] Write stress test `proxy/internal/broadcaster/broadcaster_stress_test.go` — 500 registered clients, one broadcast, assert all 500 channels received delta within 500ms using `time.After` assertion; verify no goroutine leaks after `Deregister`
-- [ ] T023 [US3] Implement `StreamRulesets` bootstrap delivery in `proxy/internal/server/service.go` — on client connect, immediately send a synthetic `RulesetDelta{FullReset: true, Version: store.Version()}` so the reconnecting client gets the current version without re-bootstrapping against the backend
+- [x] T021 [US3] Add concurrent connection tracking to `Broadcaster` — ensure `Register` and `Deregister` are safe under high concurrency (`go test -race -count=100`); add `Count()` method used by health handler
+- [x] T022 [US3] Write stress test `proxy/internal/broadcaster/broadcaster_stress_test.go` — 500 registered clients, one broadcast, assert all 500 channels received delta within 500ms using `time.After` assertion; verify no goroutine leaks after `Deregister`
+- [x] T023 [US3] Implement `StreamRulesets` bootstrap delivery in `proxy/internal/server/service.go` — on client connect, immediately send a synthetic `RulesetDelta{FullReset: true, Version: store.Version()}` so the reconnecting client gets the current version without re-bootstrapping against the backend
 
 **Checkpoint**: Run Quickstart Scenario 3 (100 concurrent streaming clients, one delta broadcast). All clients receive within 500ms. `go test -race ./...` passes.
 
@@ -90,13 +90,13 @@
 
 **Purpose**: Production hardening, Docker image validation, and docker-compose integration.
 
-- [ ] T024 [P] Add `docker-compose.edge-proxy.yml` (override file) adding an optional `edge-proxy` service: uses `proxy/Dockerfile`, mounts env vars, exposes ports `9091` and `8081`, `depends_on: backend`
-- [ ] T025 [P] Add `proxy/README.md` documenting all environment variables, quickstart steps, and SDK configuration change required (endpoint only)
-- [ ] T026 Validate Docker image size: run `docker build -t flagmanagment-proxy:ci proxy/` and assert `docker image inspect --format='{{.Size}}'` < 30MB (add as CI step or note in quickstart)
-- [ ] T027 [P] Configure multi-arch build in `proxy/Dockerfile` using `--platform linux/amd64,linux/arm64` via `docker buildx`; test ARM64 build completes without errors
-- [ ] T028 Run full test suite `cd proxy && go test -race ./...` and confirm all tests pass with zero race conditions
-- [ ] T029 Run all 6 Quickstart validation scenarios from `specs/019-edge-proxy-relay/quickstart.md` and confirm each passes
-- [ ] T030 [P] Update root `README.md` (or `docs/`) to document the Edge Proxy component, when to use it, and link to `proxy/README.md`
+- [x] T024 [P] Add `docker-compose.edge-proxy.yml` (override file) adding an optional `edge-proxy` service: uses `proxy/Dockerfile`, mounts env vars, exposes ports `9091` and `8081`, `depends_on: backend`
+- [x] T025 [P] Add `proxy/README.md` documenting all environment variables, quickstart steps, and SDK configuration change required (endpoint only)
+- [x] T026 Validate Docker image size: run `docker build -t flagmanagment-proxy:ci proxy/` and assert `docker image inspect --format='{{.Size}}'` < 30MB (add as CI step or note in quickstart)
+- [x] T027 [P] Configure multi-arch build in `proxy/Dockerfile` using `--platform linux/amd64,linux/arm64` via `docker buildx`; test ARM64 build completes without errors
+- [x] T028 Run full test suite `cd proxy && go test -race ./...` and confirm all tests pass with zero race conditions
+- [x] T029 Run all 6 Quickstart validation scenarios from `specs/019-edge-proxy-relay/quickstart.md` and confirm each passes
+- [x] T030 [P] Update root `README.md` (or `docs/`) to document the Edge Proxy component, when to use it, and link to `proxy/README.md`
 
 **Checkpoint**: All Quickstart scenarios pass. `go test -race ./...` green. Docker image < 30MB. ARM64 build succeeds.
 
