@@ -12,7 +12,7 @@
 | Domain | Status | Tests / Health | Notes |
 |---|---|---|---|
 | **Backend Core** | 🟢 Healthy | Unit/API: **Passing** (`go test ./...`) | Go 1.25, Chi, PostgreSQL, Redis Pub/Sub, gRPC, PII Encryption, SSO (OIDC) |
-| **Frontend UI** | 🟢 Functional | Vitest: **Passing** (8 suites, 11 tests) | React 19, Vite, Tailwind, Monaco Editor, Integrations Hub (PostHog/Datadog/Slack) |
+| **Frontend UI** | 🟢 Functional & Verified | Vitest: **Passing** (8 suites, 11 tests) | React 19, Vite, Tailwind, Monaco Editor, Live Browser Verified (Login, Error State, Projects, Team, System SSO/SMTP) |
 | **Core SDKs** | 🟢 Operational (Tested) | Node, Go, Python, React | 100% passing tests in unified runner, sub-ms benchmarks & OpenFeature providers |
 | **Secondary SDKs** | 🟢 Functional | Java, .NET, iOS, Android | Complete with MurmurHash3 bucketing, SSE streaming clients & OpenFeature providers |
 | **CI / CD** | 🟢 Active | GitHub Actions | Linting (Go, TS, Helm), Unit tests (Go, Vitest, Node, Python), Docker multi-stage builds, Trivy scans, Playwright E2E |
@@ -145,6 +145,7 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-10-31 (Live Admin UI Browser Verification)**: Executed `test-admin-ui` workflow across all core views. Validated Login (`/login`), Spec 027 error feedback (`Invalid email or password. Please try again.`), Projects list (`/projects`), Create Project modal, Team Settings (`/settings/users`), Invite Member modal, and System Settings (`/settings/system` with OIDC/SAML 2.0 SSO and SMTP configuration). Zero console errors.
 - **2026-10-31 (E2E CI Optimization)**: Targeted Chromium browser download in Playwright CI step (`playwright install chromium --with-deps`) to optimize installation time.
 - **2026-10-31 (Release Packaging Automation)**: Configured `.github/workflows/release.yml` to automatically package the Helm chart and attach `flagmanagment-1.0.0.tgz` as a release asset upon tag push.
 - **2026-10-31 (CI Pipeline Fix & Documentation Enhancement)**: Fixed Trivy action tag reference (`@v0.36.0`) with audit output mode, updated `README.md` with official Helm v3 deployment guide, Go 1.25+ / React 19 badges, unified test runner instructions, and the 8-language OpenFeature SDK Matrix.
