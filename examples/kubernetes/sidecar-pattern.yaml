@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: default
+  labels:
+    app: order-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        # 1. Primary Microservice Application Container
+        - name: order-service
+          image: mycompany/order-service:v2.4.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            # SDK connects locally to the co-located Edge Proxy Sidecar
+            - name: FLAGMANAGMENT_GRPC_ENDPOINT
+              value: "localhost:9091"
+            - name: FLAGMANAGMENT_ENV_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: flagmanagment-secrets
+                  key: env-token
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+
+        # 2. FlagManagment Edge Proxy Sidecar Container
+        # Maintains single gRPC connection to central cluster and caches rulesets in-memory
+        - name: flagmanagment-edge-proxy
+          image: ghcr.io/malah-code/flagmanagment-proxy:v1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9091
+              name: grpc
+            - containerPort: 8081
+              name: health
+          env:
+            # Address of central FlagManagment backend
+            - name: FM_PROXY_BACKEND_ADDR
+              value: "flagmanagment-backend.flagmanagment.svc.cluster.local:9090"
+            - name: FM_PROXY_ENV_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: flagmanagment-secrets
+                  key: env-token
+            - name: FM_PROXY_GRPC_PORT
+              value: "9091"
+            - name: FM_PROXY_HEALTH_PORT
+              value: "8081"
+            - name: FM_PROXY_UPSTREAM_TLS
+              value: "false"
+            - name: FM_PROXY_LOG_FORMAT
+              value: "json"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

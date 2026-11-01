@@ -9,6 +9,7 @@ env:
   REGISTRY: ghcr.io
   BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/flagmanagment-backend
   FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/flagmanagment-frontend
+  PROXY_IMAGE: ghcr.io/${{ github.repository_owner }}/flagmanagment-proxy
 
 jobs:
   publish:
@@ -98,3 +99,25 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
+
+      - name: Extract Docker metadata (Edge Proxy)
+        id: meta-proxy
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.PROXY_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push edge-proxy
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./proxy/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta-proxy.outputs.tags }}
+          labels: ${{ steps.meta-proxy.outputs.labels }}

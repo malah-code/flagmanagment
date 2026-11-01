@@ -1,0 +1,72 @@
+{{- if .Values.edgeProxy.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "flagmanagment.fullname" . }}-edge-proxy
+  labels:
+    {{- include "flagmanagment.labels" . | nindent 4 }}
+    app.kubernetes.io/component: edge-proxy
+spec:
+  {{- if not .Values.edgeProxy.autoscaling.enabled }}
+  replicas: {{ .Values.edgeProxy.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "flagmanagment.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: edge-proxy
+  template:
+    metadata:
+      labels:
+        {{- include "flagmanagment.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: edge-proxy
+    spec:
+      serviceAccountName: {{ include "flagmanagment.serviceAccountName" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: edge-proxy
+          image: "{{ .Values.edgeProxy.image.repository }}:{{ .Values.edgeProxy.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.edgeProxy.image.pullPolicy | default "IfNotPresent" }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.edgeProxy.service.grpcPort }}
+              protocol: TCP
+            - name: health
+              containerPort: {{ .Values.edgeProxy.service.healthPort }}
+              protocol: TCP
+          env:
+            - name: FM_PROXY_BACKEND_ADDR
+              value: "{{ include "flagmanagment.fullname" . }}-backend:{{ .Values.backend.service.grpcPort }}"
+            - name: FM_PROXY_GRPC_PORT
+              value: {{ .Values.edgeProxy.service.grpcPort | quote }}
+            - name: FM_PROXY_HEALTH_PORT
+              value: {{ .Values.edgeProxy.service.healthPort | quote }}
+            - name: FM_PROXY_UPSTREAM_TLS
+              value: {{ .Values.edgeProxy.env.upstreamTls | quote }}
+            - name: FM_PROXY_LOG_FORMAT
+              value: {{ .Values.edgeProxy.env.logFormat | quote }}
+            {{- if .Values.edgeProxy.env.envToken }}
+            - name: FM_PROXY_ENV_TOKEN
+              value: {{ .Values.edgeProxy.env.envToken | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          resources:
+            {{- toYaml .Values.edgeProxy.resources | nindent 12 }}
+{{- end }}

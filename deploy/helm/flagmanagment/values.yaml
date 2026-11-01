@@ -122,3 +122,32 @@ ingress:
     - host: flagmanagment.local
   tls: []
 
+# Edge Proxy / Relay Node Service (In-Memory Sub-Millisecond Evaluation & Fanout)
+edgeProxy:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: flagmanagment/edge-proxy
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    grpcPort: 9091
+    healthPort: 8081
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 32Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+  env:
+    envToken: ""
+    upstreamTls: false
+    logFormat: "auto"
+

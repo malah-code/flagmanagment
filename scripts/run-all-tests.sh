@@ -10,6 +10,7 @@ RUN_E2E=false
 RUN_SDK=false
 RUN_PERF=false
 RUN_TERRAFORM=false
+RUN_PROXY=false
 GEN_JSON=false
 
 # Auto-detect Go toolchain if not in PATH
@@ -54,12 +55,17 @@ while [[ $# -gt 0 ]]; do
             RUN_TERRAFORM=true
             shift
             ;;
+        --proxy)
+            RUN_PROXY=true
+            shift
+            ;;
         --all)
             RUN_BACKEND=true
             RUN_FRONTEND=true
             RUN_SDK=true
             RUN_PERF=true
             RUN_TERRAFORM=true
+            RUN_PROXY=true
             shift
             ;;
         --json)
@@ -67,7 +73,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -h|--help)
-            echo "Usage: $0 [--backend] [--frontend] [--e2e] [--sdk] [--perf] [--terraform] [--all] [--json]"
+            echo "Usage: $0 [--backend] [--frontend] [--e2e] [--sdk] [--perf] [--terraform] [--proxy] [--all] [--json]"
             exit 0
             ;;
         *)
@@ -84,6 +90,7 @@ E2E_STATUS="SKIPPED"
 SDK_STATUS="SKIPPED"
 PERF_STATUS="SKIPPED"
 TERRAFORM_STATUS="SKIPPED"
+PROXY_STATUS="SKIPPED"
 OVERALL_EXIT=0
 
 echo "========================================================"
@@ -183,6 +190,23 @@ if [ "$RUN_TERRAFORM" = true ]; then
     fi
 fi
 
+if [ "$RUN_PROXY" = true ]; then
+    echo ""
+    echo ">>> Running Edge Proxy Tests & Build..."
+    if [ -d "$REPO_ROOT/proxy" ]; then
+        cd "$REPO_ROOT/proxy"
+        if go test ./... && go build -o proxy-bin ./cmd/proxy; then
+            rm -f proxy-bin
+            echo "✅ Edge Proxy build & tests passed."
+            PROXY_STATUS="PASS"
+        else
+            echo "❌ Edge Proxy tests failed."
+            PROXY_STATUS="FAIL"
+            OVERALL_EXIT=1
+        fi
+    fi
+fi
+
 if [ "$RUN_E2E" = true ]; then
     echo ""
     echo ">>> Running E2E Tests (Playwright)..."
@@ -209,7 +233,7 @@ fi
 
 echo ""
 echo "========================================================"
-echo " Summary: Backend=$BACKEND_STATUS, Frontend=$FRONTEND_STATUS, SDK=$SDK_STATUS, Terraform=$TERRAFORM_STATUS, Perf=$PERF_STATUS, E2E=$E2E_STATUS"
+echo " Summary: Backend=$BACKEND_STATUS, Frontend=$FRONTEND_STATUS, SDK=$SDK_STATUS, Terraform=$TERRAFORM_STATUS, Proxy=$PROXY_STATUS, Perf=$PERF_STATUS, E2E=$E2E_STATUS"
 echo "========================================================"
 
 exit $OVERALL_EXIT
