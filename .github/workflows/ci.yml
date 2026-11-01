@@ -69,9 +69,43 @@ jobs:
       - name: Run tests
         run: cd frontend && npm test
 
+  lint-helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.16.2'
+      - name: Helm Lint
+        run: helm lint deploy/helm/flagmanagment
+      - name: Helm Template Dry Run
+        run: helm template test-release deploy/helm/flagmanagment
+
+  test-sdks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Test Node SDK
+        run: |
+          cd sdk/node
+          npm ci
+          npm test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test Python SDK
+        run: |
+          cd sdk/python
+          pip install -e . pytest
+          pytest
+
   build-verify:
     runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend]
+    needs: [test-backend, test-frontend, lint-helm, test-sdks]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

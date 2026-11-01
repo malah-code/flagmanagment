@@ -15,8 +15,8 @@
 | **Frontend UI** | 🟢 Functional | Vitest: **Passing** (8 suites, 11 tests) | React 19, Vite, Tailwind, Monaco Editor, Integrations Hub (PostHog/Datadog/Slack) |
 | **Core SDKs** | 🟢 Operational (Tested) | Node, Go, Python, React | 100% passing tests in unified runner, sub-ms benchmarks & OpenFeature providers |
 | **Secondary SDKs** | 🟢 Functional | Java, .NET, iOS, Android | Complete with MurmurHash3 bucketing, SSE streaming clients & OpenFeature providers |
-| **CI / CD** | 🟢 Active | GitHub Actions | Linting, Go tests, Docker multi-stage builds, Trivy scans, Playwright E2E |
-| **K8s & Helm Deployment** | 🟢 Production Ready | `helm lint`: **0 errors** | Chart at `deploy/helm/flagmanagment` with Ingress, HPA, pre-migration job, embedded/external DB |
+| **CI / CD** | 🟢 Active | GitHub Actions | Linting (Go, TS, Helm), Unit tests (Go, Vitest, Node, Python), Docker multi-stage builds, Trivy scans, Playwright E2E |
+| **K8s & Helm Deployment** | 🟢 Production Ready | `helm lint`: **0 errors**, Packaged | Chart at `deploy/helm/flagmanagment` (v1.0.0 packaged) with Ingress, HPA, pre-migration job, embedded/external DB |
 | **SpecKit Governance** | 🟢 Fully Converged | 39 total specs | 39/39 completed (100%), 679/679 tasks verified & checked |
 
 ---
@@ -143,6 +143,7 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-10-31 (CI & Helm Release Packaging)**: Added Helm chart linting/dry-run rendering and Node/Python SDK automated testing to `.github/workflows/ci.yml`. Packaged production Helm chart v1.0.0 (`flagmanagment-1.0.0.tgz`).
 - **2026-10-31 (SDK Suite Validation)**: Verified all 8 SDKs (Node, Go, Python, React, Java, .NET, iOS, Android). Added Python pytest and React tsc build verification into `scripts/run-all-tests.sh`. All SDK tests pass.
 - **2026-10-31 (Full SpecKit Convergence)**: Reconciled all 39 specifications across `specs/` (001 through 039). All 679 tasks across all specs are now 100% completed, verified against working code, and passing tests.
 - **2026-10-31 (K8s Helm Chart Completed)**: Executed `/speckit-plan`, `/speckit-tasks`, and `/speckit-implement` for `037-k8s-helm-production-deployment`. Created official production Helm chart at `deploy/helm/flagmanagment` with backend HPA, frontend, ingress TLS, migration pre-hook job, and embedded/external PostgreSQL and Redis options. Verified with `helm lint` (0 errors).
