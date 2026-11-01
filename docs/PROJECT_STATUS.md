@@ -125,6 +125,7 @@ flowchart LR
     P1["✅ 1. Helm & K8s (Spec 037)"] --> P2["✅ 2. Automated Tests (Spec 038)"]
     P2 --> P3["✅ 3. SpecKit Convergence (39/39)"]
     P3 --> P4["✅ 4. Mobile & Compiled SDKs"]
+    P4 --> P5["5. Post-v1.0 Enhancements"]
 ```
 
 ### ✅ Phase 1: Kubernetes Helm Deployment (Spec 037)
@@ -141,6 +142,12 @@ flowchart LR
 - Delivered deterministic cross-language MurmurHash3 evaluation algorithms and OpenFeature providers across Java, .NET, iOS, and Android.
 - Added comprehensive evaluation test suites across `sdk/java` (JUnit 5), `sdk/dotnet` (xUnit), `sdk/ios` (XCTest), and `sdk/android` (JUnit 4).
 - Added multi-toolchain autodetection to `scripts/run-all-tests.sh`.
+
+### Phase 5: Post-v1.0 Enterprise Enhancements
+1. **Live Flag Telemetry & Evaluation Charts**: Surface real-time evaluations per minute, rollout variation distributions, and cache hit ratios directly in the Flag Detail dashboard.
+2. **Terraform Provider Example Registry**: Provide validated Terraform examples (`examples/terraform/`) for provisioning Flags, Environments, and Rules as Code.
+3. **Automated Stale Flag Governance Bot**: Background policy worker to identify stale/dead flags and automatically draft deprecation Change Requests or post Slack alerts.
+4. **Edge Proxy Sidecar & Multi-Region Caching**: Package `proxy/` as a lightweight sidecar deployment for sub-millisecond edge caching outside the primary database cluster.
 
 ---
 
