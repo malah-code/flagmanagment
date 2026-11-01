@@ -127,6 +127,14 @@ if [ "$RUN_SDK" = true ]; then
         echo "Testing React SDK build..."
         (cd "$REPO_ROOT/sdk/react" && npm run build) || SDK_SUCCESS=false
     fi
+    if command -v mvn >/dev/null 2>&1 && [ -f "$REPO_ROOT/sdk/java/pom.xml" ]; then
+        echo "Testing Java SDK..."
+        (cd "$REPO_ROOT/sdk/java" && mvn test -q) || SDK_SUCCESS=false
+    fi
+    if command -v dotnet >/dev/null 2>&1 && [ -f "$REPO_ROOT/sdk/dotnet/tests/FlagManagment.Sdk.Tests.csproj" ]; then
+        echo "Testing .NET SDK..."
+        (cd "$REPO_ROOT/sdk/dotnet/tests" && dotnet test -q) || SDK_SUCCESS=false
+    fi
     if [ "$SDK_SUCCESS" = true ]; then
         echo "✅ SDK tests passed."
         SDK_STATUS="PASS"

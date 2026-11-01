@@ -108,7 +108,7 @@
 ## 4. Key Gaps & Missing Requirements
 
 1. **Secondary & Mobile SDKs (Java, .NET, iOS, Android)**:
-   - While Node, Go, Python, and React SDKs have full local evaluation engines and PostHog hooks, `sdk/java`, `sdk/dotnet`, `sdk/ios`, and `sdk/android` are currently initial structural stubs awaiting full evaluation logic.
+   - ✅ **COMPLETED**: Deterministic MurmurHash3 bucketing and OpenFeature providers implemented. Added test suites for Java (`EvaluatorTest.java` with JUnit 5), .NET (`EvaluatorTests.cs` with xUnit), iOS (`EvaluatorTests.swift` with XCTest), and Android (`EvaluatorTest.kt` with JUnit). Integrated test runner autodetection into `scripts/run-all-tests.sh`.
 2. **Kubernetes Helm Deployment ([Spec 037](../specs/037-k8s-helm-production-deployment/spec.md))**:
    - ✅ **COMPLETED**: Production Helm chart delivered at `deploy/helm/flagmanagment` with Ingress, HPA, pre-migration job, and datastore configurations.
 3. **Automated Validation Matrix for 158 Test Cases ([Spec 038](../specs/038-comprehensive-test-plan/spec.md))**:
@@ -124,7 +124,7 @@
 flowchart LR
     P1["✅ 1. Helm & K8s (Spec 037)"] --> P2["✅ 2. Automated Tests (Spec 038)"]
     P2 --> P3["✅ 3. SpecKit Convergence (39/39)"]
-    P3 --> P4["4. Mobile & Compiled SDKs"]
+    P3 --> P4["✅ 4. Mobile & Compiled SDKs"]
 ```
 
 ### ✅ Phase 1: Kubernetes Helm Deployment (Spec 037)
@@ -137,12 +137,15 @@ flowchart LR
 ### ✅ Phase 3: SpecKit Workflow Convergence
 - Reconciled all 39 specifications across `specs/` (001 through 039). All 679 tasks across all specs are 100% completed and verified against working code.
 
-### Phase 4: Extended SDK Suite
-- Implement local evaluation logic and telemetry hooks for `sdk/java`, `sdk/dotnet`, `sdk/ios`, and `sdk/android`.
+### ✅ Phase 4: Extended SDK Suite
+- Delivered deterministic cross-language MurmurHash3 evaluation algorithms and OpenFeature providers across Java, .NET, iOS, and Android.
+- Added comprehensive evaluation test suites across `sdk/java` (JUnit 5), `sdk/dotnet` (xUnit), `sdk/ios` (XCTest), and `sdk/android` (JUnit 4).
+- Added multi-toolchain autodetection to `scripts/run-all-tests.sh`.
 
 ---
 
 ## 6. Update Log
+- **2026-10-31 (Secondary SDK Test Harnesses)**: Added unit test suites and configurations for Java (JUnit 5), .NET (xUnit), iOS (XCTest), and Android (JUnit 4) verifying cross-SDK MurmurHash3 bucketing determinism. Enhanced `scripts/run-all-tests.sh` to auto-detect and run Java and .NET test harnesses.
 - **2026-10-31 (CI & Helm Release Packaging)**: Added Helm chart linting/dry-run rendering and Node/Python SDK automated testing to `.github/workflows/ci.yml`. Packaged production Helm chart v1.0.0 (`flagmanagment-1.0.0.tgz`).
 - **2026-10-31 (SDK Suite Validation)**: Verified all 8 SDKs (Node, Go, Python, React, Java, .NET, iOS, Android). Added Python pytest and React tsc build verification into `scripts/run-all-tests.sh`. All SDK tests pass.
 - **2026-10-31 (Full SpecKit Convergence)**: Reconciled all 39 specifications across `specs/` (001 through 039). All 679 tasks across all specs are now 100% completed, verified against working code, and passing tests.
