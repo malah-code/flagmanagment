@@ -16,11 +16,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.16.2'
+
+      - name: Package Helm Chart
+        run: |
+          mkdir -p dist
+          helm package deploy/helm/flagmanagment -d dist/
+
       - name: Generate Release Notes & Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           draft: false
           prerelease: false
+          files: |
+            dist/*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
