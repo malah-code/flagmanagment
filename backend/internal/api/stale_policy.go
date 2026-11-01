@@ -6,17 +6,23 @@ import (
 
 	"github.com/flagmanagment/backend/internal/models"
 	"github.com/flagmanagment/backend/internal/repository"
+	"github.com/flagmanagment/backend/internal/services"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
 type StalePolicyHandler struct {
-	store repository.Store
-	rbac  *RBACMiddleware
+	store   repository.Store
+	rbac    *RBACMiddleware
+	scanner services.StaleScannerService
 }
 
-func NewStalePolicyHandler(store repository.Store, rbac *RBACMiddleware) *StalePolicyHandler {
-	return &StalePolicyHandler{store: store, rbac: rbac}
+func NewStalePolicyHandler(store repository.Store, rbac *RBACMiddleware, scanner ...services.StaleScannerService) *StalePolicyHandler {
+	var s services.StaleScannerService
+	if len(scanner) > 0 {
+		s = scanner[0]
+	}
+	return &StalePolicyHandler{store: store, rbac: rbac, scanner: s}
 }
 
 type SetStalePolicyRequest struct {
@@ -26,6 +32,20 @@ type SetStalePolicyRequest struct {
 func (h *StalePolicyHandler) RegisterRoutes(r chi.Router) {
 	r.Get("/projects/{projectId}/stale-policy", h.GetPolicy)
 	r.Put("/projects/{projectId}/stale-policy", h.SetPolicy)
+	r.Post("/projects/{projectId}/stale-policy/run-scan", h.RunScan)
+}
+
+func (h *StalePolicyHandler) RunScan(w http.ResponseWriter, r *http.Request) {
+	if h.scanner == nil {
+		RespondWithError(w, http.StatusInternalServerError, "Stale scanner service not initialized")
+		return
+	}
+	res, err := h.scanner.ScanAndGovern(r.Context())
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Failed to run stale flag scan: "+err.Error())
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, res)
 }
 
 func (h *StalePolicyHandler) GetPolicy(w http.ResponseWriter, r *http.Request) {

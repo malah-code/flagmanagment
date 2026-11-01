@@ -14,6 +14,7 @@ import (
 
 type NotificationService interface {
 	SendFlagStateChanged(ctx context.Context, envID uuid.UUID, flagKey string, oldState, newState bool, actor string)
+	SendStaleFlagAlert(ctx context.Context, envID uuid.UUID, flagKey string, staleDays int, changeRequestID *uuid.UUID)
 }
 
 type notificationService struct {
@@ -58,6 +59,46 @@ func (s *notificationService) SendFlagStateChanged(ctx context.Context, envID uu
 
 		text := fmt.Sprintf("🚩 *Feature Flag Update*\n*Flag:* `%s`\n*Status:* %s (was %t)\n*Actor:* %s\n*Time:* %s",
 			flagKey, statusStr, oldState, actor, time.Now().UTC().Format(time.RFC3339))
+
+		payload := map[string]interface{}{
+			"text": text,
+		}
+
+		body, err := json.Marshal(payload)
+		if err != nil {
+			return
+		}
+
+		req, err := http.NewRequestWithContext(bgCtx, "POST", config.WebhookURL, bytes.NewBuffer(body))
+		if err != nil {
+			return
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := s.httpClient.Do(req)
+		if err == nil {
+			_ = resp.Body.Close()
+		}
+	}()
+}
+
+func (s *notificationService) SendStaleFlagAlert(ctx context.Context, envID uuid.UUID, flagKey string, staleDays int, changeRequestID *uuid.UUID) {
+	go func() {
+		bgCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		config, err := s.store.SlackConfigRepo().GetByEnvironmentID(bgCtx, envID)
+		if err != nil || config == nil || !config.Enabled || config.WebhookURL == "" {
+			return
+		}
+
+		crMsg := "No change request drafted."
+		if changeRequestID != nil {
+			crMsg = fmt.Sprintf("Automated deprecation Change Request `#%s` created for review.", changeRequestID.String())
+		}
+
+		text := fmt.Sprintf("⚠️ *[FlagManagment Governance Alert]* Stale Flag Detected\n*Flag:* `%s`\n*Inactivity:* Flag has had no evaluations or changes for >%d days.\n*Governance Action:* %s\n*Time:* %s",
+			flagKey, staleDays, crMsg, time.Now().UTC().Format(time.RFC3339))
 
 		payload := map[string]interface{}{
 			"text": text,

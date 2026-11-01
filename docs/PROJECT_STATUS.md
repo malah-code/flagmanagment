@@ -11,8 +11,8 @@
 
 | Domain | Status | Tests / Health | Notes |
 |---|---|---|---|
-| **Backend Core** | 🟢 Healthy | Unit/API: **Passing** (`go test ./...`) | Go 1.25, Chi, PostgreSQL, Redis Pub/Sub, gRPC, PII Encryption, SSO (OIDC) |
-| **Frontend UI** | 🟢 Functional & Verified | Vitest: **Passing** (10 suites, 19 tests) | React 19, Vite, Tailwind, Monaco Editor, Flag Telemetry Panel & OpenFeature Interactive Playground |
+| **Backend Core** | 🟢 Healthy | Unit/API: **Passing** (`go test ./...`) | Go 1.25, Chi, PostgreSQL, Redis Pub/Sub, gRPC, PII Encryption, SSO (OIDC), Automated Stale Flag Governance Bot |
+| **Frontend UI** | 🟢 Functional & Verified | Vitest: **Passing** (11 suites, 21 tests) | React 19, Vite, Tailwind, Monaco Editor, Flag Telemetry Panel, OpenFeature Playground & Governance Bot Controls |
 | **Core SDKs** | 🟢 Operational (Tested) | Node, Go, Python, React | 100% passing tests in unified runner, sub-ms benchmarks & OpenFeature providers |
 | **Secondary SDKs** | 🟢 Functional | Java, .NET, iOS, Android | Complete with MurmurHash3 bucketing, SSE streaming clients & OpenFeature providers |
 | **Terraform Provider** | 🟢 Operational & Verified | Go Provider Tests & Build: **Passing** | Declarative IaC blueprint (`examples/terraform/`), full resource & data source CRUD, wired into CI & test runner |
@@ -148,12 +148,15 @@ flowchart LR
 1. **Live Flag Telemetry & Evaluation Charts**: ✅ **COMPLETED**: Interactive `FlagTelemetryPanel.tsx` added to the Flag Detail page. Features real-time evaluation counters, throughput rates, sub-millisecond P99 latency tracking (<10 µs), 99.98% cache hit monitoring, stacked variation traffic distribution bars, live evaluation audit stream with pause/resume controls, and multi-range filters (1h, 24h, 7d). Verified with dedicated Vitest suite (5 tests).
 2. **Terraform Provider Example Registry & Acceptance Tests**: ✅ **COMPLETED**: Resolved compilation and client schema mismatches across all Terraform data sources (`environment_data_source`, `feature_flag_data_source`, `flag_state_data_source`, `service_account_data_source`). Created complete, runnable IaC blueprint module in `examples/terraform/` (`main.tf`, `variables.tf`, `outputs.tf`, `README.md`) provisioning projects, environments, flags, states, and service accounts. Integrated `test-terraform` into `.github/workflows/ci.yml` and `scripts/run-all-tests.sh`.
 3. **OpenFeature Web & Mobile End-to-End Verification & Playground**: ✅ **COMPLETED**: Built interactive OpenFeature testing environment (`OpenFeaturePlayground.tsx`) accessible via project sidebar. Includes real-time OpenFeature resolution simulator (`getBooleanValue`, `getStringValue`, `getNumberValue`, `getObjectValue`), context attributes injector (`targetingKey`, custom JSON attributes), 8-language idiomatic code generator tabs (React, Node.js, Python, Go, Java, .NET, iOS, Android), CNCF conformance checklist, unit tests (`OpenFeaturePlayground.test.tsx`), and upgraded Playwright E2E journey (`cuj_openfeature.spec.ts`).
-4. **Automated Stale Flag Governance Bot**: Background policy worker to identify stale/dead flags and automatically draft deprecation Change Requests or post Slack alerts.
+4. **Automated Stale Flag Governance Bot**: ✅ **COMPLETED**: Background policy worker (`stale_scanner.go`) that scans active flags against staleness thresholds, automatically marks flags `STALE`, auto-drafts deprecation Change Requests (`models.ChangeRequest`) with duplicate idempotency protection, dispatches formatted Slack alerts (`SendStaleFlagAlert`), exposes on-demand trigger endpoint `POST /projects/{projectId}/stale-policy/run-scan`, and surfaces live bot trigger controls & scan metrics in `StalePolicySettings.tsx`. Verified with Go unit tests (`stale_scanner_test.go`) and Vitest suite (`StalePolicySettings.test.tsx`).
 5. **Edge Proxy Sidecar & Multi-Region Caching**: Package `proxy/` as a lightweight sidecar deployment for sub-millisecond edge caching outside the primary database cluster.
 
 ---
 
 ## 6. Update Log
+- **2026-10-31 (Automated Stale Flag Governance Bot Completed)**:
+  - **Governance Bot Service**: Enhanced `StaleScannerService` with `ScanAndGovern`, automatic deprecation Change Request drafting (`models.ChangeRequest` with system bot actor), duplicate pending request idempotency, and Slack webhook alerting via `NotificationService.SendStaleFlagAlert`. Verified with Go tests (`TestStaleScanner_AutomatedGovernance`, `TestStaleScanner_IdempotentDuplicatePrevention`).
+  - **API & UI**: Added `POST /api/v1/projects/{projectId}/stale-policy/run-scan` and enhanced `StalePolicySettings.tsx` with on-demand governance trigger, status indicators, and live scan metric breakdown. Frontend test suite expanded to 11 suites, 21 passing tests.
 - **2026-10-31 (OpenFeature Playground & Conformance Hub Completed)**:
   - **OpenFeature Playground**: Created [`OpenFeaturePlayground.tsx`](../frontend/src/pages/OpenFeaturePlayground.tsx) with live resolution details, context injector, CNCF compliance badges, and multi-language client code generation for React, Node.js, Python, Go, Java, C#, Swift, and Kotlin.
   - **Sidebar & Routes**: Added OpenFeature Playground route and navigation link in [`EnvironmentSidebar.tsx`](../frontend/src/components/layout/EnvironmentSidebar.tsx) and [`ProjectDetail.tsx`](../frontend/src/pages/ProjectDetail.tsx).

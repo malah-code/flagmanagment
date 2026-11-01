@@ -58,3 +58,14 @@ export const setStalePolicy = async (projectId: string, staleAfterDays: number) 
   }
   return response.json();
 };
+
+export const runStaleScan = async (projectId: string) => {
+  const response = await fetch(`${API_BASE}/v1/projects/${projectId}/stale-policy/run-scan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to trigger stale policy scan: ${response.status}`);
+  }
+  return response.json();
+};

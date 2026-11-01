@@ -84,7 +84,8 @@ func main() {
 	metricService := services.NewMetricAggregationService(store.FlagStateRepo())
 	metricService.Start(context.Background(), 10*time.Second)
 
-	staleScanner := services.NewStaleScannerService(store)
+	notificationService := services.NewNotificationService(store)
+	staleScanner := services.NewStaleScannerService(store, notificationService)
 	staleScanner.Start(context.Background(), 1*time.Hour)
 
 	envService := services.NewEnvironmentService(store, auditService)
@@ -96,7 +97,6 @@ func main() {
 	promotionHandler := api.NewPromotionHandler(promotionService, cacheClient, rbacMiddleware)
 	sdkHandler := api.NewSDKHandler(store, metricService)
 
-	notificationService := services.NewNotificationService(store)
 	webhookService := services.NewWebhookService(store, auditService, cacheClient, notificationService)
 	webhookHandler := api.NewWebhookHandler(webhookService)
 	ksHandler := api.NewKillSwitchHandler(store, rbacMiddleware)
@@ -110,7 +110,7 @@ func main() {
 	configHandler := api.NewConfigHandler(store, cryptoService, emailService)
 
 	lifecycleHandler := api.NewLifecycleHandler(store, rbacMiddleware, auditService)
-	stalePolicyHandler := api.NewStalePolicyHandler(store, rbacMiddleware)
+	stalePolicyHandler := api.NewStalePolicyHandler(store, rbacMiddleware, staleScanner)
 
 	// API v1 Routes
 	router.Route("/api/v1", func(r chi.Router) {
