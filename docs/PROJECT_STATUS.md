@@ -145,6 +145,7 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-10-31 (Remote Push & CI Verification)**: Pushed 3 commits (`c380501`) to `origin/main` via Windows GCM bridge. Monitored GitHub Actions live pipeline: `lint-helm`, `lint-backend`, and `test-sdks` succeeded immediately. Formatted newly added frontend test suites with Prettier to satisfy CI formatting checks.
 - **2026-10-31 (Secondary SDK Test Harnesses)**: Added unit test suites and configurations for Java (JUnit 5), .NET (xUnit), iOS (XCTest), and Android (JUnit 4) verifying cross-SDK MurmurHash3 bucketing determinism. Enhanced `scripts/run-all-tests.sh` to auto-detect and run Java and .NET test harnesses.
 - **2026-10-31 (CI & Helm Release Packaging)**: Added Helm chart linting/dry-run rendering and Node/Python SDK automated testing to `.github/workflows/ci.yml`. Packaged production Helm chart v1.0.0 (`flagmanagment-1.0.0.tgz`).
 - **2026-10-31 (SDK Suite Validation)**: Verified all 8 SDKs (Node, Go, Python, React, Java, .NET, iOS, Android). Added Python pytest and React tsc build verification into `scripts/run-all-tests.sh`. All SDK tests pass.

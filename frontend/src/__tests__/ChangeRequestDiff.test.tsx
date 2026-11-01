@@ -7,12 +7,9 @@ describe('ChangeRequestDiff', () => {
     const current = { enabled: false, rollout: 0 };
     const proposed = { enabled: true, rollout: 50 };
 
-    render(
-      <ChangeRequestDiff currentState={current} proposedChanges={proposed} />,
-    );
+    render(<ChangeRequestDiff currentState={current} proposedChanges={proposed} />);
 
     expect(screen.getByText('Current Configuration')).toBeInTheDocument();
     expect(screen.getByText('Proposed Configuration')).toBeInTheDocument();
   });
 });
-

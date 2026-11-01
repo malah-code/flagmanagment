@@ -13,4 +13,3 @@ describe('Flag Targeting & Lifecycle Badges', () => {
     expect(screen.getByText('Deprecated')).toBeInTheDocument();
   });
 });
-
