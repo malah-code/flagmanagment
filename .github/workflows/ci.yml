@@ -172,7 +172,7 @@ jobs:
       - name: Install dependencies
         run: cd e2e && npm ci
       - name: Install Playwright Browsers
-        run: cd e2e && npx playwright install --with-deps
+        run: cd e2e && npx playwright install chromium --with-deps
       - name: Run Playwright tests
         run: cd e2e && npx playwright test
       - name: Stop services

@@ -145,6 +145,7 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-10-31 (E2E CI Optimization)**: Targeted Chromium browser download in Playwright CI step (`playwright install chromium --with-deps`) to optimize installation time.
 - **2026-10-31 (Release Packaging Automation)**: Configured `.github/workflows/release.yml` to automatically package the Helm chart and attach `flagmanagment-1.0.0.tgz` as a release asset upon tag push.
 - **2026-10-31 (CI Pipeline Fix & Documentation Enhancement)**: Fixed Trivy action tag reference (`@v0.36.0`) with audit output mode, updated `README.md` with official Helm v3 deployment guide, Go 1.25+ / React 19 badges, unified test runner instructions, and the 8-language OpenFeature SDK Matrix.
 - **2026-10-31 (Container Registry Published & Security Hardening)**: Successfully published multi-stage container images to GitHub Packages / GHCR (`publish.yml` succeeded). Upgraded runtime Dockerfiles to Alpine 3.21 with automated package upgrades and pinned Trivy security scan action to `v0.28.0`.
