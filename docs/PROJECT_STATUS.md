@@ -155,6 +155,12 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-10-31 (Application SDK Samples & OpenFeature Provider Ergonomics)**:
+  - **Node.js Express Sample**: Created runnable sample [`examples/node-express/`](../examples/node-express/) featuring CNCF OpenFeature provider initialization, context targeting, multivariate banner variants, and unit tests (`node --test`).
+  - **Python FastAPI Sample**: Created runnable service [`examples/python-fastapi/`](../examples/python-fastapi/) with OpenFeature evaluation context injection, dynamic recommendation model selection, and passing pytest suite. Enhanced `FlagManagmentProvider` in `sdk/python` to support ergonomic initialization from server keys.
+  - **Go HTTP Sample**: Created runnable high-performance HTTP microservice [`examples/go-http/`](../examples/go-http/) demonstrating sub-microsecond local evaluations (<5 µs) and background SSE sync. Updated `sdk/go/provider.go` to conform strictly to `openfeature.FlattenedContext`.
+  - **React Vite Sample**: Created interactive SPA [`examples/react-vite/`](../examples/react-vite/) demonstrating `<FlagProvider>`, `useFlag()` hook, dynamic UI toggles, and real-time identity switching.
+  - **Examples Registry**: Authored [`examples/README.md`](../examples/README.md) cataloging all 4 application samples and 2 infrastructure blueprints.
 - **2026-10-31 (E2E Direct Route Hardening & Frontend Formatting Sync)**:
   - **Direct Navigation Routes**: Added explicit top-level routes for `/audit-logs` and `/integrations` in `App.tsx` alongside universal wildcard fallback (`<Route path="*" element={<Navigate to="/projects" replace />} />`) to eliminate zero-height layout collapses on unrouted direct paths.
   - **E2E Assertions**: Updated `cuj_audit_siem.spec.ts` and `cuj_openfeature.spec.ts` to assert both page readiness and semantic heading visibility (`h1: 'Audit Logs'` and `h1: 'Integrations'`).

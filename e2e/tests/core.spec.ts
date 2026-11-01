@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { loginUser } from './helpers';
 
 test.describe.serial('FlagManagment Core User Journeys', () => {
   let projectName = `Feature Project ${Date.now()}`;
@@ -6,14 +7,7 @@ test.describe.serial('FlagManagment Core User Journeys', () => {
   let flagKey = `checkout-v2-${Date.now()}`;
 
   async function ensureLoggedIn(page: Page) {
-    await page.goto('/');
-    if (page.url().includes('/login')) {
-      await page.fill('input[type="email"]', 'admin@example.com');
-      await page.fill('input[type="password"]', 'admin123');
-      await page.click('button[type="submit"]');
-    }
-    await page.waitForURL('**/projects');
-    await expect(page.locator('h1')).toContainText('Projects');
+    await loginUser(page);
   }
 
   async function openProject(page: Page) {

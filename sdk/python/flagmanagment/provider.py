@@ -13,8 +13,19 @@ class FlagManagmentProvider(AbstractProvider):
     using the in-memory cache maintained by Client and MurmurHash3
     bucketing via Evaluator."""
 
-    def __init__(self, client: Client):
-        self._client = client
+    def __init__(
+        self,
+        client: Optional[Client] = None,
+        server_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+    ):
+        if client is not None:
+            self._client = client
+        elif server_key is not None:
+            stream_url = f"{base_url}/api/v1/sdk/stream" if base_url else None
+            self._client = Client(api_key=server_key, stream_url=stream_url, endpoint_url=base_url)
+        else:
+            self._client = Client(api_key="default")
 
     def get_metadata(self) -> Metadata:
         return Metadata(name="FlagManagment-Python-Provider")

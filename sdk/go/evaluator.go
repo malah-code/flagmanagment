@@ -16,8 +16,8 @@ func bucketUser(targetingKey string) int {
 	return int(hashValue % 100)
 }
 
-// evaluateFlag evaluates a flag against the provided EvaluationContext
-func evaluateFlag(flag map[string]interface{}, evalContext openfeature.EvaluationContext) (interface{}, string, openfeature.Reason, error) {
+// evaluateFlag evaluates a flag against the provided evaluation context.
+func evaluateFlag(flag map[string]interface{}, evalContext interface{}) (interface{}, string, openfeature.Reason, error) {
 	// 1. Check if flag is enabled
 	enabled, ok := flag["enabled"].(bool)
 	if !ok || !enabled {
@@ -26,7 +26,19 @@ func evaluateFlag(flag map[string]interface{}, evalContext openfeature.Evaluatio
 	}
 
 	// Extract targeting key
-	targetingKey := evalContext.TargetingKey()
+	var targetingKey string
+	switch ctx := evalContext.(type) {
+	case openfeature.FlattenedContext:
+		if tk, ok := ctx["targetingKey"].(string); ok {
+			targetingKey = tk
+		}
+	case openfeature.EvaluationContext:
+		targetingKey = ctx.TargetingKey()
+	case map[string]interface{}:
+		if tk, ok := ctx["targetingKey"].(string); ok {
+			targetingKey = tk
+		}
+	}
 	if targetingKey == "" {
 		defaultVariant, _ := flag["defaultVariant"].(string)
 		return getVariantValue(flag, defaultVariant), defaultVariant, openfeature.DefaultReason, nil

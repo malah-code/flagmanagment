@@ -27,7 +27,7 @@ func (p *Provider) Metadata() openfeature.Metadata {
 }
 
 // Init initializes the provider. Connection is already started in NewProvider.
-func (p *Provider) Init(evalContext openfeature.EvaluationContext) error {
+func (p *Provider) Init(evalContext openfeature.FlattenedContext) error {
 	return nil
 }
 
@@ -42,7 +42,7 @@ func (p *Provider) Hooks() []openfeature.Hook {
 }
 
 // BooleanEvaluation returns a boolean flag value.
-func (p *Provider) BooleanEvaluation(ctx context.Context, flagKey string, defaultValue bool, evalContext openfeature.EvaluationContext) openfeature.BoolResolutionDetail {
+func (p *Provider) BooleanEvaluation(ctx context.Context, flagKey string, defaultValue bool, evalContext openfeature.FlattenedContext) openfeature.BoolResolutionDetail {
 	res, err := p.evaluate(flagKey, evalContext)
 	if err != nil {
 		return openfeature.BoolResolutionDetail{
@@ -74,7 +74,7 @@ func (p *Provider) BooleanEvaluation(ctx context.Context, flagKey string, defaul
 }
 
 // StringEvaluation returns a string flag value.
-func (p *Provider) StringEvaluation(ctx context.Context, flagKey string, defaultValue string, evalContext openfeature.EvaluationContext) openfeature.StringResolutionDetail {
+func (p *Provider) StringEvaluation(ctx context.Context, flagKey string, defaultValue string, evalContext openfeature.FlattenedContext) openfeature.StringResolutionDetail {
 	res, err := p.evaluate(flagKey, evalContext)
 	if err != nil {
 		return openfeature.StringResolutionDetail{
@@ -106,7 +106,7 @@ func (p *Provider) StringEvaluation(ctx context.Context, flagKey string, default
 }
 
 // FloatEvaluation returns a float flag value.
-func (p *Provider) FloatEvaluation(ctx context.Context, flagKey string, defaultValue float64, evalContext openfeature.EvaluationContext) openfeature.FloatResolutionDetail {
+func (p *Provider) FloatEvaluation(ctx context.Context, flagKey string, defaultValue float64, evalContext openfeature.FlattenedContext) openfeature.FloatResolutionDetail {
 	res, err := p.evaluate(flagKey, evalContext)
 	if err != nil {
 		return openfeature.FloatResolutionDetail{
@@ -138,7 +138,7 @@ func (p *Provider) FloatEvaluation(ctx context.Context, flagKey string, defaultV
 }
 
 // IntEvaluation returns an int flag value.
-func (p *Provider) IntEvaluation(ctx context.Context, flagKey string, defaultValue int64, evalContext openfeature.EvaluationContext) openfeature.IntResolutionDetail {
+func (p *Provider) IntEvaluation(ctx context.Context, flagKey string, defaultValue int64, evalContext openfeature.FlattenedContext) openfeature.IntResolutionDetail {
 	res, err := p.evaluate(flagKey, evalContext)
 	if err != nil {
 		return openfeature.IntResolutionDetail{
@@ -171,7 +171,7 @@ func (p *Provider) IntEvaluation(ctx context.Context, flagKey string, defaultVal
 }
 
 // ObjectEvaluation returns an object flag value.
-func (p *Provider) ObjectEvaluation(ctx context.Context, flagKey string, defaultValue interface{}, evalContext openfeature.EvaluationContext) openfeature.InterfaceResolutionDetail {
+func (p *Provider) ObjectEvaluation(ctx context.Context, flagKey string, defaultValue interface{}, evalContext openfeature.FlattenedContext) openfeature.InterfaceResolutionDetail {
 	res, err := p.evaluate(flagKey, evalContext)
 	if err != nil {
 		return openfeature.InterfaceResolutionDetail{
@@ -198,7 +198,7 @@ type evaluationResult struct {
 	Reason  openfeature.Reason
 }
 
-func (p *Provider) evaluate(flagKey string, evalContext openfeature.EvaluationContext) (evaluationResult, error) {
+func (p *Provider) evaluate(flagKey string, evalContext openfeature.FlattenedContext) (evaluationResult, error) {
 	// Record telemetry asynchronously
 	if p.client.metrics != nil {
 		p.client.metrics.RecordEvaluation(flagKey)

@@ -1,0 +1,16 @@
+{
+  "name": "flagmanagment-sample-node-express",
+  "version": "1.0.0",
+  "description": "Runnable Node.js & Express sample application demonstrating FlagManagment with CNCF OpenFeature",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@flagmanagment/node-sdk": "file:../../sdk/node",
+    "@openfeature/server-sdk": "^1.14.0",
+    "express": "^4.19.2"
+  }
+}
+

@@ -1,0 +1,16 @@
+module github.com/malah-code/flagmanagment/examples/go-http
+
+go 1.23
+
+require (
+	github.com/malah-code/flagmanagment/sdk/go v0.0.0
+	github.com/open-feature/go-sdk v1.11.0
+)
+
+require (
+	github.com/go-logr/logr v1.4.1 // indirect
+	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
+)
+
+replace github.com/malah-code/flagmanagment/sdk/go => ../../sdk/go
