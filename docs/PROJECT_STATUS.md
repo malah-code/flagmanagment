@@ -2,7 +2,7 @@
 
 > **Last Updated**: 2026-10-31  
 > **Repository Branch**: `main`  
-> **Status**: Late-Stage MVP / Pre-v1.0 Production Readiness  
+> **Release Version**: `v1.0.0` (Official Production Release)  
 > **Maintainer / Workflow**: Spec-Driven Development (SpecKit)
 
 ---
@@ -145,6 +145,7 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-10-31 (v1.0.0 Production Release Published)**: Cut and pushed official git tag `v1.0.0`. GitHub Release created automatically at [malah-code/flagmanagment/releases/tag/v1.0.0](https://github.com/malah-code/flagmanagment/releases/tag/v1.0.0) with automated release notes and the production Helm chart asset `flagmanagment-1.0.0.tgz` attached.
 - **2026-10-31 (Live Admin UI Browser Verification)**: Executed `test-admin-ui` workflow across all core views. Validated Login (`/login`), Spec 027 error feedback (`Invalid email or password. Please try again.`), Projects list (`/projects`), Create Project modal, Team Settings (`/settings/users`), Invite Member modal, and System Settings (`/settings/system` with OIDC/SAML 2.0 SSO and SMTP configuration). Zero console errors.
 - **2026-10-31 (E2E CI Optimization)**: Targeted Chromium browser download in Playwright CI step (`playwright install chromium --with-deps`) to optimize installation time.
 - **2026-10-31 (Release Packaging Automation)**: Configured `.github/workflows/release.yml` to automatically package the Helm chart and attach `flagmanagment-1.0.0.tgz` as a release asset upon tag push.
