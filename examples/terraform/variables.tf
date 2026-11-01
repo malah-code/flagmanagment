@@ -16,3 +16,4 @@ variable "project_name" {
   type        = string
   default     = "Flagship Storefront"
 }
+

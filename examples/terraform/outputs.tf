@@ -23,3 +23,4 @@ output "service_account_token" {
   value       = flagmanagment_service_account.evaluator_bot.api_key
   sensitive   = true
 }
+

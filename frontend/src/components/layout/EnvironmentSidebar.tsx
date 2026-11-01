@@ -10,6 +10,7 @@ import {
   Plus,
   Shield,
   GitPullRequest,
+  Code2,
 } from 'lucide-react';
 import type { Environment } from '../../types';
 
@@ -185,6 +186,17 @@ export const EnvironmentSidebar: React.FC<EnvironmentSidebarProps> = ({
           >
             <Activity className="w-4 h-4 text-indigo-400" />
             <span>Integrations</span>
+          </Link>
+          <Link
+            to={`/projects/${projectId}/openfeature`}
+            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              location.pathname === `/projects/${projectId}/openfeature`
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+            }`}
+          >
+            <Code2 className="w-4 h-4 text-emerald-400" />
+            <span>OpenFeature Playground</span>
           </Link>
         </div>
       </nav>

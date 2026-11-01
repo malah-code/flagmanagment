@@ -10,6 +10,7 @@ import { EnvironmentSidebar } from '../components/layout/EnvironmentSidebar';
 import { AuditLogs } from './AuditLogs';
 import { ChangeRequestsPage } from './ChangeRequestsPage';
 import { IntegrationsPage } from './IntegrationsPage';
+import { OpenFeaturePlayground } from './OpenFeaturePlayground';
 
 export const ProjectDetail = () => {
   const { projectId = '' } = useParams<{ projectId: string }>();
@@ -79,6 +80,7 @@ export const ProjectDetail = () => {
           <Route path="project-settings" element={<ProjectSettings projectId={projectId} />} />
           <Route path="audit-logs" element={<AuditLogs projectId={projectId} />} />
           <Route path="integrations" element={<IntegrationsPage projectId={projectId} />} />
+          <Route path="openfeature" element={<OpenFeaturePlayground projectId={projectId} />} />
           <Route
             path="change-requests"
             element={<ChangeRequestsPage environments={environments} />}

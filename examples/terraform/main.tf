@@ -79,3 +79,4 @@ resource "flagmanagment_service_account" "evaluator_bot" {
 data "flagmanagment_project" "lookup" {
   id = flagmanagment_project.ecommerce.id
 }
+
