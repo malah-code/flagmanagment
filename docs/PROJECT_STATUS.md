@@ -155,6 +155,10 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-10-31 (E2E Direct Route Hardening & Frontend Formatting Sync)**:
+  - **Direct Navigation Routes**: Added explicit top-level routes for `/audit-logs` and `/integrations` in `App.tsx` alongside universal wildcard fallback (`<Route path="*" element={<Navigate to="/projects" replace />} />`) to eliminate zero-height layout collapses on unrouted direct paths.
+  - **E2E Assertions**: Updated `cuj_audit_siem.spec.ts` and `cuj_openfeature.spec.ts` to assert both page readiness and semantic heading visibility (`h1: 'Audit Logs'` and `h1: 'Integrations'`).
+  - **Frontend Code Quality**: Formatted `StalePolicySettings.tsx` and all modified components with Prettier; verified 0 errors in `npx eslint src/` and `npx prettier --check`.
 - **2026-10-31 (Edge Proxy Sidecar & Helm Packaging Completed)**:
   - **Helm Templates**: Added `edgeProxy` configuration in `values.yaml` and created `edge-proxy-deployment.yaml`, `edge-proxy-service.yaml`, and `edge-proxy-hpa.yaml` in [`deploy/helm/flagmanagment/`](../deploy/helm/flagmanagment/). Linted (`helm lint`) and packaged production release asset [`flagmanagment-1.0.0.tgz`](../deploy/helm/flagmanagment-1.0.0.tgz).
   - **In-Pod Sidecar Blueprint**: Authored [`examples/kubernetes/sidecar-pattern.yaml`](../examples/kubernetes/sidecar-pattern.yaml) and architectural guide [`examples/kubernetes/README.md`](../examples/kubernetes/README.md) demonstrating loopback evaluation (<10 µs).

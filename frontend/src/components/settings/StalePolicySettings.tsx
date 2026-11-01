@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getStalePolicy, setStalePolicy, runStaleScan } from '../../services/api';
-import {
-  Clock,
-  Save,
-  Loader2,
-  Bot,
-  Play,
-  CheckCircle2,
-  Bell,
-  GitPullRequest,
-} from 'lucide-react';
+import { Clock, Save, Loader2, Bot, Play, CheckCircle2, Bell, GitPullRequest } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface StalePolicySettingsProps {

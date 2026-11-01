@@ -39,7 +39,7 @@ const INTEGRATION_TYPES = [
   },
 ];
 
-export const IntegrationsPage = ({ projectId }: { projectId: string }) => {
+export const IntegrationsPage = ({ projectId = '' }: { projectId?: string }) => {
   const { data: integrations = [], isLoading } = useWebhooks(projectId);
   const createWebhook = useCreateWebhook(projectId);
 

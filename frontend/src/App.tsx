@@ -9,6 +9,8 @@ import { SSOSuccess } from './pages/SSOSuccess';
 import { FlagDetail } from './pages/FlagDetail';
 import { UsersManagement } from './pages/UsersManagement';
 import { SystemSettings } from './pages/SystemSettings';
+import { AuditLogs } from './pages/AuditLogs';
+import { IntegrationsPage } from './pages/IntegrationsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,7 +38,11 @@ function App() {
             <Route path="projects/:projectId/flags/:flagId" element={<FlagDetail />} />
             <Route path="settings/users" element={<UsersManagement />} />
             <Route path="settings/system" element={<SystemSettings />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="integrations" element={<IntegrationsPage />} />
+            <Route path="*" element={<Navigate to="/projects" replace />} />
           </Route>
+          <Route path="*" element={<Navigate to="/projects" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
