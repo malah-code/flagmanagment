@@ -172,6 +172,8 @@ jobs:
       - name: Install dependencies
         run: cd e2e && npm ci
       - name: Install Playwright Browsers
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: cd e2e && npx playwright install chromium --with-deps
       - name: Run Playwright tests
         run: cd e2e && npx playwright test
