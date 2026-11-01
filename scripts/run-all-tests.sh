@@ -211,6 +211,18 @@ if [ "$RUN_PROXY" = true ]; then
     fi
 fi
 
+if [ -d "$REPO_ROOT/tools/flag-cleaner" ]; then
+    echo ""
+    echo ">>> Running Flag Cleaner CLI Tests..."
+    cd "$REPO_ROOT/tools/flag-cleaner"
+    if go test ./... && go build -o /dev/null main.go cleaner.go; then
+        echo "✅ Flag Cleaner CLI tests passed."
+    else
+        echo "❌ Flag Cleaner CLI tests failed."
+        OVERALL_EXIT=1
+    fi
+fi
+
 if [ "$RUN_E2E" = true ]; then
     echo ""
     echo ">>> Running E2E Tests (Playwright)..."

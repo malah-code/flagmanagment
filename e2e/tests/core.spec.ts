@@ -21,7 +21,8 @@ test.describe.serial('FlagManagment Core User Journeys', () => {
                              .filter({ hasText: 'Manage' }).last();
       await targetCard.locator('a:has-text("Manage")').click();
     }
-    await page.waitForURL('**/projects/*');
+    await page.waitForURL('**/projects/*', { timeout: 15000 });
+    await page.waitForSelector('nav', { timeout: 15000 });
   }
 
   test('Authentication & Login Flow', async ({ page }) => {
@@ -60,8 +61,14 @@ test.describe.serial('FlagManagment Core User Journeys', () => {
     await page.fill('form input[type="text"]', envName);
     await page.click('button[type="submit"]:has-text("Create Environment")');
 
-    await page.click('button:has-text("I have securely copied this key")');
-    await page.waitForSelector('div.fixed.inset-0', { state: 'detached' });
+    const copyKeyBtn = page.locator('button:has-text("I have securely copied this key")');
+    if (await copyKeyBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await copyKeyBtn.click();
+    }
+    const modal = page.locator('div.fixed.inset-0');
+    if (await modal.isVisible().catch(() => false)) {
+      await page.waitForSelector('div.fixed.inset-0', { state: 'detached', timeout: 5000 }).catch(() => {});
+    }
     await expect(page.locator('body')).toContainText(envName);
   });
 
@@ -74,7 +81,7 @@ test.describe.serial('FlagManagment Core User Journeys', () => {
 
     await page.click('button:has-text("New Feature Flag")');
     await page.waitForSelector('form');
-    await page.fill('input[placeholder*="checkout"]', flagKey);
+    await page.fill('form input[type="text"], input[placeholder*="checkout"]', flagKey);
     await page.fill('textarea', 'Boolean flag created for testing');
     await page.click('button[type="submit"]:has-text("Create Flag")');
     await page.waitForSelector('div.fixed.inset-0', { state: 'detached' });

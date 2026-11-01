@@ -23,6 +23,7 @@ import (
 	"github.com/flagmanagment/backend/internal/config"
 	"github.com/flagmanagment/backend/internal/health"
 	"github.com/flagmanagment/backend/internal/logging"
+	"github.com/flagmanagment/backend/internal/metrics"
 	customMiddleware "github.com/flagmanagment/backend/internal/middleware"
 	"github.com/flagmanagment/backend/internal/repository"
 	sdkService "github.com/flagmanagment/backend/internal/sdk"
@@ -63,6 +64,7 @@ func main() {
 	router.Use(middleware.Recoverer)
 
 	router.Get("/healthz", health.NewHandler(db, rdb, logger))
+	router.Get("/metrics", metrics.Global().Handler().ServeHTTP)
 
 	// Initialize Store
 	store := repository.NewStore(db)

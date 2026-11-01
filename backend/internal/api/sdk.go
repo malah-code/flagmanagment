@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/flagmanagment/backend/internal/dto"
+	"github.com/flagmanagment/backend/internal/metrics"
 	"github.com/flagmanagment/backend/internal/models"
 	"github.com/flagmanagment/backend/internal/repository"
 	"github.com/flagmanagment/backend/internal/sdk"
@@ -249,7 +250,9 @@ func (h *SDKHandler) EvaluateSingleFlag(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	evalStart := time.Now()
 	result := sdk.EvaluateFlag(flagRule, hashedContext, rulesMap, env.Salt)
+	metrics.Global().RecordEvaluation(env.ProjectID.String(), env.Name, req.FlagKey, fmt.Sprintf("%v", result.Value), result.Reason, time.Since(evalStart))
 
 	RespondWithJSON(w, http.StatusOK, map[string]interface{}{
 		"value":  result.Value,
@@ -319,6 +322,7 @@ func (h *SDKHandler) IngestMetrics(w http.ResponseWriter, r *http.Request) {
 			}
 
 			h.metricService.RecordEvaluation(stateUUID, ts)
+			metrics.Global().EvaluationsTotal.WithLabelValues(env.ProjectID.String(), env.Name, eval.FlagKey, "unknown", "SDK_INGESTED").Inc()
 		}
 	}
 
@@ -433,6 +437,7 @@ func (h *SDKHandler) EvaluateClientFlags(w http.ResponseWriter, r *http.Request)
 		if h.metricService != nil {
 			if st, ok := stateMap[key]; ok {
 				h.metricService.RecordEvaluation(st.ID, time.Now())
+				metrics.Global().RecordEvaluation(env.ProjectID.String(), env.Name, key, fmt.Sprintf("%v", res.Value), res.Reason, 0)
 			}
 		}
 	}

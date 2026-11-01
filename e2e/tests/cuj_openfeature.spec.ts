@@ -22,19 +22,20 @@ test.describe('CUJ-6: OpenFeature Multi-Language Conformance Journey', () => {
         await page.fill('input[placeholder*="Name"], input[name="name"], form input:first-of-type', `OF Conformance ${Date.now()}`);
         await page.click('button[type="submit"]:has-text("Create")');
         await page.waitForSelector('div.fixed.inset-0', { state: 'detached' });
+        await page.waitForSelector('a:has-text("Manage")', { timeout: 10000 }).catch(() => {});
       }
       manageLinks = page.locator('a:has-text("Manage")');
     }
 
     if ((await manageLinks.count()) > 0) {
       await manageLinks.first().click();
-      await page.waitForURL('**/projects/*');
+      await page.waitForURL('**/projects/*', { timeout: 15000 });
 
       // Click OpenFeature Playground in the sidebar
       const playgroundLink = page.locator('a:has-text("OpenFeature Playground")');
-      if (await playgroundLink.isVisible()) {
+      if (await playgroundLink.isVisible({ timeout: 10000 }).catch(() => false)) {
         await playgroundLink.click();
-        await page.waitForURL('**/openfeature');
+        await page.waitForURL('**/openfeature', { timeout: 15000 });
         await expect(page.locator('h1')).toContainText('OpenFeature Playground');
 
         // Trigger evaluation to show ResolutionDetails

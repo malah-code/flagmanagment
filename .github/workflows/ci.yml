@@ -221,6 +221,12 @@ jobs:
         run: cd e2e && npx playwright install chromium --with-deps
       - name: Run Playwright tests
         run: cd e2e && npx playwright test
+      - name: Output Playwright Results
+        if: always()
+        run: |
+          if [ -f e2e/results.xml ]; then
+            cat e2e/results.xml
+          fi
       - name: Dump docker logs on failure
         if: failure()
         run: docker compose logs
