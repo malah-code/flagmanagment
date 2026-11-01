@@ -9,6 +9,7 @@ RUN_FRONTEND=false
 RUN_E2E=false
 RUN_SDK=false
 RUN_PERF=false
+RUN_TERRAFORM=false
 GEN_JSON=false
 
 # Auto-detect Go toolchain if not in PATH
@@ -49,11 +50,16 @@ while [[ $# -gt 0 ]]; do
             RUN_PERF=true
             shift
             ;;
+        --terraform)
+            RUN_TERRAFORM=true
+            shift
+            ;;
         --all)
             RUN_BACKEND=true
             RUN_FRONTEND=true
             RUN_SDK=true
             RUN_PERF=true
+            RUN_TERRAFORM=true
             shift
             ;;
         --json)
@@ -61,7 +67,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -h|--help)
-            echo "Usage: $0 [--backend] [--frontend] [--e2e] [--sdk] [--perf] [--all] [--json]"
+            echo "Usage: $0 [--backend] [--frontend] [--e2e] [--sdk] [--perf] [--terraform] [--all] [--json]"
             exit 0
             ;;
         *)
@@ -77,6 +83,7 @@ FRONTEND_STATUS="SKIPPED"
 E2E_STATUS="SKIPPED"
 SDK_STATUS="SKIPPED"
 PERF_STATUS="SKIPPED"
+TERRAFORM_STATUS="SKIPPED"
 OVERALL_EXIT=0
 
 echo "========================================================"
@@ -159,6 +166,23 @@ if [ "$RUN_PERF" = true ]; then
     fi
 fi
 
+if [ "$RUN_TERRAFORM" = true ]; then
+    echo ""
+    echo ">>> Running Terraform Provider Tests & Build..."
+    if [ -d "$REPO_ROOT/providers/terraform" ]; then
+        cd "$REPO_ROOT/providers/terraform"
+        if go test ./... && go build -o terraform-provider-flagmanagment main.go; then
+            rm -f terraform-provider-flagmanagment
+            echo "✅ Terraform provider build & tests passed."
+            TERRAFORM_STATUS="PASS"
+        else
+            echo "❌ Terraform provider tests failed."
+            TERRAFORM_STATUS="FAIL"
+            OVERALL_EXIT=1
+        fi
+    fi
+fi
+
 if [ "$RUN_E2E" = true ]; then
     echo ""
     echo ">>> Running E2E Tests (Playwright)..."
@@ -185,7 +209,7 @@ fi
 
 echo ""
 echo "========================================================"
-echo " Summary: Backend=$BACKEND_STATUS, Frontend=$FRONTEND_STATUS, SDK=$SDK_STATUS, Perf=$PERF_STATUS, E2E=$E2E_STATUS"
+echo " Summary: Backend=$BACKEND_STATUS, Frontend=$FRONTEND_STATUS, SDK=$SDK_STATUS, Terraform=$TERRAFORM_STATUS, Perf=$PERF_STATUS, E2E=$E2E_STATUS"
 echo "========================================================"
 
 exit $OVERALL_EXIT

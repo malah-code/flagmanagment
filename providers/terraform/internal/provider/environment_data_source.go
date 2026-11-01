@@ -19,11 +19,10 @@ type EnvironmentDataSource struct {
 }
 
 type EnvironmentDataSourceModel struct {
-	ID        types.String `tfsdk:"id"`
-	ProjectID types.String `tfsdk:"project_id"`
-	Name      types.String `tfsdk:"name"`
-	Type      types.String `tfsdk:"type"`
-	Color     types.String `tfsdk:"color"`
+	ID          types.String `tfsdk:"id"`
+	ProjectID   types.String `tfsdk:"project_id"`
+	Name        types.String `tfsdk:"name"`
+	IsProtected types.Bool   `tfsdk:"is_protected"`
 }
 
 func NewEnvironmentDataSource() datasource.DataSource {
@@ -50,13 +49,9 @@ func (d *EnvironmentDataSource) Schema(ctx context.Context, req datasource.Schem
 				Computed:    true,
 				Description: "Human-readable name of the environment.",
 			},
-			"type": schema.StringAttribute{
+			"is_protected": schema.BoolAttribute{
 				Computed:    true,
-				Description: "Type of the environment (e.g. production, staging).",
-			},
-			"color": schema.StringAttribute{
-				Computed:    true,
-				Description: "Color code for the UI.",
+				Description: "Whether modifications generate change requests.",
 			},
 		},
 	}
@@ -85,7 +80,7 @@ func (d *EnvironmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	env, err := d.client.GetEnvironment(ctx, state.ProjectID.ValueString(), state.ID.ValueString())
+	env, err := d.client.GetEnvironment(ctx, state.ID.ValueString())
 	if err != nil {
 		if errors.Is(err, client.ErrNotFound) {
 			resp.Diagnostics.AddError("Environment not found", fmt.Sprintf("Environment ID %s not found in Project %s", state.ID.ValueString(), state.ProjectID.ValueString()))
@@ -96,8 +91,7 @@ func (d *EnvironmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	state.Name = types.StringValue(env.Name)
-	state.Type = types.StringValue(env.Type)
-	state.Color = types.StringValue(env.Color)
+	state.IsProtected = types.BoolValue(env.IsProtected)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

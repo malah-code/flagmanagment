@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -90,7 +91,7 @@ func (d *FlagStateDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	fs, err := d.client.GetFlagState(ctx, state.EnvironmentID.ValueString(), state.FeatureFlagID.ValueString(), state.ID.ValueString())
+	fs, err := d.client.GetFlagState(ctx, state.EnvironmentID.ValueString(), state.FeatureFlagID.ValueString())
 	if err != nil {
 		if errors.Is(err, client.ErrNotFound) {
 			resp.Diagnostics.AddError("Flag State not found", "Flag state not found")
@@ -101,8 +102,12 @@ func (d *FlagStateDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	state.Enabled = types.BoolValue(fs.Enabled)
-	state.Rules = types.StringValue(fs.Rules)
 	state.DefaultVariant = types.StringValue(fs.DefaultVariant)
+	if rulesBytes, err := json.Marshal(fs.TargetingRules); err == nil {
+		state.Rules = types.StringValue(string(rulesBytes))
+	} else {
+		state.Rules = types.StringValue("[]")
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

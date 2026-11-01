@@ -19,12 +19,12 @@ type FeatureFlagDataSource struct {
 }
 
 type FeatureFlagDataSourceModel struct {
-	ID          types.String `tfsdk:"id"`
-	ProjectID   types.String `tfsdk:"project_id"`
-	Key         types.String `tfsdk:"key"`
-	Name        types.String `tfsdk:"name"`
-	Description types.String `tfsdk:"description"`
-	Type        types.String `tfsdk:"type"`
+	ID           types.String `tfsdk:"id"`
+	ProjectID    types.String `tfsdk:"project_id"`
+	Key          types.String `tfsdk:"key"`
+	Name         types.String `tfsdk:"name"`
+	Type         types.String `tfsdk:"type"`
+	ParentFlagID types.String `tfsdk:"parent_flag_id"`
 }
 
 func NewFeatureFlagDataSource() datasource.DataSource {
@@ -55,13 +55,13 @@ func (d *FeatureFlagDataSource) Schema(ctx context.Context, req datasource.Schem
 				Computed:    true,
 				Description: "Human-readable name of the flag.",
 			},
-			"description": schema.StringAttribute{
-				Computed:    true,
-				Description: "Detailed description of the flag.",
-			},
 			"type": schema.StringAttribute{
 				Computed:    true,
 				Description: "Type of flag (boolean, string, number, json).",
+			},
+			"parent_flag_id": schema.StringAttribute{
+				Computed:    true,
+				Description: "ID of the parent flag if this flag depends on another flag.",
 			},
 		},
 	}
@@ -90,7 +90,7 @@ func (d *FeatureFlagDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	flag, err := d.client.GetFeatureFlag(ctx, state.ProjectID.ValueString(), state.ID.ValueString())
+	flag, err := d.client.GetFeatureFlag(ctx, state.ID.ValueString())
 	if err != nil {
 		if errors.Is(err, client.ErrNotFound) {
 			resp.Diagnostics.AddError("Feature Flag not found", fmt.Sprintf("Flag ID %s not found in Project %s", state.ID.ValueString(), state.ProjectID.ValueString()))
@@ -102,8 +102,8 @@ func (d *FeatureFlagDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	state.Key = types.StringValue(flag.Key)
 	state.Name = types.StringValue(flag.Name)
-	state.Description = types.StringValue(flag.Description)
 	state.Type = types.StringValue(flag.Type)
+	state.ParentFlagID = types.StringValue(flag.ParentFlagID)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

@@ -16,6 +16,7 @@ vendor/
 backend/server
 *.tar.gz*
 *.tgz
+terraform-provider-*
 *.zip*
 wget-log
 tmp/

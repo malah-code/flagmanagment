@@ -80,7 +80,7 @@ func (d *ServiceAccountDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	sa, err := d.client.GetServiceAccount(ctx, state.ProjectID.ValueString(), state.ID.ValueString())
+	sa, err := d.client.GetServiceAccount(ctx, state.ID.ValueString())
 	if err != nil {
 		if errors.Is(err, client.ErrNotFound) {
 			resp.Diagnostics.AddError("Service Account not found", "Service account not found")

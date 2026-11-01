@@ -8,14 +8,16 @@ import {
   Sliders,
   Settings,
   LayoutTemplate,
+  Activity,
   Save,
   Loader2,
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { FlagTelemetryPanel } from '../components/flags/FlagTelemetryPanel';
 
-type TabType = 'targeting' | 'variations' | 'settings';
+type TabType = 'targeting' | 'variations' | 'telemetry' | 'settings';
 
 export const FlagDetail = () => {
   const { projectId = '', flagId = '' } = useParams<{ projectId: string; flagId: string }>();
@@ -167,6 +169,18 @@ export const FlagDetail = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('telemetry')}
+            className={`inline-flex items-center gap-2 py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
+              activeTab === 'telemetry'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <Activity className="w-4 h-4" />
+            <span>Telemetry</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('settings')}
             className={`inline-flex items-center gap-2 py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
               activeTab === 'settings'
@@ -179,7 +193,7 @@ export const FlagDetail = () => {
           </button>
         </nav>
 
-        {activeTab === 'targeting' && environments.length > 0 && (
+        {(activeTab === 'targeting' || activeTab === 'telemetry') && environments.length > 0 && (
           <div className="flex items-center gap-2 pb-2">
             <span className="text-xs font-semibold text-slate-500 uppercase">Environment:</span>
             <select
@@ -307,6 +321,15 @@ export const FlagDetail = () => {
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === 'telemetry' && (
+          <FlagTelemetryPanel
+            flagKey={flag.key}
+            flagType={flag.type}
+            currentEnvName={environments.find((e) => e.id === currentEnvId)?.name || 'Production'}
+            variations={flag.variations}
+          />
         )}
 
         {activeTab === 'settings' && (

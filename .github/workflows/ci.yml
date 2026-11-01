@@ -103,9 +103,23 @@ jobs:
           pip install -e . pytest
           pytest
 
+  test-terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'providers/terraform/go.mod'
+          cache-dependency-path: providers/terraform/go.sum
+      - name: Build & Test Terraform Provider
+        run: |
+          cd providers/terraform
+          go test ./...
+          go build -o terraform-provider-flagmanagment main.go
+
   build-verify:
     runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend, lint-helm, test-sdks]
+    needs: [test-backend, test-frontend, lint-helm, test-sdks, test-terraform]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
