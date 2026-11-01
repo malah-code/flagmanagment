@@ -1,10 +1,11 @@
 # 🚩 FlagManagment
 
 [![CI Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat&logo=go)](https://go.dev/)
-[![React Version](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react)](https://reactjs.org/)
+[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![React Version](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react)](https://reactjs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=flat&logo=postgresql)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7+-DC382D?style=flat&logo=redis)](https://redis.io/)
+[![Helm](https://img.shields.io/badge/Helm-v3-0F1689?style=flat&logo=helm)](https://helm.sh/)
 [![License](https://img.shields.io/badge/License-BSL_1.1_(Fair--Source)-blue.svg)](LICENSE)
 
 **FlagManagment** is an enterprise-grade, cloud-native feature flag and remote configuration platform. It provides deterministic evaluations, multi-environment isolation, contextual targeting, emergency kill switches, four-eyes governance change requests, and tamper-evident audit logging with zero vendor lock-in.
@@ -76,6 +77,45 @@ docker compose up -d --build
 
 ---
 
+## ☸️ Production Kubernetes Deployment (Helm)
+
+FlagManagment provides an official, production-ready Helm v3 chart at `deploy/helm/flagmanagment` configured with Horizontal Pod Autoscaling (HPA), TLS Ingress, automated pre-migration jobs, and embedded or external PostgreSQL and Redis support.
+
+```bash
+# 1. Lint and verify the chart
+helm lint deploy/helm/flagmanagment
+
+# 2. Dry run template rendering
+helm template flagmanagment deploy/helm/flagmanagment
+
+# 3. Deploy to your Kubernetes cluster
+helm install flagmanagment deploy/helm/flagmanagment \
+  --namespace flagmanagment \
+  --create-namespace \
+  --set ingress.hosts[0].host=flags.example.com
+```
+
+Packaged release tarballs are located at `deploy/helm/flagmanagment-1.0.0.tgz`.
+
+---
+
+## 📦 SDK Matrix
+
+All official FlagManagment SDKs adhere to the [OpenFeature Specification](https://openfeature.dev/) and implement deterministic sub-millisecond local evaluation with MurmurHash3 bucketing:
+
+| Language / Platform | Directory | OpenFeature | Streaming (SSE) | Tests / Status |
+|---|---|:---:|:---:|---|
+| **Node.js / TypeScript** | [`sdk/node`](sdk/node) | ✅ | ✅ | Jest Suites Passing |
+| **Go** | [`sdk/go`](sdk/go) | ✅ | ✅ | Sub-ms Benchmarks Passing (< 4µs) |
+| **Python** | [`sdk/python`](sdk/python) | ✅ | ✅ | Pytest Suites Passing |
+| **React** | [`sdk/react`](sdk/react) | ✅ | ✅ | TypeScript Build Passing |
+| **Java** | [`sdk/java`](sdk/java) | ✅ | ✅ | JUnit 5 Tests Passing |
+| **.NET (C#)** | [`sdk/dotnet`](sdk/dotnet) | ✅ | ✅ | xUnit Tests Passing |
+| **iOS (Swift)** | [`sdk/ios`](sdk/ios) | ✅ | ✅ | XCTest Suites Passing |
+| **Android (Kotlin)** | [`sdk/android`](sdk/android) | ✅ | ✅ | JUnit 4 Tests Passing |
+
+---
+
 ## 📡 API Overview
 
 | Method | Route | Description | Auth Required |
@@ -112,12 +152,19 @@ npm run dev
 ```
 
 ### Running Tests
-```bash
-# Backend unit tests
-cd backend && go test ./...
 
-# Database migrations check
-docker compose logs -f postgres
+```bash
+# Run the comprehensive test suite across all layers (Backend, Frontend, SDKs, Benchmarks)
+./scripts/run-all-tests.sh --all
+
+# Run evaluation sub-millisecond benchmarks
+./scripts/run-all-tests.sh --perf
+
+# Run backend unit tests with race detection
+cd backend && go test -race ./...
+
+# Run frontend Vitest suites with coverage
+cd frontend && npm run test:coverage
 ```
 
 ---
