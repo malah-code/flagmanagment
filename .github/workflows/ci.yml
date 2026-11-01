@@ -94,6 +94,12 @@ jobs:
           cd sdk/node
           npm ci
           npm test
+      - name: Test Web SDK
+        run: |
+          cd sdk/web
+          npm ci
+          npm run build
+          npm test
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'

@@ -13,8 +13,8 @@
 |---|---|---|---|
 | **Backend Core** | 🟢 Healthy | Unit/API: **Passing** (`go test ./...`) | Go 1.25, Chi, PostgreSQL, Redis Pub/Sub, gRPC, PII Encryption, SSO (OIDC), Automated Stale Flag Governance Bot |
 | **Frontend UI** | 🟢 Functional & Verified | Vitest: **Passing** (11 suites, 21 tests) | React 19, Vite, Tailwind, Monaco Editor, Flag Telemetry Panel, OpenFeature Playground & Governance Bot Controls |
-| **Core SDKs** | 🟢 Operational (Tested) | Node, Go, Python, React | 100% passing tests in unified runner, sub-ms benchmarks & OpenFeature providers |
-| **Secondary SDKs** | 🟢 Functional | Java, .NET, iOS, Android | Complete with MurmurHash3 bucketing, SSE streaming clients & OpenFeature providers |
+| **Core SDKs** | 🟢 Operational (Tested) | Node, Go, Python, React, Web (JS) | 100% passing tests in unified runner, sub-ms benchmarks & OpenFeature providers |
+| **Secondary & Extended SDKs** | 🟢 Functional & Complete | Java, .NET, iOS, Android, Rust, Flutter | Complete with MurmurHash3 bucketing, SSE streaming clients & OpenFeature providers |
 | **Terraform Provider** | 🟢 Operational & Verified | Go Provider Tests & Build: **Passing** | Declarative IaC blueprint (`examples/terraform/`), full resource & data source CRUD, wired into CI & test runner |
 | **Edge Proxy / Relay Node** | 🟢 Operational & Verified | Go Tests & Build: **Passing** | In-memory evaluation cache (<10µs), gRPC delta fanout, Helm deployment/service/HPA templates, In-Pod Sidecar blueprint (`examples/kubernetes/`) |
 | **CI / CD** | 🟢 Fully Passing (100% Green) | GitHub Actions | All matrix stages passing: Linting (Go, TS, Helm), Unit tests (Go, Vitest, Node, Python, Terraform, Proxy), Multi-stage Docker builds, Trivy scans, and Playwright E2E |
@@ -155,6 +155,11 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-10-31 (Multi-Language SDK Ecosystem Expansion: Web, Rust & Flutter)**:
+  - **Vanilla Browser Web SDK (`sdk/web/`)**: Created zero-dependency TypeScript browser client with synchronous evaluation, `localStorage` caching, real-time SSE streaming, and CNCF `OpenFeatureWebProvider`. Automated test suite passing (`node --test`).
+  - **Rust SDK (`sdk/rust/`)**: Created thread-safe Rust evaluation crate with `RwLock` in-memory caching and MurmurHash3 bucketing for sub-microsecond local flag evaluations (<1 µs).
+  - **Flutter / Dart SDK (`sdk/flutter/`)**: Created Flutter/Dart client package supporting offline mobile caching, targeting contexts, and change streaming.
+  - **Unified Test Matrix**: Updated `scripts/run-all-tests.sh` and `.github/workflows/ci.yml` to automatically verify Web SDK builds and tests.
 - **2026-10-31 (Application SDK Samples & OpenFeature Provider Ergonomics)**:
   - **Node.js Express Sample**: Created runnable sample [`examples/node-express/`](../examples/node-express/) featuring CNCF OpenFeature provider initialization, context targeting, multivariate banner variants, and unit tests (`node --test`).
   - **Python FastAPI Sample**: Created runnable service [`examples/python-fastapi/`](../examples/python-fastapi/) with OpenFeature evaluation context injection, dynamic recommendation model selection, and passing pytest suite. Enhanced `FlagManagmentProvider` in `sdk/python` to support ergonomic initialization from server keys.

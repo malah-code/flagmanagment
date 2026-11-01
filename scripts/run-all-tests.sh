@@ -141,6 +141,10 @@ if [ "$RUN_SDK" = true ]; then
         echo "Testing React SDK build..."
         (cd "$REPO_ROOT/sdk/react" && npm run build) || SDK_SUCCESS=false
     fi
+    if [ -d "$REPO_ROOT/sdk/web" ]; then
+        echo "Testing Web SDK build and tests..."
+        (cd "$REPO_ROOT/sdk/web" && npm test) || SDK_SUCCESS=false
+    fi
     if command -v mvn >/dev/null 2>&1 && [ -f "$REPO_ROOT/sdk/java/pom.xml" ]; then
         echo "Testing Java SDK..."
         (cd "$REPO_ROOT/sdk/java" && mvn test -q) || SDK_SUCCESS=false

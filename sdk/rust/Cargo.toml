@@ -1,0 +1,17 @@
+[package]
+name = "flagmanagment-sdk"
+version = "1.0.0"
+edition = "2021"
+authors = ["FlagManagment Team"]
+description = "Official high-performance Rust SDK and local evaluation engine for FlagManagment"
+license = "Apache-2.0"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+murmur3 = "0.5"
+reqwest = { version = "0.11", features = ["json", "stream"], optional = true }
+tokio = { version = "1.0", features = ["full"], optional = true }
+
+[dev-dependencies]
+serde_json = "1.0"

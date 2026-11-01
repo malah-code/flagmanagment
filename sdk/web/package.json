@@ -1,0 +1,27 @@
+{
+  "name": "@flagmanagment/web-sdk",
+  "version": "1.0.0",
+  "description": "Zero-dependency client-side Web/JavaScript SDK and OpenFeature Provider for FlagManagment",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test"
+  },
+  "keywords": [
+    "feature-flags",
+    "feature-toggles",
+    "openfeature",
+    "browser",
+    "vanilla-js",
+    "vue",
+    "svelte",
+    "angular"
+  ],
+  "author": "FlagManagment Team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,18 @@
+name: flagmanagment_flutter
+description: Official Flutter & Dart client SDK for FlagManagment with offline cache and real-time streaming updates.
+version: 1.0.0
+homepage: https://github.com/malah-code/flagmanagment
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0

@@ -9,3 +9,4 @@ export async function loginUser(page: Page) {
   await page.waitForURL('**/projects', { timeout: 15000 });
   await expect(page.locator('h1')).toContainText('Projects');
 }
+
