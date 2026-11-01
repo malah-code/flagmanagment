@@ -152,3 +152,4 @@ func (c *Cleaner) CleanFlag(filePath, flagKey string, resolution bool, dryRun bo
 		Diff:              diff,
 	}, nil
 }
+

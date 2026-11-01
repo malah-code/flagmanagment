@@ -168,3 +168,4 @@ func (m *Metrics) RecordCacheMiss() {
 	}
 	m.CacheOperationsTotal.WithLabelValues("miss").Inc()
 }
+

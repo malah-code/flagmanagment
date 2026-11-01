@@ -48,3 +48,4 @@ func TestMetricsRegistryAndHandler(t *testing.T) {
 		}
 	}
 }
+

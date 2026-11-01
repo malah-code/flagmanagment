@@ -113,3 +113,4 @@ Examples:
   flag-cleaner clean --path ./src --flag checkout-v2 --resolution true
   flag-cleaner clean --path ./src --flag checkout-v2 --resolution true --write`)
 }
+

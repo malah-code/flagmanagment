@@ -13,8 +13,8 @@ test.describe('CUJ-6: OpenFeature Multi-Language Conformance Journey', () => {
     await expect(page.locator('body')).toBeVisible();
 
     // Check if any projects exist to navigate into OpenFeature playground
-    let manageLinks = page.locator('a:has-text("Manage")');
-    if ((await manageLinks.count()) === 0) {
+    let projectLinks = page.locator('a[href^="/projects/"]:has-text("Manage")');
+    if ((await projectLinks.count()) === 0) {
       const createBtn = page.locator('button:has-text("New Project"), button:has-text("Create Project")').first();
       if (await createBtn.isVisible()) {
         await createBtn.click();
@@ -22,14 +22,15 @@ test.describe('CUJ-6: OpenFeature Multi-Language Conformance Journey', () => {
         await page.fill('input[placeholder*="Name"], input[name="name"], form input:first-of-type', `OF Conformance ${Date.now()}`);
         await page.click('button[type="submit"]:has-text("Create")');
         await page.waitForSelector('div.fixed.inset-0', { state: 'detached' });
-        await page.waitForSelector('a:has-text("Manage")', { timeout: 10000 }).catch(() => {});
+        await page.waitForSelector('a[href^="/projects/"]:has-text("Manage")', { timeout: 10000 }).catch(() => {});
       }
-      manageLinks = page.locator('a:has-text("Manage")');
+      projectLinks = page.locator('a[href^="/projects/"]:has-text("Manage")');
     }
 
-    if ((await manageLinks.count()) > 0) {
-      await manageLinks.first().click();
+    if ((await projectLinks.count()) > 0) {
+      await projectLinks.first().click();
       await page.waitForURL('**/projects/*', { timeout: 15000 });
+      await page.waitForSelector('nav', { timeout: 15000 });
 
       // Click OpenFeature Playground in the sidebar
       const playgroundLink = page.locator('a:has-text("OpenFeature Playground")');

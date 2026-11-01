@@ -157,6 +157,8 @@ flowchart LR
 ---
 
 ## 6. Update Log
+- **2026-11-01 (Playwright E2E Header Logo Selector Collision Resolution)**:
+  - **Scoped Project Link Selector**: In `cuj_openfeature.spec.ts`, scoped project card selectors to `a[href^="/projects/"]:has-text("Manage")` instead of broad `a:has-text("Manage")`. This eliminated an unintended selector collision where `manageLinks.first()` erroneously matched the header brand logo `<Link to="/">Flag<span>Management</span></Link>`, causing self-navigation loops to `/projects` and a navigation timeout. Added `nav` sidebar wait guard before asserting the OpenFeature Playground link.
 - **2026-11-01 (Prometheus Observability Exporter & AST Flag Cleaner CLI)**:
   - **Prometheus Metrics Exporter**: Created `backend/internal/metrics/metrics.go` exposing `/metrics` with `flagmanagment_evaluator_evaluations_total`, `evaluation_duration_seconds`, and cache telemetry. Hooked evaluation latency tracking into SDK evaluation endpoints.
   - **Helm Metrics Scrape Annotations**: Updated `backend-deployment.yaml` in `deploy/helm/flagmanagment/` to include standard `prometheus.io/scrape` annotations. Verified with `helm lint` (0 errors).

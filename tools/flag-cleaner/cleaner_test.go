@@ -76,3 +76,4 @@ export function CheckoutButton() {
 		t.Errorf("expected 'checkout-v2' to be removed from file after write")
 	}
 }
+
