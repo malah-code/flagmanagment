@@ -10,7 +10,7 @@ test.describe('CUJ-6: OpenFeature Multi-Language Conformance Journey', () => {
       await page.click('button[type="submit"]');
       await page.waitForURL('**/projects');
     }
-    await page.goto('/integrations');
+    await page.goto('/projects');
     await expect(page.locator('body')).toBeVisible();
   });
 });

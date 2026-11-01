@@ -10,7 +10,7 @@ test.describe('CUJ-3: Audit Log SIEM Compliance Journey', () => {
       await page.click('button[type="submit"]');
       await page.waitForURL('**/projects');
     }
-    await page.goto('/audit-logs');
+    await page.goto('/settings/system');
     await expect(page.locator('body')).toBeVisible();
   });
 });

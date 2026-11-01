@@ -158,10 +158,18 @@ jobs:
       - name: Start services
         run: |
           docker compose up -d --build
-          echo "Waiting for services to be ready..."
+          echo "Waiting for backend to be ready..."
           for i in {1..30}; do
             if curl -s http://localhost:8080/healthz > /dev/null; then
               echo "Backend is healthy!"
+              break
+            fi
+            sleep 2
+          done
+          echo "Waiting for frontend to be ready..."
+          for i in {1..30}; do
+            if curl -s -I http://localhost:3000 > /dev/null; then
+              echo "Frontend is healthy!"
               break
             fi
             sleep 2
@@ -177,6 +185,9 @@ jobs:
         run: cd e2e && npx playwright install chromium --with-deps
       - name: Run Playwright tests
         run: cd e2e && npx playwright test
+      - name: Dump docker logs on failure
+        if: failure()
+        run: docker compose logs
       - name: Stop services
         if: always()
         run: docker compose down
